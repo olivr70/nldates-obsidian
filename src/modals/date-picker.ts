@@ -1,5 +1,5 @@
 import { App, MarkdownView, Modal, Setting } from "obsidian";
-import { generateMarkdownLink } from "src/utils";
+import { generateMarkdownLink } from "src/utilsObsidian";
 import type NaturalLanguageDates from "../main";
 
 export default class DatePickerModal extends Modal {

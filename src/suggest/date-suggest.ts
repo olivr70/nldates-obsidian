@@ -7,12 +7,13 @@ import {
   EditorSuggestTriggerInfo,
   TFile,
 } from "obsidian";
-import type NaturalLanguageDates from "src/main";
-import { generateMarkdownLink } from "src/utils";
 
-interface IDateCompletion {
-  label: string;
-}
+import { DateDisplay, IDateCompletion, NLDSuggestContext } from "src/types";
+import type NaturalLanguageDates from "src/main";
+import { generateMarkdownLink } from "src/utilsObsidian";
+import { getSuggestionMaker } from "src/suggest/locale-suggester";
+import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
+
 
 export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   app: App;
@@ -37,7 +38,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
 
   getSuggestions(context: EditorSuggestContext): IDateCompletion[] {
     const suggestions = this.getDateSuggestions(context);
-    if (suggestions.length) {
+    if (suggestions && suggestions.length) {
       return suggestions;
     }
 
@@ -46,48 +47,9 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   }
 
   getDateSuggestions(context: EditorSuggestContext): IDateCompletion[] {
-    if (context.query.match(/^time/)) {
-      return ["now", "+15 minutes", "+1 hour", "-15 minutes", "-1 hour"]
-        .map((val) => ({ label: `time:${val}` }))
-        .filter((item) => item.label.toLowerCase().startsWith(context.query));
-    }
-    if (context.query.match(/(next|last|this)/i)) {
-      const reference = context.query.match(/(next|last|this)/i)[1];
-      return [
-        "week",
-        "month",
-        "year",
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ]
-        .map((val) => ({ label: `${reference} ${val}` }))
-        .filter((items) => items.label.toLowerCase().startsWith(context.query));
-    }
-
-    const relativeDate =
-      context.query.match(/^in ([+-]?\d+)/i) || context.query.match(/^([+-]?\d+)/i);
-    if (relativeDate) {
-      const timeDelta = relativeDate[1];
-      return [
-        { label: `in ${timeDelta} minutes` },
-        { label: `in ${timeDelta} hours` },
-        { label: `in ${timeDelta} days` },
-        { label: `in ${timeDelta} weeks` },
-        { label: `in ${timeDelta} months` },
-        { label: `${timeDelta} days ago` },
-        { label: `${timeDelta} weeks ago` },
-        { label: `${timeDelta} months ago` },
-      ].filter((items) => items.label.toLowerCase().startsWith(context.query));
-    }
-
-    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
-      (items) => items.label.toLowerCase().startsWith(context.query)
-    );
+    console.log("-------------------------------------------")
+    const nldContext:NLDSuggestContext = { plugin:this.plugin, ...context}
+    return getSuggestionMaker(this.plugin.settings.locale).getDateSuggestions(nldContext);
   }
 
   renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
@@ -95,26 +57,89 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   }
 
   selectSuggestion(suggestion: IDateCompletion, event: KeyboardEvent | MouseEvent): void {
+    console.log("+++++++++++++++++++++++++++++++++++++++++++")
     const { editor } = this.context;
+
+    console.log(`selectSuggestion()`)
+    console.log(suggestion);
+
+    // use the date provided by the suggester if set
+    const dateSuggestion:string|Date = suggestion.value !== undefined ? suggestion.value : suggestion.label;
+    let dateValue:Date = suggestion.value instanceof Date ? suggestion.value : undefined;
 
     const includeAlias = event.shiftKey;
     let dateStr = "";
+    let timeStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
-    if (suggestion.label.startsWith("time:")) {
-      const timePart = suggestion.label.substring(5);
-      dateStr = this.plugin.parseTime(timePart).formattedString;
-      makeIntoLink = false;
-    } else {
-      dateStr = this.plugin.parseDate(suggestion.label).formattedString;
-    }
+    
 
+    if (dateSuggestion instanceof Date) {
+      dateValue = dateSuggestion
+      switch(suggestion.display) {
+        case DateDisplay.asTime:
+          timeStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.timeFormat);
+          break;
+        case DateDisplay.asTimestamp:
+          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
+          timeStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.timeFormat);
+          break;
+        case DateDisplay.asDate:
+          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
+          break;
+        default:  // SAME AS asDate
+          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
+          break;
+      }
+    } else {  // value was a string, or we are directly using the suggestion label
+      let display = suggestion.display || DateDisplay.asDate;
+      if (dateSuggestion.startsWith("time:")) {
+        const timePart = dateSuggestion.substring(5);
+        const timeValue = this.plugin.parseTime(timePart);
+        dateValue = timeValue.date;
+        dateStr = this.plugin.parseTime(timePart).formattedString;
+        display = DateDisplay.asTime;
+        makeIntoLink = false;
+      } else {
+        const parseResult = this.plugin.parseDate(dateSuggestion);
+        dateValue = parseResult.date;
+        dateStr = parseResult.moment.format(this.plugin.settings.format);
+        timeStr = parseResult.moment.format(this.plugin.settings.timeFormat)
+      }
+
+      switch (display) {
+        case DateDisplay.asTime:
+          dateStr = timeStr;
+          break;
+        case DateDisplay.asTimestamp:
+          dateStr = `${dateStr}${this.plugin.settings.separator}${timeStr}`;
+          break;
+        case DateDisplay.asDate:
+            // NOTHING MORE
+          break;
+        default:
+            // NOTHING MORE
+      }
+    }
+    console.log(`makeIntoLink ${makeIntoLink}`)
+    console.log(`dateStr ${dateStr}`)
+    console.log(`suggestion ${suggestion}`)
     if (makeIntoLink) {
-      dateStr = generateMarkdownLink(
-        this.app,
-        dateStr,
-        includeAlias ? suggestion.label : undefined
-      );
+      if (this.plugin.settings.linkToDailyNotes) {
+        const dailyNoteName = this.plugin.getFormattedDate(dateValue,getDailyNoteSettings().format);
+        console.log( "linkToDailyNote\n", dailyNoteName,"\n", `suggestion.alias=${suggestion.alias}`)
+        dateStr = generateMarkdownLink(
+          this.app,
+          dailyNoteName,
+          includeAlias ? (suggestion.alias ? suggestion.alias : dateStr) : undefined
+        );
+      } else {
+        dateStr = generateMarkdownLink(
+          this.app,
+          dateStr,
+          includeAlias ? (suggestion.alias ? suggestion.alias : suggestion.label) : undefined
+        );
+      }
     }
 
     editor.replaceRange(dateStr, this.context.start, this.context.end);

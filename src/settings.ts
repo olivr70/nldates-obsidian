@@ -1,16 +1,11 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import NaturalLanguageDates from "./main";
-import { getLocaleWeekStart } from "./utils";
+import moment from "moment"
 
-export type DayOfWeek =
-  | "sunday"
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "locale-default";
+import { DayOfWeek, AllChronoLocales, ChronoLocale } from "./types";
+import { getLocaleWeekStart } from "./utils";
+import NaturalLanguageDates from "./main";
+
+
 
 export interface NLDSettings {
   autosuggestToggleLink: boolean;
@@ -20,10 +15,12 @@ export interface NLDSettings {
   format: string;
   timeFormat: string;
   separator: string;
+  locale: ChronoLocale;
   weekStart: DayOfWeek;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
+  linkToDailyNotes: boolean;
   modalMomentFormat: string;
 }
 
@@ -35,12 +32,16 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
   separator: " ",
+  locale: "en",
   weekStart: "locale-default",
 
   modalToggleTime: false,
   modalToggleLink: false,
+  linkToDailyNotes: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
 };
+
+const chronoLocales = Object.values(AllChronoLocales);
 
 const weekdays = [
   "sunday",
@@ -51,6 +52,8 @@ const weekdays = [
   "friday",
   "saturday",
 ];
+
+
 
 export class NLDSettingsTab extends PluginSettingTab {
   plugin: NaturalLanguageDates;
@@ -75,9 +78,26 @@ export class NLDSettingsTab extends PluginSettingTab {
       text: "Parser settings",
     });
 
+    // display help text and link to moment.js format documentation
+    const dateFormatDesc = document.createDocumentFragment();
+    dateFormatDesc.appendText(`Output format for parsed dates.`)
+    dateFormatDesc.appendChild(document.createElement('br'))
+    dateFormatDesc.appendText("Use 'iso' or empty for ISO 8601 standard format.")
+    dateFormatDesc.appendChild(document.createElement('br'))
+    dateFormatDesc.appendText("For more details, you can read the ")
+    const link = document.createElement('a');
+    link.href = 'https://momentjs.com/docs/?/displaying/format/#/displaying/';
+    link.textContent = 'Moment.js documentation';
+    link.title = "Moment.js | Docs";
+    dateFormatDesc.appendChild(link);
+    dateFormatDesc.appendText(`. Localized like LL can be used.`)
+    dateFormatDesc.appendChild(document.createElement('br'))
+    dateFormatDesc.appendText(`Current version of Moment.js is ${moment.version}`)
+
     new Setting(containerEl)
       .setName("Date format")
-      .setDesc("Output format for parsed dates")
+      //.setDesc("")
+      .setDesc(dateFormatDesc)
       .addMomentFormat((text) =>
         text
           .setDefaultFormat("YYYY-MM-DD")
@@ -87,6 +107,21 @@ export class NLDSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+      new Setting(containerEl)
+      .setName("Locale")
+      .setDesc("Which locale to use")
+      .addDropdown((dropdown) => {
+        dropdown.addOption("locale-default", `Locale default (${localeWeekStart})`);
+        chronoLocales.forEach((loc, i) => {
+          dropdown.addOption(chronoLocales[i], loc);
+        });
+        dropdown.setValue(this.plugin.settings.locale.toLowerCase());
+        dropdown.onChange(async (value: ChronoLocale) => {
+          this.plugin.settings.locale = value;
+          await this.plugin.saveSettings();
+        });
+      });
 
     new Setting(containerEl)
       .setName("Week starts on")
@@ -164,6 +199,21 @@ export class NLDSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+      
+    new Setting(containerEl)
+    .setName("Link to daily notes?")
+    .setDesc(
+      "If enabled, use the daily note format for [[wikilinks]]"
+    )
+    .addToggle((toggle) =>
+      toggle
+        .setValue(this.plugin.settings.linkToDailyNotes)
+        .onChange(async (value) => {
+          this.plugin.settings.linkToDailyNotes = value;
+          await this.plugin.saveSettings();
+        })
+    );
 
     new Setting(containerEl)
       .setName("Trigger phrase")

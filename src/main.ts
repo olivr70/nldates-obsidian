@@ -1,8 +1,11 @@
 import { MarkdownView, ObsidianProtocolData, Plugin } from "obsidian";
 
-import DatePickerModal from "./modals/date-picker";
-import NLDParser, { NLDResult } from "./parser";
+import { INaturalLanguageDatesPlugin, INLDParser, NLDResult } from "./types";
+import { parseTruthy } from "./utils";
+import { getOrCreateDailyNote } from "./utilsObsidian";
 import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
+import { parserFactory } from "./parser";
+import DatePickerModal from "./modals/date-picker";
 import DateSuggest from "./suggest/date-suggest";
 import {
   getParseCommand,
@@ -10,11 +13,13 @@ import {
   getCurrentTimeCommand,
   getNowCommand,
 } from "./commands";
-import { getFormattedDate, getOrCreateDailyNote, parseTruthy } from "./utils";
 
-export default class NaturalLanguageDates extends Plugin {
-  private parser: NLDParser;
+
+export default class NaturalLanguageDates extends Plugin implements INaturalLanguageDatesPlugin {
+  private _parser: INLDParser;
   public settings: NLDSettings;
+
+  public get parser(): INLDParser { return this._parser; }
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -85,8 +90,7 @@ export default class NaturalLanguageDates extends Plugin {
     this.registerEditorSuggest(new DateSuggest(this.app, this));
 
     this.app.workspace.onLayoutReady(() => {
-      // initialize the parser when layout is ready so that the correct locale is used
-      this.parser = new NLDParser();
+      this.initFromSettings();
     });
   }
 
@@ -100,16 +104,29 @@ export default class NaturalLanguageDates extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+    this.initFromSettings();
   }
 
-  /*
+  initFromSettings() {
+    console.log("************** SETTINGS CHANGED **************")
+      // initialize the parser when layout is ready so that the correct locale is used
+      this._parser = parserFactory(this.settings.locale);
+      console.log("New parser : " + this._parser.constructor.name )
+  }
+
+  /* Parse a date and format it using the current locale
+  
     @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
     @param format: A string that contains the formatting string for a Moment
     @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
   */
   parse(dateString: string, format: string): NLDResult {
+    console.log(`NaturalLanguageDates.parse ${dateString} ${format}`)
+    if (format.match(/iso(\s?8601)?/i)) {
+      format = "YYYY-MM-DD"
+    }
     const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
-    const formattedString = getFormattedDate(date, format);
+    const formattedString = this.getFormattedDate(date, format);
     if (formattedString === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
     }
@@ -117,7 +134,7 @@ export default class NaturalLanguageDates extends Plugin {
     return {
       formattedString,
       date,
-      moment: window.moment(date),
+      moment: this.parser.moment(date),
     };
   }
 
@@ -126,21 +143,28 @@ export default class NaturalLanguageDates extends Plugin {
     @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
   */
   parseDate(dateString: string): NLDResult {
+    console.log(`NaturalLanguageDates.parseDate ${dateString}`)
     return this.parse(dateString, this.settings.format);
   }
 
   parseTime(dateString: string): NLDResult {
+    console.log(`NaturalLanguageDates.parseTime ${dateString}`)
     return this.parse(dateString, this.settings.timeFormat);
+  }
+
+  /** format a date using the current locale */
+  getFormattedDate(date:Date, format: string):string {
+    return this._parser.getFormattedDate(date, format);
   }
 
   async actionHandler(params: ObsidianProtocolData): Promise<void> {
     const { workspace } = this.app;
 
-    const date = this.parseDate(params.day);
+    const parseResult = this.parseDate(params.day);
     const newPane = parseTruthy(params.newPane || "yes");
 
-    if (date.moment.isValid()) {
-      const dailyNote = await getOrCreateDailyNote(date.moment);
+    if (parseResult.moment.isValid()) {
+      const dailyNote = await getOrCreateDailyNote(window.moment(parseResult.date));
       workspace.getLeaf(newPane).openFile(dailyNote);
     }
   }
