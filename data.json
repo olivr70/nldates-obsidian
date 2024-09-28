@@ -1,0 +1,14 @@
+{
+  "autosuggestToggleLink": true,
+  "autocompleteTriggerPhrase": "@",
+  "isAutosuggestEnabled": true,
+  "format": "LL",
+  "timeFormat": "HH:mm",
+  "separator": " ",
+  "locale": "fr",
+  "weekStart": "monday",
+  "modalToggleTime": false,
+  "modalToggleLink": false,
+  "linkToDailyNotes": true,
+  "modalMomentFormat": "YYYY-MM-DD HH:mm"
+}
