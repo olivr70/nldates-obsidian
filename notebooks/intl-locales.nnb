@@ -1,0 +1,284 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "La plupart des fonctions de la librairie Intl accept des arguments de type Locale"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const lines = function(...items) {\r\n    console.log(items.join(\"\\n\"))\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nlines(\r\n    \"calendars : \" + Intl.supportedValuesOf('calendar').toString(),\r\n    \"collation : \" + Intl.supportedValuesOf('collation').toString(),\r\n    \"currency : \" + Intl.supportedValuesOf('currency').toString(),\r\n    \"numberingSystem : \" + Intl.supportedValuesOf('numberingSystem').toString(),\r\n    \"timeZone : \" + Intl.supportedValuesOf('timeZone').toString(),\r\n    \"unit : \" + Intl.supportedValuesOf('unit').toString(),\r\n    \"supportedLocales : \" + Intl.NumberFormat.supportedLocalesOf(['en', 'fr', 'de', 'es', 'ja']).toString(),\r\n)\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "calendars : buddhist,chinese,coptic,dangi,ethioaa,ethiopic,gregory,hebrew,indian,islamic,islamic-civil,islamic-rgsa,islamic-tbla,islamic-umalqura,iso8601,japanese,persian,roc",
+                                "collation : big5han,compat,dict,emoji,eor,gb2312,phonebk,phonetic,pinyin,searchjl,stroke,trad,unihan,zhuyin",
+                                "currency : AED,AFN,ALL,AMD,ANG,AOA,ARS,AUD,AWG,AZN,BAM,BBD,BDT,BGN,BHD,BIF,BMD,BND,BOB,BRL,BSD,BTN,BWP,BYN,BZD,CAD,CDF,CHF,CLP,CNY,COP,CRC,CUC,CUP,CVE,CZK,DJF,DKK,DOP,DZD,EGP,ERN,ETB,EUR,FJD,FKP,GBP,GEL,GHS,GIP,GMD,GNF,GTQ,GYD,HKD,HNL,HRK,HTG,HUF,IDR,ILS,INR,IQD,IRR,ISK,JMD,JOD,JPY,KES,KGS,KHR,KMF,KPW,KRW,KWD,KYD,KZT,LAK,LBP,LKR,LRD,LSL,LYD,MAD,MDL,MGA,MKD,MMK,MNT,MOP,MRU,MUR,MVR,MWK,MXN,MYR,MZN,NAD,NGN,NIO,NOK,NPR,NZD,OMR,PAB,PEN,PGK,PHP,PKR,PLN,PYG,QAR,RON,RSD,RUB,RWF,SAR,SBD,SCR,SDG,SEK,SGD,SHP,SLE,SLL,SOS,SRD,SSP,STN,SVC,SYP,SZL,THB,TJS,TMT,TND,TOP,TRY,TTD,TWD,TZS,UAH,UGX,USD,UYU,UZS,VES,VND,VUV,WST,XAF,XCD,XDR,XOF,XPF,XSU,YER,ZAR,ZMW,ZWL",
+                                "numberingSystem : adlm,ahom,arab,arabext,bali,beng,bhks,brah,cakm,cham,deva,diak,fullwide,gong,gonm,gujr,guru,hanidec,hmng,hmnp,java,kali,kawi,khmr,knda,lana,lanatham,laoo,latn,lepc,limb,mathbold,mathdbl,mathmono,mathsanb,mathsans,mlym,modi,mong,mroo,mtei,mymr,mymrshan,mymrtlng,nagm,newa,nkoo,olck,orya,osma,rohg,saur,segment,shrd,sind,sinh,sora,sund,takr,talu,tamldec,telu,thai,tibt,tirh,tnsa,vaii,wara,wcho",
+                                "timeZone : Africa/Abidjan,Africa/Accra,Africa/Addis_Ababa,Africa/Algiers,Africa/Asmera,Africa/Bamako,Africa/Bangui,Africa/Banjul,Africa/Bissau,Africa/Blantyre,Africa/Brazzaville,Africa/Bujumbura,Africa/Cairo,Africa/Casablanca,Africa/Ceuta,Africa/Conakry,Africa/Dakar,Africa/Dar_es_Salaam,Africa/Djibouti,Africa/Douala,Africa/El_Aaiun,Africa/Freetown,Africa/Gaborone,Africa/Harare,Africa/Johannesburg,Africa/Juba,Africa/Kampala,Africa/Khartoum,Africa/Kigali,Africa/Kinshasa,Africa/Lagos,Africa/Libreville,Africa/Lome,Africa/Luanda,Africa/Lubumbashi,Africa/Lusaka,Africa/Malabo,Africa/Maputo,Africa/Maseru,Africa/Mbabane,Africa/Mogadishu,Africa/Monrovia,Africa/Nairobi,Africa/Ndjamena,Africa/Niamey,Africa/Nouakchott,Africa/Ouagadougou,Africa/Porto-Novo,Africa/Sao_Tome,Africa/Tripoli,Africa/Tunis,Africa/Windhoek,America/Adak,America/Anchorage,America/Anguilla,America/Antigua,America/Araguaina,America/Argentina/La_Rioja,America/Argentina/Rio_Gallegos,America/Argentina/Salta,America/Argentina/San_Juan,America/Argentina/San_Luis,America/Argentina/Tucuman,America/Argentina/Ushuaia,America/Aruba,America/Asuncion,America/Bahia,America/Bahia_Banderas,America/Barbados,America/Belem,America/Belize,America/Blanc-Sablon,America/Boa_Vista,America/Bogota,America/Boise,America/Buenos_Aires,America/Cambridge_Bay,America/Campo_Grande,America/Cancun,America/Caracas,America/Catamarca,America/Cayenne,America/Cayman,America/Chicago,America/Chihuahua,America/Ciudad_Juarez,America/Coral_Harbour,America/Cordoba,America/Costa_Rica,America/Creston,America/Cuiaba,America/Curacao,America/Danmarkshavn,America/Dawson,America/Dawson_Creek,America/Denver,America/Detroit,America/Dominica,America/Edmonton,America/Eirunepe,America/El_Salvador,America/Fort_Nelson,America/Fortaleza,America/Glace_Bay,America/Godthab,America/Goose_Bay,America/Grand_Turk,America/Grenada,America/Guadeloupe,America/Guatemala,America/Guayaquil,America/Guyana,America/Halifax,America/Havana,America/Hermosillo,America/Indiana/Knox,America/Indiana/Marengo,America/Indiana/Petersburg,America/Indiana/Tell_City,America/Indiana/Vevay,America/Indiana/Vincennes,America/Indiana/Winamac,America/Indianapolis,America/Inuvik,America/Iqaluit,America/Jamaica,America/Jujuy,America/Juneau,America/Kentucky/Monticello,America/Kralendijk,America/La_Paz,America/Lima,America/Los_Angeles,America/Louisville,America/Lower_Princes,America/Maceio,America/Managua,America/Manaus,America/Marigot,America/Martinique,America/Matamoros,America/Mazatlan,America/Mendoza,America/Menominee,America/Merida,America/Metlakatla,America/Mexico_City,America/Miquelon,America/Moncton,America/Monterrey,America/Montevideo,America/Montreal,America/Montserrat,America/Nassau,America/New_York,America/Nipigon,America/Nome,America/Noronha,America/North_Dakota/Beulah,America/North_Dakota/Center,America/North_Dakota/New_Salem,America/Ojinaga,America/Panama,America/Pangnirtung,America/Paramaribo,America/Phoenix,America/Port-au-Prince,America/Port_of_Spain,America/Porto_Velho,America/Puerto_Rico,America/Punta_Arenas,America/Rainy_River,America/Rankin_Inlet,America/Recife,America/Regina,America/Resolute,America/Rio_Branco,America/Santa_Isabel,America/Santarem,America/Santiago,America/Santo_Domingo,America/Sao_Paulo,America/Scoresbysund,America/Sitka,America/St_Barthelemy,America/St_Johns,America/St_Kitts,America/St_Lucia,America/St_Thomas,America/St_Vincent,America/Swift_Current,America/Tegucigalpa,America/Thule,America/Thunder_Bay,America/Tijuana,America/Toronto,America/Tortola,America/Vancouver,America/Whitehorse,America/Winnipeg,America/Yakutat,America/Yellowknife,Antarctica/Casey,Antarctica/Davis,Antarctica/DumontDUrville,Antarctica/Macquarie,Antarctica/Mawson,Antarctica/McMurdo,Antarctica/Palmer,Antarctica/Rothera,Antarctica/Syowa,Antarctica/Troll,Antarctica/Vostok,Arctic/Longyearbyen,Asia/Aden,Asia/Almaty,Asia/Amman,Asia/Anadyr,Asia/Aqtau,Asia/Aqtobe,Asia/Ashgabat,Asia/Atyrau,Asia/Baghdad,Asia/Bahrain,Asia/Baku,Asia/Bangkok,Asia/Barnaul,Asia/Beirut,Asia/Bishkek,Asia/Brunei,Asia/Calcutta,Asia/Chita,Asia/Choibalsan,Asia/Colombo,Asia/Damascus,Asia/Dhaka,Asia/Dili,Asia/Dubai,Asia/Dushanbe,Asia/Famagusta,Asia/Gaza,Asia/Hebron,Asia/Hong_Kong,Asia/Hovd,Asia/Irkutsk,Asia/Jakarta,Asia/Jayapura,Asia/Jerusalem,Asia/Kabul,Asia/Kamchatka,Asia/Karachi,Asia/Katmandu,Asia/Khandyga,Asia/Krasnoyarsk,Asia/Kuala_Lumpur,Asia/Kuching,Asia/Kuwait,Asia/Macau,Asia/Magadan,Asia/Makassar,Asia/Manila,Asia/Muscat,Asia/Nicosia,Asia/Novokuznetsk,Asia/Novosibirsk,Asia/Omsk,Asia/Oral,Asia/Phnom_Penh,Asia/Pontianak,Asia/Pyongyang,Asia/Qatar,Asia/Qostanay,Asia/Qyzylorda,Asia/Rangoon,Asia/Riyadh,Asia/Saigon,Asia/Sakhalin,Asia/Samarkand,Asia/Seoul,Asia/Shanghai,Asia/Singapore,Asia/Srednekolymsk,Asia/Taipei,Asia/Tashkent,Asia/Tbilisi,Asia/Tehran,Asia/Thimphu,Asia/Tokyo,Asia/Tomsk,Asia/Ulaanbaatar,Asia/Urumqi,Asia/Ust-Nera,Asia/Vientiane,Asia/Vladivostok,Asia/Yakutsk,Asia/Yekaterinburg,Asia/Yerevan,Atlantic/Azores,Atlantic/Bermuda,Atlantic/Canary,Atlantic/Cape_Verde,Atlantic/Faeroe,Atlantic/Madeira,Atlantic/Reykjavik,Atlantic/South_Georgia,Atlantic/St_Helena,Atlantic/Stanley,Australia/Adelaide,Australia/Brisbane,Australia/Broken_Hill,Australia/Currie,Australia/Darwin,Australia/Eucla,Australia/Hobart,Australia/Lindeman,Australia/Lord_Howe,Australia/Melbourne,Australia/Perth,Australia/Sydney,Europe/Amsterdam,Europe/Andorra,Europe/Astrakhan,Europe/Athens,Europe/Belgrade,Europe/Berlin,Europe/Bratislava,Europe/Brussels,Europe/Bucharest,Europe/Budapest,Europe/Busingen,Europe/Chisinau,Europe/Copenhagen,Europe/Dublin,Europe/Gibraltar,Europe/Guernsey,Europe/Helsinki,Europe/Isle_of_Man,Europe/Istanbul,Europe/Jersey,Europe/Kaliningrad,Europe/Kiev,Europe/Kirov,Europe/Lisbon,Europe/Ljubljana,Europe/London,Europe/Luxembourg,Europe/Madrid,Europe/Malta,Europe/Mariehamn,Europe/Minsk,Europe/Monaco,Europe/Moscow,Europe/Oslo,Europe/Paris,Europe/Podgorica,Europe/Prague,Europe/Riga,Europe/Rome,Europe/Samara,Europe/San_Marino,Europe/Sarajevo,Europe/Saratov,Europe/Simferopol,Europe/Skopje,Europe/Sofia,Europe/Stockholm,Europe/Tallinn,Europe/Tirane,Europe/Ulyanovsk,Europe/Uzhgorod,Europe/Vaduz,Europe/Vatican,Europe/Vienna,Europe/Vilnius,Europe/Volgograd,Europe/Warsaw,Europe/Zagreb,Europe/Zaporozhye,Europe/Zurich,Indian/Antananarivo,Indian/Chagos,Indian/Christmas,Indian/Cocos,Indian/Comoro,Indian/Kerguelen,Indian/Mahe,Indian/Maldives,Indian/Mauritius,Indian/Mayotte,Indian/Reunion,Pacific/Apia,Pacific/Auckland,Pacific/Bougainville,Pacific/Chatham,Pacific/Easter,Pacific/Efate,Pacific/Enderbury,Pacific/Fakaofo,Pacific/Fiji,Pacific/Funafuti,Pacific/Galapagos,Pacific/Gambier,Pacific/Guadalcanal,Pacific/Guam,Pacific/Honolulu,Pacific/Johnston,Pacific/Kiritimati,Pacific/Kosrae,Pacific/Kwajalein,Pacific/Majuro,Pacific/Marquesas,Pacific/Midway,Pacific/Nauru,Pacific/Niue,Pacific/Norfolk,Pacific/Noumea,Pacific/Pago_Pago,Pacific/Palau,Pacific/Pitcairn,Pacific/Ponape,Pacific/Port_Moresby,Pacific/Rarotonga,Pacific/Saipan,Pacific/Tahiti,Pacific/Tarawa,Pacific/Tongatapu,Pacific/Truk,Pacific/Wake,Pacific/Wallis",
+                                "unit : acre,bit,byte,celsius,centimeter,day,degree,fahrenheit,fluid-ounce,foot,gallon,gigabit,gigabyte,gram,hectare,hour,inch,kilobit,kilobyte,kilogram,kilometer,liter,megabit,megabyte,meter,mile,mile-scandinavian,milliliter,millimeter,millisecond,minute,month,ounce,percent,petabyte,pound,second,stone,terabit,terabyte,week,yard,year",
+                                "supportedLocales : en,fr,de,es,ja",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Les différents types de locale"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const nowIn = function(locale:string, dateStyle = \"long\"):string {\r\n    try { return `${new Intl.DateTimeFormat(locale, {dateStyle:dateStyle}).format(new Date())} (${locale})` }\r\n    catch (err) { return `${err.message} (${locale})`}\r\n}\r\n\r\nconst timeIn = function(locale:string, timeStyle = \"long\"):string {\r\n    return `${new Intl.DateTimeFormat(locale, {timeStyle:timeStyle}).format(new Date())} (${locale})`\r\n}\r\n\r\nconst numberIn = function(value:number,locale:string, timeStyle = \"long\"):string {\r\n    return `${new Intl.NumberFormat(locale).format(value)} (${locale})`\r\n}\r\n\r\nlines(\r\n    nowIn(\"en-GB\"),\r\n    nowIn(\"en-US\"),\r\n    nowIn(\"fr-FR\"),\r\n    nowIn(\"ell\"), // greek\r\n    \"# japan\",\r\n    nowIn(\"ja-JP\"),\r\n    nowIn(\"ja-JP-u-ca-japanese\"),\r\n    nowIn(\"en-GB-u-ca-japanese\"),\r\n    \"# arabic\",\r\n    nowIn(\"ara\"),\r\n    nowIn(\"ara-u-ca-islamic\"),\r\n    nowIn(\"en-GB-u-ca-islamic\"),\r\n    \"# chinse\",\r\n    nowIn(\"zh\"),\r\n    numberIn(12,\"zh\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.error",
+                            "value": {
+                                "name": "ReferenceError",
+                                "message": "lines is not defined",
+                                "stack": "    at <Cell 5> [20, 17]\n    at <Cell 5> [18, 46]\n    at Script.runInContext (node:vm:141:12)\n    at Script.runInNewContext (node:vm:146:17)\n    at Object.runInNewContext (node:vm:300:38)\n    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)\n    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)\n    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)\n    at k.emit (node:events:513:28)\n    at k.emit (node:domain:489:12)"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Les codes de langue répondent à une syntaxe complexe\r\n\r\nVoir les détails [IETF Language tags](https://en.wikipedia.org/wiki/IETF_language_tag)\r\n\r\n- code de langue du 2 à 8 lettres (le plus souvent 2) : [ISO 639-2(https://en.wikipedia.org/wiki/ISO_639-2)]\r\n  - ex : `ell` (Greek)\r\n  - [liste des codes de langue à 3 lettres](https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes)\r\n- le nom d'un script (en option), sous forme capitalisée\r\n  - Ex : `Latn`, `Cyrl`\r\n  - selon la norme [ISO 15924](https://en.wikipedia.org/wiki/ISO_15924)\r\n\r\nEn option, le code de région\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// using 3 letters ()\r\nlines(\r\n    nowIn(\"eng-GB\"),\r\n    nowIn(\"eng-US\"),\r\n    nowIn(\"ara\"),\r\n    nowIn(\"arb\"),\r\n    nowIn(\"jpn\"),\r\n    nowIn(\"kor\"),\r\n    \"special codes defaults to current locale\",\r\n    nowIn(\"mis\"), \r\n    nowIn(\"mul\"), \r\n    nowIn(\"und\"), \r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "22 August 2024 (eng-GB)",
+                                "August 22, 2024 (eng-US)",
+                                "٢٢ أغسطس ٢٠٢٤ (ara)",
+                                "٢٢ أغسطس ٢٠٢٤ (arb)",
+                                "2024年8月22日 (jpn)",
+                                "2024년 8월 22일 (kor)",
+                                "special codes defaults to current locale",
+                                "22 août 2024 (mis)",
+                                "22 août 2024 (mul)",
+                                "22 août 2024 (und)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// using scripts\r\nlines(\r\n    nowIn(\"jpn-Hira\"), // hiragana\r\n    nowIn(\"jpn-Kana\"), // Katakana\r\n    nowIn(\"jpn-Hans\"), // Han simplified\r\n    \"# serbian\",\r\n    nowIn(\"srp-Latn\"), // serbian in Latin script\r\n    nowIn(\"srp-Cyrl\"), // serbian in Cyrilic\r\n    \"# chinese\",\r\n    nowIn(\"zho-Hans\", \"long\"), // serbian in simplified Han\r\n    nowIn(\"zho-Hans\", \"full\"), // serbian in simplified Han\r\n    nowIn(\"zho-Hant\", \"long\"), // serbian in taditional Han\r\n    nowIn(\"zho-Hant\", \"full\"), // serbian in taditional Han\r\n    \"# korean\",\r\n    nowIn(\"kor-Hang\"), // korean in Hangul (main use)\r\n    nowIn(\"kor-Hani\"), // korean in chinese (Hanja)\r\n    nowIn(\"kor-Kore\"), // korean in mixed\r\n    \"# Fulla\",\r\n    nowIn(\"ff-Adlm\"), \r\n    nowIn(\"ff-Latn\"), \r\n    \"# Hausa\",\r\n    nowIn(\"ha\"), \r\n    nowIn(\"ha-Arab\"), \r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2024年8月22日 (jpn-Hira)",
+                                "2024年8月22日 (jpn-Kana)",
+                                "2024年8月22日 (jpn-Hans)",
+                                "# serbian",
+                                "22. avgust 2024. (srp-Latn)",
+                                "22. август 2024. (srp-Cyrl)",
+                                "# chinese",
+                                "2024年8月22日 (zho-Hans)",
+                                "2024年8月22日星期四 (zho-Hans)",
+                                "2024年8月22日 (zho-Hant)",
+                                "2024年8月22日 星期四 (zho-Hant)",
+                                "# korean",
+                                "2024년 8월 22일 (kor-Hang)",
+                                "2024년 8월 22일 (kor-Hani)",
+                                "2024년 8월 22일 (kor-Kore)",
+                                "# Fulla",
+                                "𞥒𞥒 𞤔𞤵𞤳𞤮⹁ 𞥒𞥐𞥒𞥔 (ff-Adlm)",
+                                "22 juko 2024 (ff-Latn)",
+                                "# Hausa",
+                                "22 Agusta, 2024 (ha)",
+                                "22 Agusta, 2024 (ha-Arab)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Using unicode options\r\n\r\nUnicode has defined extensions, which start by the `-u-`. They are defined in [le RFC 6067](https://www.rfc-editor.org/info/rfc6067) and [Unicode BCP 47 U Extension](https://unicode.org/reports/tr35/#unicode-bcp-47-u-extension)\r\n\r\nThere are lots of options : \r\n- `ca`: calendar (gregory, islamic, islamic-civil)\r\n- `co`: collation (standard, search, phonetic) of locale specific (like phonebook)\r\n- `fw` : first day of week : (sun, mon, sat...)\r\n- `hc` : hour cycle (h11,h12,h23,h24)\r\n- `nu`: numbers (latn, arab, roman, romanlow)\r\n- `sr` : subregion - states, regions.. (from the [subdivision list of CLDR](https://www.unicode.org/cldr/charts/45/supplemental/territory_subdivisions.html)])\r\n    - the validity list is [validity/subdivision.xml](https://github.com/unicode-org/cldr/blob/main/common/validity/subdivision.xml)\r\n    - the tree of subdivisions, starting from countries, is in [supplemental/subdivisions.xml](https://github.com/unicode-org/cldr/blob/main/common/validity/subdivision.xml)\r\n    - the locale names of subdivsions are in the folder \"cldr/commons/subdivisions\" of [CLDR](https://github.com/unicode-org/cldr)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    calendarsInFrench = new Intl.DisplayNames([\"fr\"], { type: \"calendar\"})\r\n    \r\n    lines(\r\n            Intl.supportedValuesOf(\"calendar\"),\r\n            nowIn(\"fr-u-ca-gregory\") + \" / \" + calendarsInFrench.of(\"gregory\"),\r\n            nowIn(\"fr-u-ca-islamic\") + \" / \" + calendarsInFrench.of(\"islamic\"),\r\n            nowIn(\"fr-u-ca-islamic-civil\") + \" / \" + calendarsInFrench.of(\"islamic-civil\"),\r\n            nowIn(\"fr-u-ca-chinese\") + \" / \" + calendarsInFrench.of(\"chinese\"),\r\n            nowIn(\"fr-u-ca-japanese\") + \" / \" + calendarsInFrench.of(\"japanese\"),\r\n        )\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "buddhist,chinese,coptic,dangi,ethioaa,ethiopic,gregory,hebrew,indian,islamic,islamic-civil,islamic-rgsa,islamic-tbla,islamic-umalqura,iso8601,japanese,persian,roc",
+                                "22 août 2024 (fr-u-ca-gregory) / calendrier grégorien",
+                                "18 safar 1446 AH (fr-u-ca-islamic) / calendrier musulman",
+                                "16 safar 1446 AH (fr-u-ca-islamic-civil) / calendrier musulman (tabulaire, époque civile)",
+                                "19 qīyuè jia-chen (fr-u-ca-chinese) / calendrier chinois",
+                                "22 août 6 Reiwa (fr-u-ca-japanese) / calendrier japonais",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "lines(\r\n    nowIn(\"ar-u-nu-latn\"),\r\n    nowIn(\"ar-u-nu-arab\"),\r\n    \"# numbers\",\r\n    numberIn(125, \"ar-u-nu-arab\"),\r\n    numberIn(125, \"fr-FR-u-nu-roman\"), // NOT WORKING\r\n)\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "22 أغسطس 2024 (ar-u-nu-latn)",
+                                "٢٢ أغسطس ٢٠٢٤ (ar-u-nu-arab)",
+                                "# numbers",
+                                "١٢٥ (ar-u-nu-arab)",
+                                "125 (fr-FR-u-nu-roman)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Times\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    lines(\r\n        timeIn(\"fr-FR\"),\r\n        timeIn(\"fr-FR-u-hc-h11\"),\r\n        timeIn(\"fr-FR-u-hc-h23\")\r\n    )\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "07:59:52 UTC+2 (fr-FR)",
+                                "07:59:52 AM UTC+2 (fr-FR-u-hc-h11)",
+                                "07:59:52 UTC+2 (fr-FR-u-hc-h23)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Normalising locales\r\n\r\nBCP-47 defines conventions for writing. The `Intl.getCanonicalLocales` function analyses the locale string, and formats its correctly\r\n\r\n> NOTE : this is a way to check the locale, as is throws an exception if not valid"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "lines(\r\n    Intl.getCanonicalLocales(\"kor-Hang\"),\r\n    Intl.getCanonicalLocales(\"ja-kana-jp\"),\r\n    Intl.getCanonicalLocales(\"JA-jp-U-CA-JAPANESE\"),\r\n    \r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "ko-Hang",
+                                "ja-Kana-JP",
+                                "ja-JP-u-ca-japanese",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

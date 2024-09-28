@@ -1,0 +1,277 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# boolean operators"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## operator &&"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    \"AAA\" && \"BBB\",      // returns the second string\r\n    \"AAA\" && undefined, // returns undefined\r\n    undefined && \"BBB\", // returns undefined\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "BBB undefined undefined",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Date object\r\n\r\nL'objet Date de Javascript est représenté de manière interne comme le nombre de secondes depuis le 1e janvier 1970 UTC"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(new Date(0).toISOString())"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "1970-01-01T00:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nconsole.log(new Date(0).toDateString())"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Thu Jan 01 1970",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "toLocaleString() permet de préciser une locale pour le format de date, mais aussi une timezone IANA"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// epoch, au format US à l'heure de New-York (7PM le 31 décembre 1969 à New-York)\r\nconsole.log(new Date(0).toLocaleString(\"en-US\",{ timeZone: 'America/New_York' }))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "12/31/1969, 7:00:00 PM",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// epoch, au format FR à l'heure de Paris => il était 1h du matin à Paris\r\nconsole.log(new Date(0).toLocaleString(\"fr-FR\",{ timeZone: 'Europe/Paris' }))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "01/01/1970 01:00:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Un objet Date est toujours créé en local time\r\n\r\nPour créer une date UTC, il faut utiliser Date.UTC() qui retourne un timestamp, que l'on utilise ensuite pour créer une nouvelle Date"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var dLocal = new Date(2024,0,15,12,0) // 15th of June 2024 at 12:00\r\nvar dUTC = new Date(Date.UTC(2024,0,15,12,0)) // 15th of June 2024 at 12:00\r\nconsole.log(`created local : is on the ${dLocal.toISOString()} (and ${dLocal.toDateString()} at ${dLocal.toTimeString()})`\r\n    + `\\ncreated UTC : is on the ${dUTC.toISOString()} (and ${dUTC.toDateString()} at ${dUTC.toTimeString()})`)\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "created local : is on the 2024-01-15T11:00:00.000Z (and Mon Jan 15 2024 at 12:00:00 GMT+0100 (heure normale d’Europe centrale))",
+                                "created UTC : is on the 2024-01-15T12:00:00.000Z (and Mon Jan 15 2024 at 13:00:00 GMT+0100 (heure normale d’Europe centrale))",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Date parses ISO string in local time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    const withoutZ = new Date(\"2024-01-01T00:00\")\r\n    const withZ = new Date(\"2024-01-01T00:00Z\")\r\n    console.log(\r\n        \"created without Z marker => interpreted in local time \", withoutZ, \"\\n\",\r\n        \"created wit Z indicator => interpreted as UTC\", withZ\r\n    )\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "created without Z marker => interpreted in local time  2023-12-31T23:00:00.000Z ",
+                                " created wit Z indicator => interpreted as UTC 2024-01-01T00:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var dLocal = new Date(2024,0,15,12,0) // 15th of June 2024 at 12:00\r\nconsole.log(`is on the ${dLocal.toISOString()} (and ${dLocal.toDateString()} at ${dLocal.toTimeString()})`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "is on the 2024-01-15T11:00:00.000Z (and Mon Jan 15 2024 at 12:00:00 GMT+0100 (heure normale d’Europe centrale))",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Javascript does not take leap seconds into account\r\n\r\nBeing base on ICU, which does not handle leap seconds (\" ICU does not concern itself with either leap seconds or historical behavior\" [here](https://unicode-org.github.io/icu/userguide/datetime/timezone/) )\r\nTo check, a leap second was introduced in 2024-06-30T23:59:60 (see https://hpiers.obspm.fr/iers/bul/bulc/bulletinc.49)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const secsBefore = new Date(2015,5,30,23,59,0)\r\nconst leap2015 = new Date(2015,5,30,23,59,60)\r\nconst secsAfter = new Date(2015,6,1,0,1,0)\r\nconsole.log(`between ${secsBefore} and ${secsAfter} a leap second was introduced\\nBut is it ignored and the difference is expected to be 120 s (not 121 s) = ${(secsAfter - secsBefore)/1000} seconds`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "between Tue Jun 30 2015 23:59:00 GMT+0200 (heure d’été d’Europe centrale) and Wed Jul 01 2015 00:01:00 GMT+0200 (heure d’été d’Europe centrale) a leap second was introduced",
+                                "But is it ignored and the difference is expected to be 120 s (not 121 s) = 120 seconds",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Date computations in Javascript"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Compute date from day index in year\r\nThe Date constructor interprets days as offsets, "
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const dateFromDayIndex= (year, dayInYear) => new Date(year,0,dayInYear)\r\n\r\nconsole.log(dateFromDayIndex(2024,61).toDateString())"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Fri Mar 01 2024",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

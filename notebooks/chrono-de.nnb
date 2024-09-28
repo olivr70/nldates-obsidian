@@ -1,0 +1,234 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# Tests of Chrono-de"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Init"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var chrono = require(\"chrono-node\")\r\nvar dayjs = require(\"dayjs\")\r\n\r\nconst chronode = new chrono.Chrono(chrono.de.createCasualConfiguration(true))\r\nconsole.log(\"Chrono loaded\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Chrono loaded",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const show = (str) => (`${str} : ${chronode.parseDate(str)}\\n`)\r\nconst showAll = (...items) => console.log(...items.map(show))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// ISODateParser\r\nshowAll(\"2024-12-25\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2024-12-25 : Wed Dec 25 2024 12:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// SlashDates\r\nshowAll(\"25/12/2024\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "25/12/2024 : Wed Dec 25 2024 12:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// DETimeExpressionParser\r\nshowAll(\"um 22:00\", \"von 10:00\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "um 22:00 : Sat Sep 28 2024 22:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                " von 10:00 : Sat Sep 28 2024 10:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\n// DESpecificTimeExpressionParser\r\nshowAll(\"um 22h01m21\", \"von 10h14\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "um 22h01m21 : Sat Sep 28 2024 22:01:21 GMT+0200 (heure d’été d’Europe centrale)",
+                                " von 10h14 : Sat Sep 28 2024 10:14:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// DECasualDateParser\r\nshowAll(\"jetzt\",\"heute\",\"morgen\",\"übermorgen\",\"uebermorgen\",\"gestern\",\"vorgestern\",\"letzte nacht\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "jetzt : Sat Sep 28 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " heute : Sat Sep 28 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " morgen : Sun Sep 29 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " übermorgen : Mon Sep 30 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " uebermorgen : Mon Sep 30 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " gestern : Fri Sep 27 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " vorgestern : Thu Sep 26 2024 13:53:35 GMT+0200 (heure d’été d’Europe centrale)",
+                                " letzte nacht : Fri Sep 27 2024 00:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "showAll(\"nächste woche\",\"kommende woche\",\"folgende woche\",\"letzte woche\",\"vergangene woche\",\"vorige woche\",\"vorangegangene woche\",\"vorhergegangene woche\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "nächste woche : Sat Oct 05 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " kommende woche : Sat Oct 05 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " folgende woche : Sat Oct 05 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " letzte woche : Sat Sep 21 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " vergangene woche : Sat Sep 21 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " vorige woche : Sat Sep 21 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " vorangegangene woche : Sat Sep 21 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                " vorhergegangene woche : Sat Sep 21 2024 13:58:50 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Not supported"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "showAll(\"nächste Woche\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "nächste Woche : Sat Oct 05 2024 13:54:40 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

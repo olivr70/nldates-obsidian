@@ -1,0 +1,2095 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "Tips et essais de la libraire [Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) de Jascript"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Utils"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\n\r\nconst DTF = function(loc:Intl.LocalesArgument, options?:Intl.DateTimeFormatOptions) { return new Intl.DateTimeFormat(loc || \"en-GB\", options) }\r\nconst FORMAT = function(date:Date, loc:Intl.LocalesArgument, options?:Intl.DateTimeFormatOptions) { return DTF(loc, options).format(date || new Date()) }\r\nconst U = undefined;\r\n\r\n\r\nconst WINTER_DATE = new Date(2024,1,15)\r\nconst SUMMER_DATE = new Date(2024,7,15)\r\n\r\nconst ConstantDateTimeFormat = function(message):Intl.DateTimeFormat  {\r\n    this.format = function(anyDate?:Date | number):string { return message }\r\n}\r\n\r\ntype TimezoneFormat = \"short\" | \"long\" | \"shortOffset\" | \"longOffset\" | \"shortGeneric\" | \"longGeneric\"\r\n\r\n// crates a DateTimeFormat returns a format for the zone \r\nconst formatForZone = function (locale:string, ianaZone:string, zoneFormat:TimezoneFormat):Intl.DateTimeFormat {\r\n    try {\r\n      return new Intl.DateTimeFormat(locale, {\r\n        timeZone: ianaZone,\r\n        timeZoneName: zoneFormat,\r\n      })\r\n    } catch (e) {\r\n      return new ConstantDateTimeFormat(e.message);\r\n    }\r\n  }\r\n\r\n  // returns the timezone for date\r\n  const timezoneOf = function(date:Date, locale:string, ianaZone:string, zoneFormat:TimezoneFormat):string {\r\n    const fmt = new Intl.DateTimeFormat(locale, {\r\n      timeZone: ianaZone,\r\n      timeZoneName: zoneFormat,\r\n    })\r\n    parts = fmt.formatToParts(date)\r\n    str = parts.map(x => x.value).join(\"\")\r\n    return parts.find((x) => x.type == \"timeZoneName\")?.value;\r\n  }\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Obtenir des informations\r\n\r\nLes librairies sous-jacentes sont très évolutives. Les fonctionnalités disponibles dans Intl dépendent de la version de la librairie [ICU](https://icu.unicode.org/) incluse dans Node.js. ICU contient :\r\n- la TZ database avec les informations relatives aux timezones IANA (dernière version 75).\r\n- la Common Locale Data Repository ([CLDR](https://cldr.unicode.org/)) (dernière version 46)\r\n\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// La version d'ICU\r\nconsole.log(process.versions.icu)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "72.1",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Version de node\r\nconsole.log(process.version)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "v18.16.0",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// pour savoir si node a été construit avec l'option ICU small (anglais seulement) \r\nconsole.log(process.config.variables.icu_small)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "false",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// la version de timezone database\r\nconsole.log(process.versions.tz)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2022g",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Using DateTimeFormat"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Using dateStyle and timeStyle"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Specify date and time format using \"style\" options (i.e. full, long, medium, short)\r\nconst dates = [\"short\", \"medium\", \"long\", \"full\"].map(s => `${s} : ${FORMAT(U,\"fr\", {dateStyle:s})}` )\r\nconst times = [\"short\", \"medium\", \"long\", \"full\"].map(s => `${s} : ${FORMAT(U,\"de\", {timeStyle:s})}` )\r\nconsole.log(\"Now with different dateStyle\\n\",dates.join(\"\\n\"), \"\\n\\nNow with different timeStyle\\n\", times.join(\"\\n\"))\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Now with different dateStyle",
+                                " short : 29/08/2024",
+                                "medium : 29 août 2024",
+                                "long : 29 août 2024",
+                                "full : jeudi 29 août 2024 ",
+                                "",
+                                "Now with different timeStyle",
+                                " short : 17:28",
+                                "medium : 17:28:04",
+                                "long : 17:28:04 MESZ",
+                                "full : 17:28:04 Mitteleuropäische Sommerzeit",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Display names\r\n\r\nthe Intl.DisplayNames object offers translation services"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\ntry {\r\n    const regionNamesInSpanish = new Intl.DisplayNames([ \"es\"], { type: \"region\"})\r\n    const currencyNamesInItalian = new Intl.DisplayNames([ \"it\"], { type: \"currency\"})\r\n    const dateTimeFieldsInGerman = new Intl.DisplayNames([ \"de\"], { type: \"dateTimeField\"})\r\n    const calendarsInChinsed= new Intl.DisplayNames([ \"zh\"], { type: \"calendar\"})\r\n    const scriptsInFrench= new Intl.DisplayNames([ \"fr\"], { type: \"script\"})\r\n    \r\n    console.log(\r\n        regionNamesInSpanish.of(\"FR\"),\"\\n\",\r\n        currencyNamesInItalian.of(\"USD\"),\"\\n\",\r\n        dateTimeFieldsInGerman.of(\"month\"),\"\\n\",\r\n        calendarsInChinsed.of(\"islamic\"),\"\\n\",\r\n        scriptsInFrench.of(\"Kana\"),\"\\n\",\r\n    )\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Francia ",
+                                " dollaro statunitense ",
+                                " Monat ",
+                                " 伊斯兰历 ",
+                                " katakana ",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Working with timezones"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## The timezone database"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// toutes les timezone IANA en Europe\r\nconst SUPPORTED_TIME_ZONES:string[] = Intl.supportedValuesOf(\"timeZone\")\r\nconsole.log(SUPPORTED_TIME_ZONES.filter(x => x.startsWith(\"Europe\")))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  'Europe/Amsterdam',  'Europe/Andorra',    'Europe/Astrakhan',",
+                                "  'Europe/Athens',     'Europe/Belgrade',   'Europe/Berlin',",
+                                "  'Europe/Bratislava', 'Europe/Brussels',   'Europe/Bucharest',",
+                                "  'Europe/Budapest',   'Europe/Busingen',   'Europe/Chisinau',",
+                                "  'Europe/Copenhagen', 'Europe/Dublin',     'Europe/Gibraltar',",
+                                "  'Europe/Guernsey',   'Europe/Helsinki',   'Europe/Isle_of_Man',",
+                                "  'Europe/Istanbul',   'Europe/Jersey',     'Europe/Kaliningrad',",
+                                "  'Europe/Kiev',       'Europe/Kirov',      'Europe/Lisbon',",
+                                "  'Europe/Ljubljana',  'Europe/London',     'Europe/Luxembourg',",
+                                "  'Europe/Madrid',     'Europe/Malta',      'Europe/Mariehamn',",
+                                "  'Europe/Minsk',      'Europe/Monaco',     'Europe/Moscow',",
+                                "  'Europe/Oslo',       'Europe/Paris',      'Europe/Podgorica',",
+                                "  'Europe/Prague',     'Europe/Riga',       'Europe/Rome',",
+                                "  'Europe/Samara',     'Europe/San_Marino', 'Europe/Sarajevo',",
+                                "  'Europe/Saratov',    'Europe/Simferopol', 'Europe/Skopje',",
+                                "  'Europe/Sofia',      'Europe/Stockholm',  'Europe/Tallinn',",
+                                "  'Europe/Tirane',     'Europe/Ulyanovsk',  'Europe/Uzhgorod',",
+                                "  'Europe/Vaduz',      'Europe/Vatican',    'Europe/Vienna',",
+                                "  'Europe/Vilnius',    'Europe/Volgograd',  'Europe/Warsaw',",
+                                "  'Europe/Zagreb',     'Europe/Zaporozhye', 'Europe/Zurich'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Get the current IANA Timezone"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const currentIANATimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone\r\nconst tzFormater = formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" )\r\n\r\n\r\nconsole.log(\r\n    Intl.DateTimeFormat().resolvedOptions(), \"\\n\",\r\n    currentIANATimeZone, \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date()), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-07-15\")), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-01-15\")), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-061\")), \"\\n\",\r\n    \r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.error",
+                            "value": {
+                                "name": "RangeError",
+                                "message": "Invalid time value",
+                                "stack": "    at <Cell 18> [8, 17]\n    at <Cell 18> [6, 46]\n    at Script.runInContext (node:vm:141:12)\n    at Script.runInNewContext (node:vm:146:17)\n    at Object.runInNewContext (node:vm:300:38)\n    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)\n    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)\n    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)\n    at k.emit (node:events:513:28)\n    at k.emit (node:domain:489:12)"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Zone names can have multiple forms"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Some forms of zone names are not supported"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "> **Warning** : some zone names are not supported\r\n> - zone names, like \"Pacific Standard Time\"\r\n> - localised abbreviations, like \"MESZ (Mitteleuropäische Sommerzeit)\" which is Central European Time in german"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    formatForZone(\"en\",\"Pacific Time\",\"longGeneric\").format(new Date()),\"\\n\",\r\n    formatForZone(\"en\",\"MESZ\",\"longGeneric\").format(new Date()),\"\\n\",\r\n    formatForZone(\"en\",\"Pacific Standard Time\",\"longGeneric\").format(new Date()),\"\\n\",\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Invalid time zone specified: Pacific Time ",
+                                " Invalid time zone specified: MESZ ",
+                                " Invalid time zone specified: Pacific Standard Time ",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Other forms can be generated using DateTimeFormat\r\n\r\nSome forms are dependant on the locale of the format. \r\n\r\nThe formats for timeZone, specified in the `timeZoneFormat' options are: \r\n- **short**\r\n- **long** \r\n- **shortOffset** like UTC+1\r\n- **longOffset** like UTC+01:00\r\n- **shortGeneric** in theory, a short representation which does not depend on the locale\r\n- **longGeneric** a short representation which does not depend on the locale"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const date = Date.UTC(2021, 11, 17, 3, 0, 42);\r\nconst someTimezones = [ \"UTC\", \"Pacific Standard Time\", \"CET\", \"Europe/Paris\", \"PST\", \"Etc/Zulu\", \"Etc/GMT+1\" ];\r\n  // Etc/Zulu is same a UTC\r\n  // WARNING : Etc/GMT offsets are inverted, this equals to GMT-1\r\nconst TIMEZONE_FORMATS:TimezoneFormat[] = [ \"short\", \"long\", \"shortOffset\", \"longOffset\", \"shortGeneric\", \"longGeneric\", ];\r\nconst formattedFr = someTimezones.map(zone => TIMEZONE_FORMATS.map(fmt => `${fmt} for ${zone} : ${formatForZone(\"fr-FR\", zone, fmt).format(date)}`))\r\nconst formattedEn = someTimezones.map(zone => TIMEZONE_FORMATS.map(fmt => `${fmt} for ${zone} : ${formatForZone(\"en-GB\", zone, fmt).format(date)}`))\r\n  \r\nconsole.log(\"In french\\n\", formattedFr, \"\\n\\nIn english\\n\",formattedEn);\r\n\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "In french",
+                                " [",
+                                "  [",
+                                "    'short for UTC : 17/12/2021 UTC',",
+                                "    'long for UTC : 17/12/2021 temps universel coordonné',",
+                                "    'shortOffset for UTC : 17/12/2021 UTC',",
+                                "    'longOffset for UTC : 17/12/2021 UTC',",
+                                "    'shortGeneric for UTC : 17/12/2021 UTC',",
+                                "    'longGeneric for UTC : 17/12/2021 UTC'",
+                                "  ],",
+                                "  [",
+                                "    'short for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'long for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'shortOffset for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'longOffset for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'shortGeneric for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'longGeneric for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time'",
+                                "  ],",
+                                "  [",
+                                "    'short for CET : 17/12/2021 UTC+1',",
+                                "    'long for CET : 17/12/2021 UTC+01:00',",
+                                "    'shortOffset for CET : 17/12/2021 UTC+1',",
+                                "    'longOffset for CET : 17/12/2021 UTC+01:00',",
+                                "    'shortGeneric for CET : 17/12/2021 UTC+1',",
+                                "    'longGeneric for CET : 17/12/2021 UTC+01:00'",
+                                "  ],",
+                                "  [",
+                                "    'short for Europe/Paris : 17/12/2021 UTC+1',",
+                                "    'long for Europe/Paris : 17/12/2021 heure normale d’Europe centrale',",
+                                "    'shortOffset for Europe/Paris : 17/12/2021 UTC+1',",
+                                "    'longOffset for Europe/Paris : 17/12/2021 UTC+01:00',",
+                                "    'shortGeneric for Europe/Paris : 17/12/2021 heure : France',",
+                                "    'longGeneric for Europe/Paris : 17/12/2021 heure d’Europe centrale'",
+                                "  ],",
+                                "  [",
+                                "    'short for PST : 16/12/2021 UTC−8',",
+                                "    'long for PST : 16/12/2021 heure normale du Pacifique nord-américain',",
+                                "    'shortOffset for PST : 16/12/2021 UTC−8',",
+                                "    'longOffset for PST : 16/12/2021 UTC−08:00',",
+                                "    'shortGeneric for PST : 16/12/2021 heure : Los Angeles',",
+                                "    'longGeneric for PST : 16/12/2021 heure du Pacifique nord-américain'",
+                                "  ],",
+                                "  [",
+                                "    'short for Etc/Zulu : 17/12/2021 UTC',",
+                                "    'long for Etc/Zulu : 17/12/2021 temps universel coordonné',",
+                                "    'shortOffset for Etc/Zulu : 17/12/2021 UTC',",
+                                "    'longOffset for Etc/Zulu : 17/12/2021 UTC',",
+                                "    'shortGeneric for Etc/Zulu : 17/12/2021 UTC',",
+                                "    'longGeneric for Etc/Zulu : 17/12/2021 UTC'",
+                                "  ],",
+                                "  [",
+                                "    'short for Etc/GMT+1 : 17/12/2021 UTC−1',",
+                                "    'long for Etc/GMT+1 : 17/12/2021 UTC−01:00',",
+                                "    'shortOffset for Etc/GMT+1 : 17/12/2021 UTC−1',",
+                                "    'longOffset for Etc/GMT+1 : 17/12/2021 UTC−01:00',",
+                                "    'shortGeneric for Etc/GMT+1 : 17/12/2021 UTC−1',",
+                                "    'longGeneric for Etc/GMT+1 : 17/12/2021 UTC−01:00'",
+                                "  ]",
+                                "] ",
+                                "",
+                                "In english",
+                                " [",
+                                "  [",
+                                "    'short for UTC : 17/12/2021, UTC',",
+                                "    'long for UTC : 17/12/2021, Coordinated Universal Time',",
+                                "    'shortOffset for UTC : 17/12/2021, GMT',",
+                                "    'longOffset for UTC : 17/12/2021, GMT',",
+                                "    'shortGeneric for UTC : 17/12/2021, GMT',",
+                                "    'longGeneric for UTC : 17/12/2021, GMT'",
+                                "  ],",
+                                "  [",
+                                "    'short for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'long for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'shortOffset for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'longOffset for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'shortGeneric for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time',",
+                                "    'longGeneric for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time'",
+                                "  ],",
+                                "  [",
+                                "    'short for CET : 17/12/2021, GMT+1',",
+                                "    'long for CET : 17/12/2021, GMT+01:00',",
+                                "    'shortOffset for CET : 17/12/2021, GMT+1',",
+                                "    'longOffset for CET : 17/12/2021, GMT+01:00',",
+                                "    'shortGeneric for CET : 17/12/2021, GMT+1',",
+                                "    'longGeneric for CET : 17/12/2021, GMT+01:00'",
+                                "  ],",
+                                "  [",
+                                "    'short for Europe/Paris : 17/12/2021, CET',",
+                                "    'long for Europe/Paris : 17/12/2021, Central European Standard Time',",
+                                "    'shortOffset for Europe/Paris : 17/12/2021, GMT+1',",
+                                "    'longOffset for Europe/Paris : 17/12/2021, GMT+01:00',",
+                                "    'shortGeneric for Europe/Paris : 17/12/2021, CET',",
+                                "    'longGeneric for Europe/Paris : 17/12/2021, Central European Time'",
+                                "  ],",
+                                "  [",
+                                "    'short for PST : 16/12/2021, GMT-8',",
+                                "    'long for PST : 16/12/2021, Pacific Standard Time',",
+                                "    'shortOffset for PST : 16/12/2021, GMT-8',",
+                                "    'longOffset for PST : 16/12/2021, GMT-08:00',",
+                                "    'shortGeneric for PST : 16/12/2021, Los Angeles Time',",
+                                "    'longGeneric for PST : 16/12/2021, Pacific Time'",
+                                "  ],",
+                                "  [",
+                                "    'short for Etc/Zulu : 17/12/2021, UTC',",
+                                "    'long for Etc/Zulu : 17/12/2021, Coordinated Universal Time',",
+                                "    'shortOffset for Etc/Zulu : 17/12/2021, GMT',",
+                                "    'longOffset for Etc/Zulu : 17/12/2021, GMT',",
+                                "    'shortGeneric for Etc/Zulu : 17/12/2021, GMT',",
+                                "    'longGeneric for Etc/Zulu : 17/12/2021, GMT'",
+                                "  ],",
+                                "  [",
+                                "    'short for Etc/GMT+1 : 17/12/2021, GMT-1',",
+                                "    'long for Etc/GMT+1 : 17/12/2021, GMT-01:00',",
+                                "    'shortOffset for Etc/GMT+1 : 17/12/2021, GMT-1',",
+                                "    'longOffset for Etc/GMT+1 : 17/12/2021, GMT-01:00',",
+                                "    'shortGeneric for Etc/GMT+1 : 17/12/2021, GMT-1',",
+                                "    'longGeneric for Etc/GMT+1 : 17/12/2021, GMT-01:00'",
+                                "  ]",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Comparing shortGeneric and longGeneric timeZoneFormat"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// utilities\r\n\r\n// return an object whose properties are timezonenames\r\nconst zoneNamesOf = function (ianaZone:string, date:Date, loc:string): {[k in TimezoneFormat | \"ianaZone\"]: string} {\r\n    const result = Object.fromEntries(TIMEZONE_FORMATS.map(fmt => [fmt, timezoneOf(date,loc,ianaZone, fmt)]))\r\n    result[\"ianaZone\"] = ianaZone\r\n    result[\"locale\"] = loc\r\n    return result\r\n}\r\n\r\n\r\nconst allNamesOfZone = function(date:Date, ianaZone:string, locales:string[]) {\r\n    const result = new Set();\r\n    for (loc of locales) {\r\n        TIMEZONE_FORMATS.map(fmt => timezoneOf(date,loc,ianaZone, fmt))\r\n            .forEach(x => result.add(x))\r\n    }\r\n    return Array.from(result);\r\n}\r\n\r\nconst xx = zoneNamesOf(\"Europe/Paris\", WINTER_DATE, \"fr-FR\")\r\n\r\nconsole.log(\r\n    zoneNamesOf(\"Europe/Paris\", WINTER_DATE, \"fr-FR\"),\r\n    allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"en\", \"fr\",\"de\", \"ja\"])\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "{",
+                                "  short: 'UTC+1',",
+                                "  long: 'heure normale d’Europe centrale',",
+                                "  shortOffset: 'UTC+1',",
+                                "  longOffset: 'UTC+01:00',",
+                                "  shortGeneric: 'heure : France',",
+                                "  longGeneric: 'heure d’Europe centrale',",
+                                "  ianaZone: 'Europe/Paris',",
+                                "  locale: 'fr-FR'",
+                                "} [",
+                                "  'GMT+1',",
+                                "  'Central European Standard Time',",
+                                "  'GMT+01:00',",
+                                "  'France Time',",
+                                "  'Central European Time',",
+                                "  'UTC+1',",
+                                "  'heure normale d’Europe centrale',",
+                                "  'UTC+01:00',",
+                                "  'heure : France',",
+                                "  'heure d’Europe centrale',",
+                                "  'MEZ',",
+                                "  'Mitteleuropäische Normalzeit',",
+                                "  'Mitteleuropäische Zeit',",
+                                "  '中央ヨーロッパ標準時',",
+                                "  'フランス時間',",
+                                "  '中央ヨーロッパ時間'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const ZONES_FR = SUPPORTED_TIME_ZONES.map(ianaZone => zoneNamesOf(ianaZone, WINTER_DATE, \"en-GB\"))\r\n\r\nconsole.log(ZONES_FR)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Abidjan',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Accra',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Ethiopia Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Addis_Ababa',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'CET',",
+                                "    long: 'Central European Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'CET',",
+                                "    longGeneric: 'Central European Standard Time',",
+                                "    ianaZone: 'Africa/Algiers',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Eritrea Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Asmera',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Bamako',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Central African Republic Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Bangui',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Banjul',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Bissau',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Malawi Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Blantyre',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Congo - Brazzaville Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Brazzaville',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Burundi Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Bujumbura',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'EET',",
+                                "    long: 'Eastern European Standard Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'EET',",
+                                "    longGeneric: 'Eastern European Standard Time',",
+                                "    ianaZone: 'Africa/Cairo',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'GMT+01:00',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Morocco Time',",
+                                "    longGeneric: 'Morocco Time',",
+                                "    ianaZone: 'Africa/Casablanca',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'CET',",
+                                "    long: 'Central European Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'CET',",
+                                "    longGeneric: 'Central European Time',",
+                                "    ianaZone: 'Africa/Ceuta',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Conakry',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Dakar',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Tanzania Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Dar_es_Salaam',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Djibouti Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Djibouti',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Cameroon Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Douala',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'GMT+01:00',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Western Sahara Time',",
+                                "    longGeneric: 'Western Sahara Time',",
+                                "    ianaZone: 'Africa/El_Aaiun',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Freetown',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Botswana Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Gaborone',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Zimbabwe Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Harare',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'South Africa Standard Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'South Africa Time',",
+                                "    longGeneric: 'South Africa Standard Time',",
+                                "    ianaZone: 'Africa/Johannesburg',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'South Sudan Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Juba',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Uganda Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Kampala',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Sudan Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Khartoum',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Rwanda Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Kigali',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Kinshasa Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Kinshasa',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Nigeria Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Lagos',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Gabon Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Libreville',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Lome',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Angola Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Luanda',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Lubumbashi Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Lubumbashi',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Zambia Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Lusaka',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Equatorial Guinea Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Malabo',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Mozambique Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Maputo',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'South Africa Standard Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Lesotho Time',",
+                                "    longGeneric: 'South Africa Standard Time',",
+                                "    ianaZone: 'Africa/Maseru',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'South Africa Standard Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Eswatini Time',",
+                                "    longGeneric: 'South Africa Standard Time',",
+                                "    ianaZone: 'Africa/Mbabane',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Somalia Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Mogadishu',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Monrovia',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+3',",
+                                "    long: 'East Africa Time',",
+                                "    shortOffset: 'GMT+3',",
+                                "    longOffset: 'GMT+03:00',",
+                                "    shortGeneric: 'Kenya Time',",
+                                "    longGeneric: 'East Africa Time',",
+                                "    ianaZone: 'Africa/Nairobi',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Chad Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Ndjamena',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Niger Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Niamey',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Nouakchott',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Ouagadougou',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+1',",
+                                "    long: 'West Africa Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'Benin Time',",
+                                "    longGeneric: 'West Africa Standard Time',",
+                                "    ianaZone: 'Africa/Porto-Novo',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'Africa/Sao_Tome',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'EET',",
+                                "    long: 'Eastern European Standard Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'EET',",
+                                "    longGeneric: 'Eastern European Standard Time',",
+                                "    ianaZone: 'Africa/Tripoli',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'CET',",
+                                "    long: 'Central European Standard Time',",
+                                "    shortOffset: 'GMT+1',",
+                                "    longOffset: 'GMT+01:00',",
+                                "    shortGeneric: 'CET',",
+                                "    longGeneric: 'Central European Standard Time',",
+                                "    ianaZone: 'Africa/Tunis',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT+2',",
+                                "    long: 'Central Africa Time',",
+                                "    shortOffset: 'GMT+2',",
+                                "    longOffset: 'GMT+02:00',",
+                                "    shortGeneric: 'Namibia Time',",
+                                "    longGeneric: 'Central Africa Time',",
+                                "    ianaZone: 'Africa/Windhoek',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-10',",
+                                "    long: 'Hawaii-Aleutian Standard Time',",
+                                "    shortOffset: 'GMT-10',",
+                                "    longOffset: 'GMT-10:00',",
+                                "    shortGeneric: 'Adak Time',",
+                                "    longGeneric: 'Hawaii-Aleutian Time',",
+                                "    ianaZone: 'America/Adak',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-9',",
+                                "    long: 'Alaska Standard Time',",
+                                "    shortOffset: 'GMT-9',",
+                                "    longOffset: 'GMT-09:00',",
+                                "    shortGeneric: 'Anchorage Time',",
+                                "    longGeneric: 'Alaska Time',",
+                                "    ianaZone: 'America/Anchorage',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Anguilla Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Anguilla',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Antigua & Barbuda Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Antigua',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Brasilia Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Araguaina Time',",
+                                "    longGeneric: 'Brasilia Standard Time',",
+                                "    ianaZone: 'America/Araguaina',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'La Rioja Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/La_Rioja',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Rio Gallegos Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/Rio_Gallegos',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Salta Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/Salta',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'San Juan Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/San_Juan',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'San Luis Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/San_Luis',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Tucuman Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/Tucuman',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Ushuaia Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Argentina/Ushuaia',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Aruba Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Aruba',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Paraguay Summer Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Paraguay Time',",
+                                "    longGeneric: 'Paraguay Time',",
+                                "    ianaZone: 'America/Asuncion',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Brasilia Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Bahia Time',",
+                                "    longGeneric: 'Brasilia Standard Time',",
+                                "    ianaZone: 'America/Bahia',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-6',",
+                                "    long: 'Central Standard Time',",
+                                "    shortOffset: 'GMT-6',",
+                                "    longOffset: 'GMT-06:00',",
+                                "    shortGeneric: 'Bahia Banderas Time',",
+                                "    longGeneric: 'Central Standard Time',",
+                                "    ianaZone: 'America/Bahia_Banderas',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Barbados Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Barbados',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Brasilia Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Belem Time',",
+                                "    longGeneric: 'Brasilia Standard Time',",
+                                "    ianaZone: 'America/Belem',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-6',",
+                                "    long: 'Central Standard Time',",
+                                "    shortOffset: 'GMT-6',",
+                                "    longOffset: 'GMT-06:00',",
+                                "    shortGeneric: 'Belize Time',",
+                                "    longGeneric: 'Central Standard Time',",
+                                "    ianaZone: 'America/Belize',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Blanc-Sablon Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Blanc-Sablon',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Amazon Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Boa Vista Time',",
+                                "    longGeneric: 'Amazon Standard Time',",
+                                "    ianaZone: 'America/Boa_Vista',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Colombia Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Colombia Time',",
+                                "    longGeneric: 'Colombia Standard Time',",
+                                "    ianaZone: 'America/Bogota',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Boise Time',",
+                                "    longGeneric: 'Mountain Time',",
+                                "    ianaZone: 'America/Boise',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Buenos Aires Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Buenos_Aires',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Cambridge Bay Time',",
+                                "    longGeneric: 'Mountain Time',",
+                                "    ianaZone: 'America/Cambridge_Bay',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Amazon Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Campo Grande Time',",
+                                "    longGeneric: 'Amazon Standard Time',",
+                                "    ianaZone: 'America/Campo_Grande',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Eastern Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Cancun Time',",
+                                "    longGeneric: 'Eastern Standard Time',",
+                                "    ianaZone: 'America/Cancun',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Venezuela Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Venezuela Time',",
+                                "    longGeneric: 'Venezuela Time',",
+                                "    ianaZone: 'America/Caracas',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Catamarca Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Catamarca',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'French Guiana Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'French Guiana Time',",
+                                "    longGeneric: 'French Guiana Time',",
+                                "    ianaZone: 'America/Cayenne',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Eastern Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Cayman Islands Time',",
+                                "    longGeneric: 'Eastern Standard Time',",
+                                "    ianaZone: 'America/Cayman',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-6',",
+                                "    long: 'Central Standard Time',",
+                                "    shortOffset: 'GMT-6',",
+                                "    longOffset: 'GMT-06:00',",
+                                "    shortGeneric: 'Chicago Time',",
+                                "    longGeneric: 'Central Time',",
+                                "    ianaZone: 'America/Chicago',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-6',",
+                                "    long: 'Central Standard Time',",
+                                "    shortOffset: 'GMT-6',",
+                                "    longOffset: 'GMT-06:00',",
+                                "    shortGeneric: 'Chihuahua Time',",
+                                "    longGeneric: 'Central Standard Time',",
+                                "    ianaZone: 'America/Chihuahua',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Ciudad Juarez Time',",
+                                "    longGeneric: 'Mountain Time',",
+                                "    ianaZone: 'America/Ciudad_Juarez',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Eastern Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Atikokan Time',",
+                                "    longGeneric: 'Eastern Standard Time',",
+                                "    ianaZone: 'America/Coral_Harbour',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-3',",
+                                "    long: 'Argentina Standard Time',",
+                                "    shortOffset: 'GMT-3',",
+                                "    longOffset: 'GMT-03:00',",
+                                "    shortGeneric: 'Cordoba Time',",
+                                "    longGeneric: 'Argentina Standard Time',",
+                                "    ianaZone: 'America/Cordoba',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-6',",
+                                "    long: 'Central Standard Time',",
+                                "    shortOffset: 'GMT-6',",
+                                "    longOffset: 'GMT-06:00',",
+                                "    shortGeneric: 'Costa Rica Time',",
+                                "    longGeneric: 'Central Standard Time',",
+                                "    ianaZone: 'America/Costa_Rica',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Creston Time',",
+                                "    longGeneric: 'Mountain Standard Time',",
+                                "    ianaZone: 'America/Creston',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Amazon Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Cuiaba Time',",
+                                "    longGeneric: 'Amazon Standard Time',",
+                                "    ianaZone: 'America/Cuiaba',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Curaçao Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Curacao',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT',",
+                                "    long: 'Greenwich Mean Time',",
+                                "    shortOffset: 'GMT',",
+                                "    longOffset: 'GMT',",
+                                "    shortGeneric: 'GMT',",
+                                "    longGeneric: 'Greenwich Mean Time',",
+                                "    ianaZone: 'America/Danmarkshavn',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Yukon Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Dawson Time',",
+                                "    longGeneric: 'Yukon Time',",
+                                "    ianaZone: 'America/Dawson',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Dawson Creek Time',",
+                                "    longGeneric: 'Mountain Standard Time',",
+                                "    ianaZone: 'America/Dawson_Creek',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Denver Time',",
+                                "    longGeneric: 'Mountain Time',",
+                                "    ianaZone: 'America/Denver',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Eastern Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Detroit Time',",
+                                "    longGeneric: 'Eastern Time',",
+                                "    ianaZone: 'America/Detroit',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-4',",
+                                "    long: 'Atlantic Standard Time',",
+                                "    shortOffset: 'GMT-4',",
+                                "    longOffset: 'GMT-04:00',",
+                                "    shortGeneric: 'Dominica Time',",
+                                "    longGeneric: 'Atlantic Standard Time',",
+                                "    ianaZone: 'America/Dominica',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-7',",
+                                "    long: 'Mountain Standard Time',",
+                                "    shortOffset: 'GMT-7',",
+                                "    longOffset: 'GMT-07:00',",
+                                "    shortGeneric: 'Edmonton Time',",
+                                "    longGeneric: 'Mountain Time',",
+                                "    ianaZone: 'America/Edmonton',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  {",
+                                "    short: 'GMT-5',",
+                                "    long: 'Acre Standard Time',",
+                                "    shortOffset: 'GMT-5',",
+                                "    longOffset: 'GMT-05:00',",
+                                "    shortGeneric: 'Eirunepe Time',",
+                                "    longGeneric: 'Acre Standard Time',",
+                                "    ianaZone: 'America/Eirunepe',",
+                                "    locale: 'en-GB'",
+                                "  },",
+                                "  ... 329 more items",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### shortGeneric names for timezone are not constant among multiple english locales"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nconst someLocales = [\"en\", \"en-US\", \"en-GB\"]\r\n\r\nconst REG_ABBR = /^[A-Z]{2,4}$/\r\n\r\n\r\n\r\n\r\n\r\n// from Intl, computes the timezones for a IANA zone\r\nconst timezoneAbbr = function (zone:string) {\r\n    const winterDate = new Date(2024,1,15)\r\n    const summerDate = new Date(2024,7,15)\r\n\r\n    const summerAbbr = new Set();\r\n    const winterAbbr = new Set();\r\n    for (let loc of someLocales) {\r\n        summerForLoc = TIMEZONE_FORMATS.map(fmt => timezoneOf(summerDate,loc,zone, fmt)).filter((n) => REG_ABBR.test(n));\r\n        winterForLoc = TIMEZONE_FORMATS.map(fmt => timezoneOf(winterDate,loc,zone, fmt)).filter((n) => REG_ABBR.test(n));\r\n        if (summerForLoc.length != 0) { summerAbbr.add(...summerForLoc); }\r\n        if (winterForLoc.length != 0) { winterAbbr.add(...winterForLoc); }\r\n    }\r\n    const winter = winterAbbr.size == 1 ? Array.from(winterAbbr.values())[0] : undefined;\r\n    const summer = winterAbbr.size == 1 ? Array.from(summerAbbr.values())[0] : undefined;\r\n    if (winter === undefined) {\r\n        return summer;\r\n    } else {\r\n        return summer ? `${winter}/${summer}` : winter\r\n    }\r\n}\r\n\r\n\r\ntry {\r\n    europeEnNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"en\"])\r\n    europeGbNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"en-GB\"])\r\n    europeFranceNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"fr-FR\"]);\r\n    europeChNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"fr-CH\"]);\r\n    europeCaNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"fr-CA\"]);\r\n    europeDeNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"de-DE\"]);\r\n    europeAtNamesWinter = allNamesOfZone(WINTER_DATE, \"Europe/Paris\", [\"de-AR\"]);\r\n    europeGbNamesSummer = allNamesOfZone(SUMMER_DATE, \"Europe/Paris\", [\"en-GB\"])\r\n    // Tokyo\r\n    tokyoEnNamesWinter = allNamesOfZone(WINTER_DATE, \"Asia/Tokyo\", [\"en\"])\r\n    tokyojpNamesWinter = allNamesOfZone(WINTER_DATE, \"Asia/Tokyo\", [\"ja-JP\"])\r\n    tokyoEnNamesSummer = allNamesOfZone(SUMMER_DATE, \"Asia/Tokyo\", [\"en\"])\r\n    tokyojpNamesSummer = allNamesOfZone(SUMMER_DATE, \"Asia/Tokyo\", [\"ja-JP\"])\r\ntimezoneAbbr(\"Europe/Paris\")\r\n    \r\n    const problems = []\r\n    const noproblems = []\r\n    const fmt = \"shortGeneric\"\r\n    for (let zone of SUPPORTED_TIME_ZONES) {\r\n        const shorts = new Set();\r\n        someLocales\r\n            .map(loc => timezoneOf(date, loc, zone, fmt))\r\n            .forEach(x => shorts.add(x))\r\n        if (shorts.size != 1) {\r\n            const locs = someLocales\r\n                .map(loc => `${loc} - ${timezoneOf(date, loc, zone, fmt)}`)\r\n            problems.push(`${zone} : ${locs}`)\r\n        } else {\r\n            noproblems.push(zone)\r\n        }\r\n    }\r\n    console.log(\r\n        `${noproblems.length} zones are OK. ${problems.length} have different shortGeneric names for ${someLocales.join(\",\")}\\n\\n`,\r\n        problems.join(\"\\n\"))\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "265 zones are OK. 164 have different shortGeneric names for en,en-US,en-GB",
+                                "",
+                                " Africa/Algiers : en - Algeria Time,en-US - Algeria Time,en-GB - CET",
+                                "Africa/Cairo : en - Egypt Time,en-US - Egypt Time,en-GB - EET",
+                                "Africa/Ceuta : en - Ceuta Time,en-US - Ceuta Time,en-GB - CET",
+                                "Africa/Tripoli : en - Libya Time,en-US - Libya Time,en-GB - EET",
+                                "Africa/Tunis : en - Tunisia Time,en-US - Tunisia Time,en-GB - CET",
+                                "America/Adak : en - HAT,en-US - HAT,en-GB - Adak Time",
+                                "America/Anchorage : en - AKT,en-US - AKT,en-GB - Anchorage Time",
+                                "America/Anguilla : en - AST,en-US - AST,en-GB - Anguilla Time",
+                                "America/Antigua : en - AST,en-US - AST,en-GB - Antigua & Barbuda Time",
+                                "America/Aruba : en - AST,en-US - AST,en-GB - Aruba Time",
+                                "America/Bahia_Banderas : en - CT,en-US - CT,en-GB - Bahia Banderas Time",
+                                "America/Barbados : en - AST,en-US - AST,en-GB - Barbados Time",
+                                "America/Belize : en - CST,en-US - CST,en-GB - Belize Time",
+                                "America/Blanc-Sablon : en - AST,en-US - AST,en-GB - Blanc-Sablon Time",
+                                "America/Boise : en - MT,en-US - MT,en-GB - Boise Time",
+                                "America/Cambridge_Bay : en - MT,en-US - MT,en-GB - Cambridge Bay Time",
+                                "America/Cancun : en - EST,en-US - EST,en-GB - Cancun Time",
+                                "America/Cayman : en - EST,en-US - EST,en-GB - Cayman Islands Time",
+                                "America/Chicago : en - CT,en-US - CT,en-GB - Chicago Time",
+                                "America/Coral_Harbour : en - EST,en-US - EST,en-GB - Atikokan Time",
+                                "America/Costa_Rica : en - CST,en-US - CST,en-GB - Costa Rica Time",
+                                "America/Creston : en - MST,en-US - MST,en-GB - Creston Time",
+                                "America/Curacao : en - AST,en-US - AST,en-GB - Curaçao Time",
+                                "America/Dawson_Creek : en - MST,en-US - MST,en-GB - Dawson Creek Time",
+                                "America/Denver : en - MT,en-US - MT,en-GB - Denver Time",
+                                "America/Detroit : en - ET,en-US - ET,en-GB - Detroit Time",
+                                "America/Dominica : en - AST,en-US - AST,en-GB - Dominica Time",
+                                "America/Edmonton : en - MT,en-US - MT,en-GB - Edmonton Time",
+                                "America/El_Salvador : en - CST,en-US - CST,en-GB - El Salvador Time",
+                                "America/Fort_Nelson : en - MST,en-US - MST,en-GB - Fort Nelson Time",
+                                "America/Glace_Bay : en - AT,en-US - AT,en-GB - Glace Bay Time",
+                                "America/Goose_Bay : en - AT,en-US - AT,en-GB - Goose Bay Time",
+                                "America/Grand_Turk : en - ET,en-US - ET,en-GB - Turks & Caicos Islands Time",
+                                "America/Grenada : en - AST,en-US - AST,en-GB - Grenada Time",
+                                "America/Guadeloupe : en - AST,en-US - AST,en-GB - Guadeloupe Time",
+                                "America/Guatemala : en - CST,en-US - CST,en-GB - Guatemala Time",
+                                "America/Halifax : en - AT,en-US - AT,en-GB - Halifax Time",
+                                "America/Indiana/Knox : en - CT,en-US - CT,en-GB - Knox, Indiana Time",
+                                "America/Indiana/Marengo : en - ET,en-US - ET,en-GB - Marengo, Indiana Time",
+                                "America/Indiana/Petersburg : en - ET,en-US - ET,en-GB - Petersburg, Indiana Time",
+                                "America/Indiana/Tell_City : en - CT,en-US - CT,en-GB - Tell City, Indiana Time",
+                                "America/Indiana/Vevay : en - ET,en-US - ET,en-GB - Vevay, Indiana Time",
+                                "America/Indiana/Vincennes : en - ET,en-US - ET,en-GB - Vincennes, Indiana Time",
+                                "America/Indiana/Winamac : en - ET,en-US - ET,en-GB - Winamac, Indiana Time",
+                                "America/Indianapolis : en - ET,en-US - ET,en-GB - Indianapolis Time",
+                                "America/Inuvik : en - MT,en-US - MT,en-GB - Inuvik Time",
+                                "America/Iqaluit : en - ET,en-US - ET,en-GB - Iqaluit Time",
+                                "America/Jamaica : en - EST,en-US - EST,en-GB - Jamaica Time",
+                                "America/Juneau : en - AKT,en-US - AKT,en-GB - Juneau Time",
+                                "America/Kentucky/Monticello : en - ET,en-US - ET,en-GB - Monticello, Kentucky Time",
+                                "America/Kralendijk : en - AST,en-US - AST,en-GB - Caribbean Netherlands Time",
+                                "America/Los_Angeles : en - PT,en-US - PT,en-GB - Los Angeles Time",
+                                "America/Louisville : en - ET,en-US - ET,en-GB - Louisville Time",
+                                "America/Lower_Princes : en - AST,en-US - AST,en-GB - Sint Maarten Time",
+                                "America/Managua : en - CST,en-US - CST,en-GB - Nicaragua Time",
+                                "America/Marigot : en - AST,en-US - AST,en-GB - St Martin Time",
+                                "America/Martinique : en - AST,en-US - AST,en-GB - Martinique Time",
+                                "America/Matamoros : en - CT,en-US - CT,en-GB - Matamoros Time",
+                                "America/Menominee : en - CT,en-US - CT,en-GB - Menominee Time",
+                                "America/Merida : en - CT,en-US - CT,en-GB - Merida Time",
+                                "America/Metlakatla : en - AKT,en-US - AKT,en-GB - Metlakatla Time",
+                                "America/Mexico_City : en - CT,en-US - CT,en-GB - Mexico City Time",
+                                "America/Miquelon : en - St. Pierre & Miquelon Time,en-US - St. Pierre & Miquelon Time,en-GB - St Pierre & Miquelon Time",
+                                "America/Moncton : en - AT,en-US - AT,en-GB - Moncton Time",
+                                "America/Monterrey : en - CT,en-US - CT,en-GB - Monterrey Time",
+                                "America/Montserrat : en - AST,en-US - AST,en-GB - Montserrat Time",
+                                "America/Nassau : en - ET,en-US - ET,en-GB - Bahamas Time",
+                                "America/New_York : en - ET,en-US - ET,en-GB - New York Time",
+                                "America/Nipigon : en - ET,en-US - ET,en-GB - Nipigon Time",
+                                "America/Nome : en - AKT,en-US - AKT,en-GB - Nome Time",
+                                "America/North_Dakota/Beulah : en - CT,en-US - CT,en-GB - Beulah, North Dakota Time",
+                                "America/North_Dakota/Center : en - CT,en-US - CT,en-GB - Center, North Dakota Time",
+                                "America/North_Dakota/New_Salem : en - CT,en-US - CT,en-GB - New Salem, North Dakota Time",
+                                "America/Ojinaga : en - MT,en-US - MT,en-GB - Ojinaga Time",
+                                "America/Panama : en - EST,en-US - EST,en-GB - Panama Time",
+                                "America/Pangnirtung : en - ET,en-US - ET,en-GB - Pangnirtung Time",
+                                "America/Phoenix : en - MST,en-US - MST,en-GB - Phoenix Time",
+                                "America/Port-au-Prince : en - ET,en-US - ET,en-GB - Haiti Time",
+                                "America/Port_of_Spain : en - AST,en-US - AST,en-GB - Trinidad & Tobago Time",
+                                "America/Puerto_Rico : en - AST,en-US - AST,en-GB - Puerto Rico Time",
+                                "America/Rainy_River : en - CT,en-US - CT,en-GB - Rainy River Time",
+                                "America/Rankin_Inlet : en - CT,en-US - CT,en-GB - Rankin Inlet Time",
+                                "America/Regina : en - CST,en-US - CST,en-GB - Regina Time",
+                                "America/Resolute : en - CT,en-US - CT,en-GB - Resolute Time",
+                                "America/Santo_Domingo : en - AST,en-US - AST,en-GB - Dominican Republic Time",
+                                "America/Sitka : en - AKT,en-US - AKT,en-GB - Sitka Time",
+                                "America/St_Barthelemy : en - AST,en-US - AST,en-GB - St Barthélemy Time",
+                                "America/St_Johns : en - St. John’s Time,en-US - St. John’s Time,en-GB - St John’s Time",
+                                "America/St_Kitts : en - AST,en-US - AST,en-GB - St Kitts & Nevis Time",
+                                "America/St_Lucia : en - AST,en-US - AST,en-GB - St Lucia Time",
+                                "America/St_Thomas : en - AST,en-US - AST,en-GB - US Virgin Islands Time",
+                                "America/St_Vincent : en - AST,en-US - AST,en-GB - St Vincent & the Grenadines Time",
+                                "America/Swift_Current : en - CST,en-US - CST,en-GB - Swift Current Time",
+                                "America/Tegucigalpa : en - CST,en-US - CST,en-GB - Honduras Time",
+                                "America/Thule : en - AT,en-US - AT,en-GB - Thule Time",
+                                "America/Thunder_Bay : en - ET,en-US - ET,en-GB - Thunder Bay Time",
+                                "America/Tijuana : en - PT,en-US - PT,en-GB - Tijuana Time",
+                                "America/Toronto : en - ET,en-US - ET,en-GB - Toronto Time",
+                                "America/Tortola : en - AST,en-US - AST,en-GB - British Virgin Islands Time",
+                                "America/Vancouver : en - PT,en-US - PT,en-GB - Vancouver Time",
+                                "America/Winnipeg : en - CT,en-US - CT,en-GB - Winnipeg Time",
+                                "America/Yakutat : en - AKT,en-US - AKT,en-GB - Yakutat Time",
+                                "America/Yellowknife : en - MT,en-US - MT,en-GB - Yellowknife Time",
+                                "Arctic/Longyearbyen : en - Svalbard & Jan Mayen Time,en-US - Svalbard & Jan Mayen Time,en-GB - CET",
+                                "Asia/Amman : en - Jordan Time,en-US - Jordan Time,en-GB - EET",
+                                "Asia/Aqtau : en - Aqtau Time,en-US - Aqtau Time,en-GB - Aktau Time",
+                                "Asia/Beirut : en - Lebanon Time,en-US - Lebanon Time,en-GB - EET",
+                                "Asia/Damascus : en - Syria Time,en-US - Syria Time,en-GB - EET",
+                                "Asia/Dubai : en - United Arab Emirates Time,en-US - United Arab Emirates Time,en-GB - GTS",
+                                "Asia/Gaza : en - Gaza Time,en-US - Gaza Time,en-GB - EET",
+                                "Asia/Hebron : en - Hebron Time,en-US - Hebron Time,en-GB - EET",
+                                "Asia/Muscat : en - Oman Time,en-US - Oman Time,en-GB - GTS",
+                                "Asia/Nicosia : en - Nicosia Time,en-US - Nicosia Time,en-GB - EET",
+                                "Atlantic/Bermuda : en - AT,en-US - AT,en-GB - Bermuda Time",
+                                "Atlantic/Canary : en - Canary Time,en-US - Canary Time,en-GB - WET",
+                                "Atlantic/Faeroe : en - Faroe Islands Time,en-US - Faroe Islands Time,en-GB - WET",
+                                "Atlantic/Madeira : en - Madeira Time,en-US - Madeira Time,en-GB - WET",
+                                "Europe/Amsterdam : en - Netherlands Time,en-US - Netherlands Time,en-GB - CET",
+                                "Europe/Andorra : en - Andorra Time,en-US - Andorra Time,en-GB - CET",
+                                "Europe/Athens : en - Greece Time,en-US - Greece Time,en-GB - EET",
+                                "Europe/Belgrade : en - Serbia Time,en-US - Serbia Time,en-GB - CET",
+                                "Europe/Berlin : en - Germany Time,en-US - Germany Time,en-GB - CET",
+                                "Europe/Bratislava : en - Slovakia Time,en-US - Slovakia Time,en-GB - CET",
+                                "Europe/Brussels : en - Belgium Time,en-US - Belgium Time,en-GB - CET",
+                                "Europe/Bucharest : en - Romania Time,en-US - Romania Time,en-GB - EET",
+                                "Europe/Budapest : en - Hungary Time,en-US - Hungary Time,en-GB - CET",
+                                "Europe/Busingen : en - Busingen Time,en-US - Busingen Time,en-GB - CET",
+                                "Europe/Chisinau : en - Moldova Time,en-US - Moldova Time,en-GB - EET",
+                                "Europe/Copenhagen : en - Denmark Time,en-US - Denmark Time,en-GB - CET",
+                                "Europe/Gibraltar : en - Gibraltar Time,en-US - Gibraltar Time,en-GB - CET",
+                                "Europe/Helsinki : en - Finland Time,en-US - Finland Time,en-GB - EET",
+                                "Europe/Kaliningrad : en - Kaliningrad Time,en-US - Kaliningrad Time,en-GB - EET",
+                                "Europe/Kiev : en - Ukraine Time,en-US - Ukraine Time,en-GB - EET",
+                                "Europe/Lisbon : en - Portugal Time,en-US - Portugal Time,en-GB - WET",
+                                "Europe/Ljubljana : en - Slovenia Time,en-US - Slovenia Time,en-GB - CET",
+                                "Europe/Luxembourg : en - Luxembourg Time,en-US - Luxembourg Time,en-GB - CET",
+                                "Europe/Madrid : en - Spain Time,en-US - Spain Time,en-GB - CET",
+                                "Europe/Malta : en - Malta Time,en-US - Malta Time,en-GB - CET",
+                                "Europe/Mariehamn : en - Åland Islands Time,en-US - Åland Islands Time,en-GB - EET",
+                                "Europe/Monaco : en - Monaco Time,en-US - Monaco Time,en-GB - CET",
+                                "Europe/Oslo : en - Norway Time,en-US - Norway Time,en-GB - CET",
+                                "Europe/Paris : en - France Time,en-US - France Time,en-GB - CET",
+                                "Europe/Podgorica : en - Montenegro Time,en-US - Montenegro Time,en-GB - CET",
+                                "Europe/Prague : en - Czechia Time,en-US - Czechia Time,en-GB - CET",
+                                "Europe/Riga : en - Latvia Time,en-US - Latvia Time,en-GB - EET",
+                                "Europe/Rome : en - Italy Time,en-US - Italy Time,en-GB - CET",
+                                "Europe/San_Marino : en - San Marino Time,en-US - San Marino Time,en-GB - CET",
+                                "Europe/Sarajevo : en - Bosnia & Herzegovina Time,en-US - Bosnia & Herzegovina Time,en-GB - CET",
+                                "Europe/Skopje : en - North Macedonia Time,en-US - North Macedonia Time,en-GB - CET",
+                                "Europe/Sofia : en - Bulgaria Time,en-US - Bulgaria Time,en-GB - EET",
+                                "Europe/Stockholm : en - Sweden Time,en-US - Sweden Time,en-GB - CET",
+                                "Europe/Tallinn : en - Estonia Time,en-US - Estonia Time,en-GB - EET",
+                                "Europe/Tirane : en - Albania Time,en-US - Albania Time,en-GB - CET",
+                                "Europe/Uzhgorod : en - Uzhhorod Time,en-US - Uzhhorod Time,en-GB - EET",
+                                "Europe/Vaduz : en - Liechtenstein Time,en-US - Liechtenstein Time,en-GB - CET",
+                                "Europe/Vatican : en - Vatican City Time,en-US - Vatican City Time,en-GB - CET",
+                                "Europe/Vienna : en - Austria Time,en-US - Austria Time,en-GB - CET",
+                                "Europe/Vilnius : en - Lithuania Time,en-US - Lithuania Time,en-GB - EET",
+                                "Europe/Warsaw : en - Poland Time,en-US - Poland Time,en-GB - CET",
+                                "Europe/Zagreb : en - Croatia Time,en-US - Croatia Time,en-GB - CET",
+                                "Europe/Zaporozhye : en - Zaporozhye Time,en-US - Zaporozhye Time,en-GB - EET",
+                                "Europe/Zurich : en - Switzerland Time,en-US - Switzerland Time,en-GB - CET",
+                                "Pacific/Honolulu : en - HST,en-US - HST,en-GB - Honolulu Time",
+                                "Pacific/Johnston : en - HAST,en-US - HAST,en-GB - Johnston Time",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### This makes it complex to compute the timezones for a specific IANA timezone"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nconst EN_LOCALES = [\"en\", \"en-US\", \"en-GB\"]\r\n\r\nconst REG_ABBR = /^[A-Z]{2,4}$/\r\n\r\n\r\nconst summerDate = new Date(2024,7,15)\r\nconst winterDate = new Date(2024,1,15)\r\n\r\n\r\n// compute timezones for the IANA timezone\r\nconst timezoneAbbr = function (ianaZone:string) {\r\n\r\n    let xSummer = allNamesOfZone(ianaZone, summerDate, EN_LOCALES)\r\n    let xWinter = allNamesOfZone(ianaZone, winterDate, EN_LOCALES)\r\n    xSummer = xSummer.filter((n) => REG_ABBR.test(n));\r\n    xWinter = xWinter.filter((n) => REG_ABBR.test(n));\r\n\r\n    const summerAbbr = new Set();\r\n    const winterAbbr = new Set();\r\n    // try to get all names for the zone, and filter\r\n    for (let loc of someLocales) {\r\n        summerForLoc = TIMEZONE_FORMATS.map(fmt => timezoneOf(summerDate,loc,ianaZone, fmt)).filter((n) => REG_ABBR.test(n));\r\n        winterForLoc = TIMEZONE_FORMATS.map(fmt => timezoneOf(winterDate,loc,ianaZone, fmt)).filter((n) => REG_ABBR.test(n));\r\n        if (summerForLoc.length != 0) { summerAbbr.add(...summerForLoc); }\r\n        if (winterForLoc.length != 0) { winterAbbr.add(...winterForLoc); }\r\n    }\r\n    const winter = winterAbbr.size == 1 ? Array.from(winterAbbr.values())[0] : undefined;\r\n    const summer = winterAbbr.size == 1 ? Array.from(summerAbbr.values())[0] : undefined;\r\n    if (winter === undefined) {\r\n        return summer;\r\n    } else {\r\n        return summer ? `${winter}/${summer}` : winter\r\n    }\r\n}\r\n\r\n\r\ntry {\r\n    enGBnamesWinter = zoneNameOf(\"Europe/Paris\",winterDate, \"en-GB\")\r\n    enGBnamesSummer = zoneNameOf(\"Europe/Paris\",summerDate, \"en-GB\")\r\n    abbr = timezoneAbbr(\"Europe/Paris\")\r\n    allTimezones = Array.from(Intl.supportedValuesOf(\"timeZone\").map(ianaZone => `${ianaZone} : ${timezoneAbbr(ianaZone)}`))\r\n    console.log(allTimezones.join(\"\\n\"))\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "ReferenceError: zoneNameOf is not defined",
+                                "    at <Cell 31> [39, 19]",
+                                "    at <Cell 31> [43, 46]",
+                                "    at Script.runInContext (node:vm:141:12)",
+                                "    at Script.runInNewContext (node:vm:146:17)",
+                                "    at Object.runInNewContext (node:vm:300:38)",
+                                "    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)",
+                                "    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)",
+                                "    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)",
+                                "    at k.emit (node:events:513:28)",
+                                "    at k.emit (node:domain:489:12)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### All shorts"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    res = [\"Europe/Paris\"].map(zone => timezoneOf(date, \"en-US\", zone, \"longGeneric\"))\r\n    // console.log(res)\r\n\r\n    allZones = [\"Europe/Paris\", \"CET\", \"PST\", \"JST\"]\r\n    // allZones = Intl.supportedValuesOf(\"timeZone\")\r\n    res = allZones.map((zone) => `${zone} : ${timezoneOf(date, \"de\", zone, \"short\")} / ${timezoneOf(date, \"en\", zone, \"long\")}`)\r\n    console.log(res.join(\"\\n\"))\r\n} catch (err) {\r\n    console.log(err)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Europe/Paris : MEZ / Central European Standard Time",
+                                "CET : GMT+1 / GMT+01:00",
+                                "PST : GMT-8 / Pacific Standard Time",
+                                "JST : GMT+9 / Japan Standard Time",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Etc timezones"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Etc timezones are supported"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    FORMAT(U, \"en\", { timeZone: \"Etc/GMT+1\", timeZoneName: \"longGeneric\"})\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "8/24/2024, GMT-01:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### But Etc/ timezones are not listed in the IANA database"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const tz:string[] = Intl.supportedValuesOf(\"timeZone\")\r\n// console.log(tz.filter((x) => x.indexOf(\"/K\") != -1))\r\n// const locations = tz.map(x => x.split(\"/\")[1]).filter(x => x.startsWith(\"K\")).sort()\r\nconst etcZones = tz.filter(x => x.startsWith(\"Etc\"))\r\nconsole.log(etcZones.length != 0 ? etcZones : \"No Etc/ zones\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "No Etc/ zones",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Some timezones have 3 components"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// All timezones with 3 components\r\nconst tz:string[] = Intl.supportedValuesOf(\"timeZone\")\r\n// console.log(tz.filter((x) => x.indexOf(\"/K\") != -1))\r\n// const locations = tz.map(x => x.split(\"/\")[1]).filter(x => x.startsWith(\"K\")).sort()\r\nconst zoneWith3Components = tz.filter(x => x.split(\"/\").length > 2)\r\nconsole.log(zoneWith3Components.length != 0 ? zoneWith3Components : \"No zone have 3 components\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  'America/Argentina/La_Rioja',",
+                                "  'America/Argentina/Rio_Gallegos',",
+                                "  'America/Argentina/Salta',",
+                                "  'America/Argentina/San_Juan',",
+                                "  'America/Argentina/San_Luis',",
+                                "  'America/Argentina/Tucuman',",
+                                "  'America/Argentina/Ushuaia',",
+                                "  'America/Indiana/Knox',",
+                                "  'America/Indiana/Marengo',",
+                                "  'America/Indiana/Petersburg',",
+                                "  'America/Indiana/Tell_City',",
+                                "  'America/Indiana/Vevay',",
+                                "  'America/Indiana/Vincennes',",
+                                "  'America/Indiana/Winamac',",
+                                "  'America/Kentucky/Monticello',",
+                                "  'America/North_Dakota/Beulah',",
+                                "  'America/North_Dakota/Center',",
+                                "  'America/North_Dakota/New_Salem'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## No timezones have the same `location` name"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// toutes les timezone dont le location nmae est un doublon\r\nconst tz:string[] = Intl.supportedValuesOf(\"timeZone\")\r\n// console.log(tz.filter((x) => x.indexOf(\"/K\") != -1))\r\n// const locations = tz.map(x => x.split(\"/\")[1]).filter(x => x.startsWith(\"K\")).sort()\r\nconst locations = tz.map(x => x.split(\"/\").reverse()[0])\r\n// console.log(locations)\r\nconst duplicates = []\r\nfor (let i = 0; i < locations.length - 1;++i) { if (locations[i] == locations[i+1]) { duplicates.push(locations[i])} }\r\nconsole.log(duplicates.length != 0 ? duplicates : \"No zone with duplicate location names\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "No zone with duplicate location names",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// toutes les timezone IANA en Europe\r\nconst tz:string[] = Intl.supportedValuesOf(\"timeZone\")\r\nconst locations = tz.map((x) => x.split(\"/\")[0]).sort()\r\nconst duplicateLocationNames = []\r\nfor (let i = 0; i < locations.length - 1; ++i) { if (tz[i] == tz[i+1]) { dup.push(tz[i]) }}\r\nconsole.log(duplicateLocationNames)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Working with Calendars"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const arEG = new Intl.Locale(\"ar-EG\");\r\ntry {\r\n    console.log(arEG.getCalendars())\r\n\r\n} catch (e) {console.log(e)}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "TypeError: arEG.getCalendars is not a function",
+                                "    at <Cell 45> [3, 11]",
+                                "    at <Cell 45> [10, 46]",
+                                "    at Script.runInContext (node:vm:141:12)",
+                                "    at Script.runInNewContext (node:vm:146:17)",
+                                "    at Object.runInNewContext (node:vm:300:38)",
+                                "    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)",
+                                "    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)",
+                                "    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)",
+                                "    at k.emit (node:events:513:28)",
+                                "    at k.emit (node:domain:489:12)",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Comment utiliser les timezone"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Specify date and time format using \"style\" options (i.e. full, long, medium, short)\r\nconsole.log(\r\n    new Intl.DateTimeFormat('fr-FR', {\r\n      dateStyle: 'full',\r\n      timeStyle: 'long',\r\n      timeZone: 'Australia/Sydney',\r\n    }).format(new Date()),\r\n  );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "samedi 24 août 2024 à 16:13:52 UTC+10",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### L'utilisation des timezone IANA intègre le Daylight Saving Time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "#### Une heure à Paris en hiver\r\nL'heure est créé avec UTC+1"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Specify date and time format using \"style\" options (i.e. full, long, medium, short)\r\nconsole.log(\r\n    new Intl.DateTimeFormat('fr-FR', {\r\n      dateStyle: 'full',\r\n      timeStyle: 'long',\r\n      timeZone: 'Europe/Paris',\r\n    }).format(new Date(\"2024-02-10\")),\r\n  );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "samedi 10 février 2024 à 01:00:00 UTC+1",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "#### Une heure à Paris en été\r\nL'heure est créé avec UTC+2"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Specify date and time format using \"style\" options (i.e. full, long, medium, short)\r\nconsole.log(\r\n    new Intl.DateTimeFormat('fr-FR', {\r\n      dateStyle: 'full',\r\n      timeStyle: 'long',\r\n      timeZone: 'Europe/Paris',\r\n    }).format(new Date(\"2024-08-10\")),\r\n  );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "samedi 10 août 2024 à 02:00:00 UTC+2",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

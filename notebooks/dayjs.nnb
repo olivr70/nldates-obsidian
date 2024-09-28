@@ -1,0 +1,959 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "This notebook summarizes usage rules and tips for the [dayjs](https://day.js.org/en/) npm module\r\n\r\n# Import and extend **dayjs**\r\n\r\n- il faut importer les locales que l'on veut utiliser\r\n- il faut importer utc() et timezone()\r\n\r\nLocaleData doit aussi être importé, mais présente peu d'utilité dans un contexte international"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var dayjs = require(\"dayjs\")\r\n\r\nimport utc from \"dayjs/plugin/utc\"\r\nimport timezone from \"dayjs/plugin/timezone\"\r\nimport localizedFormat from \"dayjs/plugin/localizedFormat\"\r\nimport localeData from \"dayjs/plugin/localeData\"\r\nimport duration from \"dayjs/plugin/duration\"\r\nimport relativeTime from \"dayjs/plugin/relativeTime\"\r\nimport weekday from \"dayjs/plugin/weekday\"\r\nimport weekOfYear from \"dayjs/plugin/weekOfYear\"\r\n\r\ndayjs.extend(utc)\r\ndayjs.extend(timezone)\r\ndayjs.extend(localizedFormat)\r\ndayjs.extend(duration)\r\ndayjs.extend(relativeTime)\r\ndayjs.extend(localeData) // https://day.js.org/docs/en/plugin/locale-data\r\ndayjs.extend(weekday)\r\ndayjs.extend(weekOfYear)\r\n\r\nconsole.debug(\"Current time zone : \" + dayjs.tz.guess())\r\n\r\nconst DAY_NAMES = [\"Sunday\",\"Monday\",\"Tuesday\",\"Wednesday\", \"Thursday\", \"Friday\",\"Saturday\",\"Sunday\" ];\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Current time zone : Europe/Paris",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Import des locales"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// one can import specific locales\r\nimport 'dayjs/locale/fr';\r\nimport 'dayjs/locale/de';\r\nimport 'dayjs/locale/pt';"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "{",
+                                "  name: \u001b[32m'pt'\u001b[39m,",
+                                "  weekdays: [",
+                                "    \u001b[32m'domingo'\u001b[39m,",
+                                "    \u001b[32m'segunda-feira'\u001b[39m,",
+                                "    \u001b[32m'terça-feira'\u001b[39m,",
+                                "    \u001b[32m'quarta-feira'\u001b[39m,",
+                                "    \u001b[32m'quinta-feira'\u001b[39m,",
+                                "    \u001b[32m'sexta-feira'\u001b[39m,",
+                                "    \u001b[32m'sábado'\u001b[39m",
+                                "  ],",
+                                "  weekdaysShort: [",
+                                "    \u001b[32m'dom'\u001b[39m,",
+                                "    \u001b[32m'seg'\u001b[39m,",
+                                "    \u001b[32m'ter'\u001b[39m,",
+                                "    \u001b[32m'qua'\u001b[39m,",
+                                "    \u001b[32m'qui'\u001b[39m,",
+                                "    \u001b[32m'sex'\u001b[39m,",
+                                "    \u001b[32m'sab'\u001b[39m",
+                                "  ],",
+                                "  weekdaysMin: [",
+                                "    \u001b[32m'Do'\u001b[39m,",
+                                "    \u001b[32m'2ª'\u001b[39m,",
+                                "    \u001b[32m'3ª'\u001b[39m,",
+                                "    \u001b[32m'4ª'\u001b[39m,",
+                                "    \u001b[32m'5ª'\u001b[39m,",
+                                "    \u001b[32m'6ª'\u001b[39m,",
+                                "    \u001b[32m'Sa'\u001b[39m",
+                                "  ],",
+                                "  months: [",
+                                "    \u001b[32m'janeiro'\u001b[39m,",
+                                "    \u001b[32m'fevereiro'\u001b[39m,",
+                                "    \u001b[32m'março'\u001b[39m,",
+                                "    \u001b[32m'abril'\u001b[39m,",
+                                "    \u001b[32m'maio'\u001b[39m,",
+                                "    \u001b[32m'junho'\u001b[39m,",
+                                "    \u001b[32m'julho'\u001b[39m,",
+                                "    \u001b[32m'agosto'\u001b[39m,",
+                                "    \u001b[32m'setembro'\u001b[39m,",
+                                "    \u001b[32m'outubro'\u001b[39m,",
+                                "    \u001b[32m'novembro'\u001b[39m,",
+                                "    \u001b[32m'dezembro'\u001b[39m",
+                                "  ],",
+                                "  monthsShort: [",
+                                "    \u001b[32m'jan'\u001b[39m,",
+                                "    \u001b[32m'fev'\u001b[39m,",
+                                "    \u001b[32m'mar'\u001b[39m,",
+                                "    \u001b[32m'abr'\u001b[39m,",
+                                "    \u001b[32m'mai'\u001b[39m,",
+                                "    \u001b[32m'jun'\u001b[39m,",
+                                "    \u001b[32m'jul'\u001b[39m,",
+                                "    \u001b[32m'ago'\u001b[39m,",
+                                "    \u001b[32m'set'\u001b[39m,",
+                                "    \u001b[32m'out'\u001b[39m,",
+                                "    \u001b[32m'nov'\u001b[39m,",
+                                "    \u001b[32m'dez'\u001b[39m",
+                                "  ],",
+                                "  ordinal: \u001b[36m[Function: ordinal]\u001b[39m,",
+                                "  weekStart: \u001b[33m1\u001b[39m,",
+                                "  yearStart: \u001b[33m4\u001b[39m,",
+                                "  formats: {",
+                                "    LT: \u001b[32m'HH:mm'\u001b[39m,",
+                                "    LTS: \u001b[32m'HH:mm:ss'\u001b[39m,",
+                                "    L: \u001b[32m'DD/MM/YYYY'\u001b[39m,",
+                                "    LL: \u001b[32m'D [de] MMMM [de] YYYY'\u001b[39m,",
+                                "    LLL: \u001b[32m'D [de] MMMM [de] YYYY [às] HH:mm'\u001b[39m,",
+                                "    LLLL: \u001b[32m'dddd, D [de] MMMM [de] YYYY [às] HH:mm'\u001b[39m",
+                                "  },",
+                                "  relativeTime: {",
+                                "    future: \u001b[32m'em %s'\u001b[39m,",
+                                "    past: \u001b[32m'há %s'\u001b[39m,",
+                                "    s: \u001b[32m'alguns segundos'\u001b[39m,",
+                                "    m: \u001b[32m'um minuto'\u001b[39m,",
+                                "    mm: \u001b[32m'%d minutos'\u001b[39m,",
+                                "    h: \u001b[32m'uma hora'\u001b[39m,",
+                                "    hh: \u001b[32m'%d horas'\u001b[39m,",
+                                "    d: \u001b[32m'um dia'\u001b[39m,",
+                                "    dd: \u001b[32m'%d dias'\u001b[39m,",
+                                "    M: \u001b[32m'um mês'\u001b[39m,",
+                                "    MM: \u001b[32m'%d meses'\u001b[39m,",
+                                "    y: \u001b[32m'um ano'\u001b[39m,",
+                                "    yy: \u001b[32m'%d anos'\u001b[39m",
+                                "  }",
+                                "}"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// or import all available locales\r\n// WARNING : one should either import all locales, or import specific locales\r\n// import \"dayjs/locale\""
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Utils\r\nThese are utility functions for the notebook"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nconst expect = require(\"expect\").default\r\n\r\nconst TRY = (f:() => void) => {\r\n    try {\r\n        f();\r\n    } catch (e) {\r\n        console.error(`Exception caught\\n`,e.message)\r\n    }\r\n}\r\n\r\nconst TEST = (f:() => void, name?:string = \"\") => {\r\n    try {\r\n        f();\r\n    } catch (e) {\r\n        console.error(`Test failed : ${name}\\n`,e.message)\r\n    }\r\n}\r\n\r\nconst spec = (val,expected, name?:string = \"\") => {\r\n    TEST(() => expect(val).toEqual(expected), name)\r\n}\r\n\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var l = console.debug;\r\n\r\nvar listMethods = (o:object) => {\r\n    let result = new Set();\r\n    while (o) {\r\n        Object.getOwnPropertyNames(o)\r\n            .filter((prop:string) => typeof o[prop] === 'function')\r\n            .forEach((m:string) => { result.add(m); })\r\n        o = Object.getPrototypeOf(o);\r\n    }\r\n    return Array.from(result)\r\n}\r\nvar listFields = (o:object) => {\r\n    let result = new Set();\r\n    while (o) {\r\n        Object.getOwnPropertyNames(o)\r\n            .filter((prop:string) => typeof o[prop] !== 'function')\r\n            .forEach((m:string) => { result.add(m); })\r\n        o = Object.getPrototypeOf(o);\r\n    }\r\n    return Array.from(result)\r\n}\r\n\r\nl(\"hello jupyter\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "hello jupyter",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## By default date parsing uses local time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "spec(dayjs(\"2024-01-01\").toDate().getUTCFullYear(), 2023, \"dayjs parses in local time\")\r\nspec(dayjs(\"2024-01-01T00:00Z\").toDate().getUTCFullYear(), 2024, \"dayjs parses in local time\")\r\nl(\r\n    \"New year without timezone is : \",     dayjs(\"2024-01-01\").toDate(),\r\n    \"\\nNew year in UTC time zone is : \",     dayjs(\"2024-01-01T00:00Z\").toDate()\r\n)\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "New year without timezone is :  2023-12-31T23:00:00.000Z ",
+                                "New year in UTC time zone is :  2024-01-01T00:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# startOf() et endOf()"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const d = dayjs(\"2024-06-18\").locale(\"en\")\r\nl(`Week of ${d.format(\"LL\")} starts on ${d.startOf(\"w\").format(\"LLL\")} and ends on ${d.endOf(\"w\").format(\"LLL\")}`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Week of June 18, 2024 starts on June 16, 2024 12:00 AM and ends on June 22, 2024 11:59 PM",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Durations\r\n\r\n**Requires the plugin _Duration_ and _RelativeTime_**"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var oneHour = dayjs.duration(1, \"h\").locale(\"de\")\r\nl(oneHour.humanize(true))\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "in einer Stunde",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "l(oneHour.as(\"minutes\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "60",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "l(`Add 2 more hours :  '${oneHour.add({ hours: 2}).humanize(true)}'`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Add 2 more hours :  'in 3 Stunden'",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# gestion des Locales"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## la locale globale"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// on peut changer la locale globale de dayjs\r\ndayjs.locale(\"fr\")\r\n// les nouvelles dates adoptent cette locale par défaut\r\nl(dayjs(\"2024-01-01\").format(\"LLLL\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "lundi 1 janvier 2024 00:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Localedata\r\n\r\nLe plugin LocaleData ajoute une méthode globale localeData()"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "globalLocaleData = dayjs.localeData();\r\nglobalLocaleData.firstDayOfWeek();\r\nglobalLocaleData.months()\r\nglobalLocaleData.monthsShort();\r\nglobalLocaleData.weekdays();\r\nglobalLocaleData.weekdaysShort();\r\nglobalLocaleData.weekdaysMin();\r\nglobalLocaleData.longDateFormat(\"L\");\r\n\r\nl(globalLocaleData.months().join(\"/\") + \"\\n\" + globalLocaleData.monthsShort().join(\"/\")+ \"\\n\" + globalLocaleData.weekdays().join(\"/\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "janvier/février/mars/avril/mai/juin/juillet/août/septembre/octobre/novembre/décembre",
+                                "janv./févr./mars/avr./mai/juin/juil./août/sept./oct./nov./déc.",
+                                "dimanche/lundi/mardi/mercredi/jeudi/vendredi/samedi",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var deData = dayjs.locale(\"de\")\r\nl(dayjs.months().join(\"/\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Januar/Februar/März/April/Mai/Juni/Juli/August/September/Oktober/November/Dezember",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var frData = dayjs.locale(\"fr\")\r\nl(dayjs.months().join(\"/\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "janvier/février/mars/avril/mai/juin/juillet/août/septembre/octobre/novembre/décembre",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    var esData = dayjs.locale(\"pt\")\r\n    var esData = dayjs.locale(\"es\") // does nothing because 'es' locale has not been imported\r\n    l(\"displays month names in portuguese (last global locale), because spanish locale has not been imported\\n\" + dayjs.months().join(\"/\"))\r\n} catch (e) {\r\n    l(e)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "displays month names in portuguese (last global locale), because spanish locale has not been imported",
+                                "janeiro/fevereiro/março/abril/maio/junho/julho/agosto/setembro/outubro/novembro/dezembro",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "Si on ne veut pas mofidier la locale par défaut (ce qui revient à utiliser une variable globale et induit de possibles effets de bord), la méthode months() n'est pas disponible sur une instance particulière."
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var dateDe= dayjs(\"2024-01-01\")\r\nl(`dayjs instance ${listMethods(dateDe).includes(\"months\") ? \"has\" : \"does not have\"} a months() method`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "dayjs instance does not have a months() method",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "\r\nIl faut recalculer les noms de jours (ou de mois)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var dayNanmesDE = [0,1,2,3,4,5,6].map(x => dayjs().locale(\"de\").day(x).format(\"dddd\")).join(\"/\")\r\nl(dayNanmesDE)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Sonntag/Montag/Dienstag/Mittwoch/Donnerstag/Freitag/Samstag",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Using locales"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Start of year in german format\r\nl(dayjs(\"2024-01-01\").locale(\"de\").format(\"LLLL\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Montag, 1. Januar 2024 00:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Start of year in french format\r\nl(dayjs(\"2024-01-01\").locale(\"fr\").format(\"LLLL\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "lundi 1 janvier 2024 00:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// If locale is not imported, it falls back to english formats\r\nl(dayjs(\"2024-01-01\").locale(\"es\").format(\"LLLL\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "segunda-feira, 1 de janeiro de 2024 às 00:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Using timezones\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// dayjs defaults to current timezone, and toDate() always displays times in the UTC time zone (Z)\r\nl(dayjs(\"2024-01-01\").toDate())"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2023-12-31T23:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## dayjs.tz() accepts IANA names. \r\n\r\nTimezones can be IANA names (like Europe/Paris or Asia/Tokyo), timezone abbreviations (like PST) , global timezones names (like Etc/Zulu or Etc/Greenwich), or GMT offsets (like Etc/GMT+1)\r\n\r\n> **WARNING** long name of timezones, like \"Pacific Standard Time\" are not accepted"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "spec(spec(dayjs.tz(\"2024-01-01\", \"Asia/Tokyo\").toDate().getFullYear(), 2023))\r\nspec(spec(dayjs.tz(\"2024-01-01\", \"PST\").toDate().getFullYear(), 2024))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## dayjs.offsetName() does not return the timezone argument, but the effective timezone\r\n\r\nBut offsetName() does not return the IANA timezone, but the concrete timezone after applying DST with local rules\r\n\r\nThis can be surprising. "
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "spec(dayjs.tz(\"2024-01-01\", \"Etc/GMT+1\").offsetName(), \"GMT-1\", \"Etc/GMT are inverted (by convention)\")\r\nspec(dayjs.tz(\"2024-01-01\", \"Europe/Paris\").offsetName(\"short\"), \"GMT+1\")\r\nspec(dayjs.tz(\"2024-07-01\", \"Europe/Paris\").offsetName(\"short\"), \"GMT+2\")\r\nspec(dayjs.tz(\"2024-01-01\", \"Asia/Tokyo\").offsetName(\"short\"), \"GMT+9\")\r\nspec(dayjs.tz(\"2024-01-01\", \"Asia/Tokyo\").offsetName(\"long\"), \"Japan Standard Time\")\r\nspec(dayjs.tz(\"2024-01-01\", \"America/Los_Angeles\").offsetName(\"long\"), \"Pacific Standard Time\")\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## dayjs.tz() ISO date parsing accepts timezone information\r\n\r\n**Note** : it overrides any timezone information provided in the date string"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "l(dayjs.tz(\"2024-01-01\", \"Asia/Tokyo\").toDate(),\"\\n\",\r\n\"New year UTC : \",\r\ndayjs(\"2024-01-01\").toDate(),\"\\n\",\r\n\"New year UTC in Tokyo time : \",\r\n dayjs(\"2024-01-01\").tz(\"Asia/Tokyo\").toDate()\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2023-12-31T15:00:00.000Z ",
+                                " New year UTC :  2023-12-31T23:00:00.000Z ",
+                                " New year UTC in Tokyo time :  2023-12-31T23:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "l(dayjs(\"2024-01-01T00:00Z\").toDate(),\"\\n\", \r\ndayjs.tz(\"2024-01-01T00:00Z\", \"Asia/Tokyo\").toDate(),\"\\n\", \r\ndayjs.tz(\"2024-01-01T00:00+00:00\", \"Asia/Tokyo\").toDate())"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2024-01-01T00:00:00.000Z ",
+                                " 2023-12-31T15:00:00.000Z ",
+                                " 2023-12-31T15:00:00.000Z",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// Beware, default timezone is used only when using the tz() method to create an instace\r\ndayjs.tz.setDefault(\"America/Toronto\")\r\nl(`start of year with dayjs() '${dayjs(\"2024-01-01\")}' \\nand with dayjs.tz() '${dayjs.tz(\"2024-01-01\")}'`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "start of year with dayjs() 'Sun, 31 Dec 2023 23:00:00 GMT' ",
+                                "and with dayjs.tz() 'Mon, 01 Jan 2024 05:00:00 GMT'",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\n\r\n// new year in Saigon, in Paris\r\nconst saigonNewYear = dayjs.tz(\"2024-01-01T00:00\", \"Asia/Saigon\")\r\nconsole.log(\"On new year 2024 in Saigon, in Paris it was  : \" + saigonNewYear.tz(\"Europe/Paris\").format(\"YYYY-MM-DD à HH:mm Z\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "On new year 2024 in Saigon, in Paris it was  : 2023-12-31 à 18:00 +01:00",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## dayjs() has support for etc time zones and relative"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "It supports GMT and relative GMT"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "l(`Date  UTC'${dayjs.tz(\"2024-01-01T12:00\",\"Etc/GMT\")}' \\nand with Etc/GMT+4 '${dayjs.tz(\"2024-01-01T12:00\", \"Etc/GMT+4\")}'`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Date  UTC'Mon, 01 Jan 2024 12:00:00 GMT' ",
+                                "and with Etc/GMT+4 'Mon, 01 Jan 2024 16:00:00 GMT'",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "And other standard Etc"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const res = [\"UTC\", \"UCT\", \"Universal\", \"GMT0\", \"Greenwich\", \"Zulu\"].map(x => `${x} : ${dayjs.tz(\"2024-01-01\", `Etc/${x}`)}`)\r\nconsole.log(res)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  'UTC : Mon, 01 Jan 2024 00:00:00 GMT',",
+                                "  'UCT : Mon, 01 Jan 2024 00:00:00 GMT',",
+                                "  'Universal : Mon, 01 Jan 2024 00:00:00 GMT',",
+                                "  'GMT0 : Mon, 01 Jan 2024 00:00:00 GMT',",
+                                "  'Greenwich : Mon, 01 Jan 2024 00:00:00 GMT',",
+                                "  'Zulu : Mon, 01 Jan 2024 00:00:00 GMT'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Dayjs properly handle daylight saving time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "#### Including for add() and subtract()\r\n\r\nIf adding a week goes over a daylight saving time change, it preserves the time of day (not simply adding 168 hours)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const beforeDST = dayjs.tz(\"2024-03-29T10:00\", \"Europe/Paris\")\r\nconst oneWeekAfter = beforeDST.add(1,\"w\")\r\nconst diff = oneWeekAfter.diff(beforeDST)\r\nconsole.log(`Date before time change in Paris '${beforeDST.format(\"LLLL\")}' and 1 week later ${oneWeekAfter.format(\"LLLL\")}. Elapsed time is only ${dayjs.duration(diff).as(\"h\")} hours`)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Date before time change in Paris 'sexta-feira, 29 de março de 2024 às 10:00' and 1 week later sexta-feira, 5 de abril de 2024 às 10:00. Elapsed time is only 167 hours",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Additional ISO features"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### Week numbers are not supported"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const x = dayjs(\"2024-W01\")\r\nconsole.log(x)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "M {",
+                                "  '$L': 'pt',",
+                                "  '$d': Invalid Date,",
+                                "  '$y': NaN,",
+                                "  '$M': NaN,",
+                                "  '$D': NaN,",
+                                "  '$W': NaN,",
+                                "  '$H': NaN,",
+                                "  '$m': NaN,",
+                                "  '$s': NaN,",
+                                "  '$ms': NaN,",
+                                "  '$x': {},",
+                                "  '$isDayjsObject': true",
+                                "}",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const j4 = dayjs(\"2023-01-04Z\")\r\nconst j3day = j4.weekday()\r\nconsole.log(\r\n    \"The\", j4.format(\"YYYY-MM-DD\"),\"\\n\",\r\n    \"was a\", DAY_NAMES[j3day],\"\\n\",\r\n    \"Week 1 started on \", j4.weekday(1).format(\"YYYY-MM-DD\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "The 2023-01-04 ",
+                                " was a Tuesday ",
+                                " Week 1 started on  2023-01-03",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const dayInYear = dayjs(\"2024-365\")\r\nconst someDays = [1,3,5,7,9].map(i => {\r\n    const str = `2023-${i.toString().padStart(3, \"0\")}`\r\n    return str + \"=>\" + dayjs(str).toString();\r\n})\r\nconsole.log(\r\n    someDays,\r\n    \"Week 1 of 2024 starts on \", dayInYear.toString(), \"\\n\",\r\n    \"It was a \", DAY_NAMES[dayInYear.weekday()])"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "[",
+                                "  '2023-001=>Wed, 30 Nov 2022 23:00:00 GMT',",
+                                "  '2023-003=>Fri, 02 Dec 2022 23:00:00 GMT',",
+                                "  '2023-005=>Sun, 04 Dec 2022 23:00:00 GMT',",
+                                "  '2023-007=>Tue, 06 Dec 2022 23:00:00 GMT',",
+                                "  '2023-009=>Thu, 08 Dec 2022 23:00:00 GMT'",
+                                "] Week 1 of 2024 starts on  Fri, 04 Dec 2026 23:00:00 GMT ",
+                                " It was a  Friday",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

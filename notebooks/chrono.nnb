@@ -1,0 +1,229 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "## Handling of timezones for parsing\r\n\r\n- default time is 12:00 in chrono, 00:00 with Javascript"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "var chrono = require(\"chrono-node\")\r\nvar dayjs = require(\"dayjs\")\r\n\r\nimport \"dayjs/locale\"\r\n\r\nimport utc from \"dayjs/plugin/utc\"\r\nimport timezone from \"dayjs/plugin/timezone\"\r\n\r\ndayjs.extend(utc)\r\ndayjs.extend(timezone)\r\n\r\nconsole.log(\"Chrono loaded\")\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Chrono loaded",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Chrono does not parse ISO dates like Javascript or dayjs"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Full ISO dates and time work"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    `New year UTC is        : ${new Date(\"2024-01-01T00:00Z\")}\\n`,\r\n    `   with dayjs          : ${dayjs(\"2024-01-01T00:00Z\").toDate()}\\n`,\r\n    `   with Chrono         : ${chrono.parseDate(\"2024-01-01T00:00Z\")}\\n`,\r\n    `New year in Toronto is : ${newYear2024Toronto}\\n`,\r\n    `   with Chrono         : ${chrono.parseDate(\"2024-01-01T00:00:00-04:00\")}\\n`,\r\n    `New year in Tokyo is   : ${newYear2024Tokyo}\\n`,\r\n    `   with Chrono         : ${chrono.parseDate(\"2024-01-01T00:00:00+09:00\")}\\n`,\r\n    );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.error",
+                            "value": {
+                                "name": "ReferenceError",
+                                "message": "newYear2024Toronto is not defined",
+                                "stack": "    at <Cell 5> [3, 32]\n    at <Cell 5> [4, 46]\n    at Script.runInContext (node:vm:141:12)\n    at Script.runInNewContext (node:vm:146:17)\n    at Object.runInNewContext (node:vm:300:38)\n    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)\n    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)\n    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)\n    at k.emit (node:events:513:28)\n    at k.emit (node:domain:489:12)"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## ⚠️ ISO dates without time are interpreted at midday local time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    `New year UTC is        : ${new Date(\"2024-01-01\")}\\n`,\r\n    `   with dayjs          : ${dayjs(\"2024-01-01\").toDate()}\\n`,\r\n    `   with Chrono ⚠️     : ${chrono.parseDate(\"2024-01-01\")}\\n`,\r\n    `July UTC is        : ${new Date(\"2024-07-01\")}\\n`,\r\n    `   with dayjs          : ${dayjs(\"2024-07-01\").toDate()}\\n`,\r\n    `   with Chrono ⚠️     : ${chrono.parseDate(\"2024-07-01\")}\\n`,\r\n    );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "New year UTC is        : Mon Jan 01 2024 01:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with dayjs          : Mon Jan 01 2024 00:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with Chrono ⚠️     : Mon Jan 01 2024 12:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                " July UTC is        : Mon Jul 01 2024 02:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "    with dayjs          : Mon Jul 01 2024 00:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "    with Chrono ⚠️     : Mon Jul 01 2024 12:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## ⚠️ ISO dates with Z suffix are not recognised by Chrono\r\n\r\nChrono conforms to ISO Standard though"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    `New year UTC is        : ${new Date(\"2024-01-01Z\")}\\n`,\r\n    `   with dayjs          : ${dayjs(\"2024-01-01Z\").toDate()}\\n`,\r\n    `   with Chrono ⚠️     : ${chrono.parseDate(\"2024-01-01Z\")}\\n`,\r\n    );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "New year UTC is        : Mon Jan 01 2024 01:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with dayjs          : Mon Jan 01 2024 01:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with Chrono ⚠️     : Fri Aug 30 2024 04:00:00 GMT+0200 (heure d’été d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## ⚠️ Dates only with timezone offset are recognized\r\n\r\nThis is not standard, and is considered invalid by Javascript and dayjs()"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    `New year UTC is        : ${new Date(\"2024-01-01+05:00\")}\\n`,\r\n    `   with dayjs         : ${dayjs(\"2024-01-01+05:00\").toDate()}\\n`,\r\n    `   with Chrono   ⚠️   : ${chrono.parseDate(\"2024-01-01+05:00\")}\\n`,\r\n    \"         parse ISO date at noon local time, then apply offset \"\r\n    );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "New year UTC is        : Invalid Date",
+                                "    with dayjs         : Invalid Date",
+                                "    with Chrono   ⚠️   : Mon Jan 01 2024 08:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "          parse ISO date at noon local time, then apply offset ",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## ⚠️ ISO timestamps without any timezone indication are not parsed as local time"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\r\n    `New year UTC is        : ${new Date(\"2024-01-01T12:00\")}\\n`,\r\n    `   with dayjs          : ${dayjs(\"2024-01-01T12:00\").toDate()}\\n`,\r\n    `   with Chrono ⚠️     : ${chrono.parseDate(\"2024-01-01T12:00\")}\\n`,\r\n    );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "New year UTC is        : Mon Jan 01 2024 12:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with dayjs          : Mon Jan 01 2024 12:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "    with Chrono ⚠️     : Mon Jan 01 2024 13:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Date offsets are recognized"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    var in2daysToronto = chrono.parse(\"in 2 days\", { instant: newYear2024Toronto}) // Tokyo is UTC+9\r\n    var in2daysTokyo = chrono.parse(\"in 2 days\", { instant: newYear2024Tokyo}) // Tokyo is UTC+9\r\n    console.log(\r\n        `2 days after Toronto New Year is : ${in2daysToronto[0].date()}\\n`,\r\n        `2 days after Tokyo New Year is : ${in2daysTokyo[0].date()}\\n`,\r\n    );\r\n} catch (e) {\r\n    console.error(e)\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "2 days after Toronto New Year is : Wed Jan 03 2024 05:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                " 2 days after Tokyo New Year is : Tue Jan 02 2024 16:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                " 2 days after Tokyo New Year is : Tue Jan 02 2024 16:00:00 GMT+0100 (heure normale d’Europe centrale)",
+                                "",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
