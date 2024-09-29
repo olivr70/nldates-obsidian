@@ -4,9 +4,8 @@ import { App, Editor, EditorRange, EditorPosition, normalizePath, TFile } from "
 import { createDailyNote, getAllDailyNotes, getDailyNote } from "obsidian-daily-notes-interface";
 
 
-export default function getWordBoundaries(editor: Editor): EditorRange {
-    const cursor = editor.getCursor();
-  
+export default function getWordBoundaries(editor: Editor, position?:EditorPosition): EditorRange {
+    const cursor = position || editor.getCursor();
       const pos = editor.posToOffset(cursor);
       const word = (editor as any).cm.state.wordAt(pos);
       const wordStart = editor.offsetToPos(word.from);

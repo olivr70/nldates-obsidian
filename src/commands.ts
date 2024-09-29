@@ -1,5 +1,5 @@
-import { MarkdownView } from "obsidian";
-import { adjustCursor, getSelectedText } from "./utilsObsidian";
+import { EditorChange, EditorSelection, MarkdownView } from "obsidian";
+import getWordBoundaries, { adjustCursor, getSelectedText } from "./utilsObsidian";
 import NaturalLanguageDates from "./main";
 
 export function getParseCommand(plugin: NaturalLanguageDates, mode: string): void {
@@ -11,36 +11,52 @@ export function getParseCommand(plugin: NaturalLanguageDates, mode: string): voi
     return;
   }
 
+  let firstError:EditorSelection = undefined;
+
   const editor = activeView.editor;
-  const cursor = editor.getCursor();
-  const selectedText = getSelectedText(editor);
+  
+  const changes: EditorChange[] = [];
 
-  const date = plugin.parseDate(selectedText);
+  for (let sel of editor.listSelections()) {
+    if (sel.anchor.line == sel.head.line && sel.anchor.ch == sel.head.ch) {
+      // empty selection, get word boundaries
+      const word = getWordBoundaries(editor, sel.anchor)
+      sel = { anchor: word.from, head:word.to}
+    }
+    const anchor = sel.anchor;
+    const head = sel.head
+    const selectedText = editor.getRange(anchor, head)
+    const cursor = editor.getCursor();
 
-  if (!date.moment.isValid()) {
-    // Do nothing
-    editor.setCursor({
-      line: cursor.line,
-      ch: cursor.ch,
-    });
-    return;
+    const date = plugin.parseDate(selectedText);
+
+    if (!date.moment.isValid()) {
+      if (!firstError) firstError = sel;
+      continue; // error, iterate on next selection
+    }
+
+    // generate replacement text
+    let newStr = `[[${date.formattedString}]]`;
+
+    if (mode == "link") {
+      newStr = `[${selectedText}](${date.formattedString})`;
+    } else if (mode == "clean") {
+      newStr = `${date.formattedString}`;
+    } else if (mode == "time") {
+      const time = plugin.parseTime(selectedText);
+
+      newStr = `${time.formattedString}`;
+    }
+    // add a new change to the Editor transaction
+    changes.push( { text:newStr, from:anchor, to:head })
+    // editor.replaceRange(newStr, anchor, head);
   }
-
-  //mode == "replace"
-  let newStr = `[[${date.formattedString}]]`;
-
-  if (mode == "link") {
-    newStr = `[${selectedText}](${date.formattedString})`;
-  } else if (mode == "clean") {
-    newStr = `${date.formattedString}`;
-  } else if (mode == "time") {
-    const time = plugin.parseTime(selectedText);
-
-    newStr = `${time.formattedString}`;
+  // using transaction() allows for global undo of all changes if multiple selection
+  editor.transaction({ changes })
+  if (firstError) {
+    // an error occured, select the problem
+    editor.setSelection(firstError.anchor, firstError.head);
   }
-
-  editor.replaceSelection(newStr);
-  adjustCursor(editor, cursor, newStr, selectedText);
   editor.focus();
 }
 
