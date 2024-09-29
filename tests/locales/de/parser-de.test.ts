@@ -2,25 +2,7 @@ import dayjs from "dayjs";
 import NLDParserDe from "../../../src/locales/de/parser-de";
 import { parseMonthNameDe } from "../../../src/locales/de/constants-de";
 
-
-
-
-
-describe("parseMonthNameDe() should", () => {
-    test("match long names", () => {
-        expect(parseMonthNameDe("März")).toBe(2);
-    })
-    test("match lowercase names", () => {
-        expect(parseMonthNameDe("märz")).toBe(2);
-    })
-    test("match stripped names", () => {
-        expect(parseMonthNameDe("marz")).toBe(2);
-    })
-    test("match short names", () => {
-        expect(parseMonthNameDe("mar")).toBe(2);
-    })
-
-})
+import "../../date-equality"
 
 describe("NLDParserDe", () => {
     let parser:NLDParserDe;
@@ -33,6 +15,21 @@ describe("NLDParserDe", () => {
         })
         test("format localised dates", () => {
             expect(parser.getFormattedDate(new Date(2024,9,2), "LL")).toBe("2. Oktober 2024")
+        })
+    })
+    
+    describe("shoud handle all standard Chrono patterns", () => {
+        test("ISO dates", () => {
+            expect(parser.getParsedDate("2024-12-25", "monday")).toEqual(new Date(2024,11,25,12));
+        })
+        test("Slash dates", () => {
+            expect(parser.getParsedDate("25/12/2024", "monday")).toEqual(new Date(2024,11,25,12));
+        })
+        test("standard times", () => {
+            expect(parser.getParsedDate("8:25:10", "monday")).toEqual(dayjs().hour(8).minute(25).second(10));
+        })
+        test("german times", () => {
+            expect(parser.getParsedDate("8h25m10", "monday")).toEqual(dayjs().hour(8).minute(25).second(10));
         })
     })
     describe("parse() should parse", () => {

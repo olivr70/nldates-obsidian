@@ -154,6 +154,7 @@ describe("MONTH_NAMES_DE_REGEX should", () => {
         expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Mär")).toBeTruthy();
         expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Jän")).toBeTruthy();
         expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Feb")).toBeTruthy();
+        expect(parseMonthNameDe("mar")).toBe(2);
     });
     describe('parseMonthNameDe() should', () => {
         test('accept partial names', () => {
@@ -168,6 +169,8 @@ describe("MONTH_NAMES_DE_REGEX should", () => {
         })
 
     })
+    
+
 });
 
 describe("DAY_NAMES_DE_REGEX should", () => {
