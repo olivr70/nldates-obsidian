@@ -94,11 +94,16 @@ describe('chrono-de ', () => {
 
         test('relative days with period names', () => {
             expect(parseDate("gestern morgen")).toEqual(ref.subtract(1, "d").hour(6))
+            expect(parseDate("gestern Morgen")).toEqual(ref.subtract(1, "d").hour(6))
             expect(parseDate("gestern vormittag")).toEqual(ref.subtract(1, "d").hour(9))
+            expect(parseDate("gestern Vormittag")).toEqual(ref.subtract(1, "d").hour(9))
             expect(parseDate("gestern mittags")).toEqual(ref.subtract(1, "d").hour(12))
             expect(parseDate("gestern nachmittag")).toEqual(ref.subtract(1, "d").hour(15))
+            expect(parseDate("gestern Nachmittag")).toEqual(ref.subtract(1, "d").hour(15))
             expect(parseDate("gestern abend")).toEqual(ref.subtract(1, "d").hour(18))
+            expect(parseDate("gestern Abend")).toEqual(ref.subtract(1, "d").hour(18))
             expect(parseDate("gestern nacht")).toEqual(ref.subtract(1, "d").hour(22))
+            expect(parseDate("gestern Nacht")).toEqual(ref.subtract(1, "d").hour(22))
         
         })
         

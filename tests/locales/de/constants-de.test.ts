@@ -12,6 +12,7 @@ describe("eras", () => {
         test("shoud match vor Christus", () => {
             const eraReg = NCHR_ZTR_REG
             expect("v. Chr.").toMatch(eraReg)
+            expect("v. chr.").toMatch(eraReg)
             expect("vc").toMatch(eraReg)
             expect("vc.").toMatch(eraReg)
             expect("vch").toMatch(eraReg)
@@ -20,7 +21,9 @@ describe("eras", () => {
             expect("v.C.").toMatch(eraReg)
             expect("v. Ch").toMatch(eraReg)
             expect("v. Ch.").toMatch(eraReg)
+            expect("v. ch.").toMatch(eraReg)
             expect("v. Chr.↵").toMatch(eraReg)
+            expect("v. chr.↵").toMatch(eraReg)
         })
         test("shoud match vor Zeitrechnung", () => {
             const eraReg = NCHR_ZTR_REG
