@@ -9,7 +9,7 @@ import 'dayjs/locale/en-in';
 import 'dayjs/locale/en-nz';
 import 'dayjs/locale/en-sg';
 import 'dayjs/locale/en-tt';
-import chrono, { Chrono, Parser } from "chrono-node";
+import { Chrono, Parser } from "chrono-node";
 
 dayjs.extend(localizedFormat)
 
@@ -23,7 +23,7 @@ import {
   getLastDayOfMonth,
   getLocaleWeekStart,
   getWeekNumber
-} from "../../utils";
+} from "../../utils/tools";
 import { matchAnyPattern } from "../../utils/regex";
 import { IsoPatchParser } from "../common/IsoPatchParser";
 import { IsoPatchWeekDateTzdParser } from "../common/IsoPatchWeekDateTzdParser";
@@ -48,9 +48,7 @@ export default class NLDParserEn extends NLDParserBase {
 
   getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date {
     const myChrono = this.chrono;
-    console.log(`ChronoEN.parseDate ${selectedText}`)
     const initialParse = myChrono.parse(selectedText);
-    console.log(`initialParse ${initialParse}`)
     const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
 
     const weekStart =

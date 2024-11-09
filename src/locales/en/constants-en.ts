@@ -8,7 +8,7 @@ import { DateComponents } from "src/types";
 import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
 import { matchAnyPattern, matchPartialPattern, matchPartialRegex } from "../../utils/regex";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
-import { dictFromArrays } from "../../utils";
+import { dictFromArrays } from "../../utils/tools";
 
 export const VARIANTS_EN = ["GB", "US"];
 
@@ -79,8 +79,8 @@ export const DAY_NAMES_EN_DICT_INTL = dictFromArrays("de", DAY_NAMES_EN_INTL, ge
 export const DAY_NAMES_EN_PATTERN = matchPartialPattern(DAY_NAMES_EN_DICT_INTL,4);
 export const DAY_NAMES_EN_REGEX = matchPartialRegex(DAY_NAMES_EN_DICT_INTL,4);
 
-export const TIME_OF_DAYS_EN = [ "morgen", "vormittag", "mittag", "nachmittag", "abend", "nacht" ];
-export const TIME_OF_DAYS_PATTERN = matchPartialPattern(TIME_OF_DAYS_EN, 1);
+export const TIME_OF_DAYS_EN = [ "dawn", "morning", "midday", "afternoon", "evening", "night" ];
+export const TIME_OF_DAYS_PATTERN = matchPartialPattern(TIME_OF_DAYS_EN, 2);
 
 export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   today : "today",
@@ -89,8 +89,8 @@ export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   "the day before yesterday" : "the day before yesterday",
   "the day after tomorrow" : "the day after tomorrow",
 }
-export const DAY_NAMES_RELATIVE_EN_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
-export const DAY_NAMES_RELATIVE_EN_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, true, true);
+export const DAY_NAMES_RELATIVE_EN_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3,{allowAmbiguous:true});
+export const DAY_NAMES_RELATIVE_EN_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true, allowAmbiguous:true});
 
 
 export function findDayFromStart(key:string):number {
@@ -109,8 +109,8 @@ export const MONTH_NAMES_EN_INTL_DICT = dictFromArrays("en",
   );
 
 export const MONTH_NAME_PATTERN_EN = `(${matchAnyPattern(MONTH_NAMES_EN_INTL_DICT)})`;
-export const MONTH_NAMES_PARTIAL1_PATTERN_EN = matchPartialPattern(MONTH_NAMES_EN_INTL_DICT,1);
-export const MONTH_NAMES_EN_PARTIAL1_REGEX = matchPartialRegex(MONTH_NAMES_EN_INTL_DICT,1);
+export const MONTH_NAMES_PARTIAL1_PATTERN_EN = matchPartialPattern(MONTH_NAMES_EN_INTL_DICT,1, {allowAmbiguous:true});
+export const MONTH_NAMES_EN_PARTIAL1_REGEX = matchPartialRegex(MONTH_NAMES_EN_INTL_DICT,1, {allowAmbiguous:true});
 
 export function parseMonthNameEn(name: string, def:number = NaN): number {
   return findPartialInDict("en", MONTH_NAMES_EN_INTL_DICT, name, def);
