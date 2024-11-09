@@ -8,11 +8,16 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 
 import { DateDisplay, IDateCompletion, INaturalLanguageDatesPlugin, ISuggestionContext, ISuggestionMaker, Suggester } from "../../types";
-import { iterateFrom } from "../../utils";
+import { iterateFrom } from "../../utils/tools";
 import { DAY_NAMES_FR_INTL, DAY_NAMES_FR_REGEX, MONTH_NAMES_FR_INTL, LOCALES_FR, VARIANTS_FR,  DAY_NAME_RELATIVES_DICT, findDayFromStartFr } from "./constants-fr"
 import { SuggestionMakerBase } from "src/suggest/suggestion-maker-base";
+import { formatWeekIso } from "../../../src/utils/weeks";
 import { SUGGESTERS_COMMON } from "../common/suggestions-common";
-import { regSrc } from "src/utils/regex";
+import { matchPartialItemPattern, regSrc } from "../../utils/regex";
+import { ParsingComponents, ReferenceWithTimezone } from "chrono-node";
+import { parseIsoWeekDate } from "../common/constants";
+
+import { range } from "../../utils/tools";
 
 dayjs.extend(weekday)
 dayjs.extend(localeData)
@@ -30,7 +35,7 @@ const SUGGESTERS_FR:Suggester[] = [
   getThisSuggestions,
   getNumberSuggestions,
   getCasualSuggestions, 
-  getVorSuggestions,
+  getIlyaSuggestions,
   getInSuggestion, 
 ]
 
@@ -71,15 +76,47 @@ function getTimeSuggestionsFr(context: ISuggestionContext): IDateCompletion[] {
   }
 }
 
+
+function formatWeekFr(year:number, week:number, day:number = undefined) {
+  console.log(`formatWeekFr(${year},${week},${day})`)
+  // compute number of weeks in year
+  const weekLimit = dayjs(`{year}-01-01`).isoWeeksInYear() + 1
+  const currentYear = dayjs().year()
+  let result = `semaine ${(week % weekLimit).toString()}`
+  const yearOfWeek = year + Math.floor(week / weekLimit);
+  if (yearOfWeek != currentYear) {
+    result += `de <${yearOfWeek}>`
+  }
+  if (day !== undefined) {
+    result = `${DAY_NAMES_FR_INTL[day]} de la ${result}`
+  }
+  return result;
+}
+
+function makeWeekSuggestionFr(context: ISuggestionContext, year:number, week:number, day?:number):IDateCompletion {
+  const alias = formatWeekFr(year, week, day)
+  const isoWeek = formatWeekIso(year, week, day)
+  console.log("alias", alias, "isoWeek", isoWeek)
+  const mondayDate = new ParsingComponents(new ReferenceWithTimezone(), parseIsoWeekDate(isoWeek)).date();
+  return {
+      label: `${alias} (${context.plugin.parser.getFormattedDate(mondayDate, "dddd LL")})`,
+      alias,
+      value: mondayDate
+  }
+}
+
 // only when day name is first
-const SUG_DAY_NAME = new RegExp(`(?:^\s*${regSrc(DAY_NAMES_FR_REGEX)})`,"i")
+const SUG_DAY_NAME = new RegExp(`(?:^\\s*${regSrc(DAY_NAMES_FR_REGEX)})(?:\\s+de?(?:\\s+la?)?)?(?:\\s*${matchPartialItemPattern("semaine", 3)}\\s+(?<weekRef>\\d+|${matchPartialItemPattern("prochaine",3)}|${matchPartialItemPattern("précédente",3)})?)?`,"i")
 
 function getDaynamesSuggestions(context: ISuggestionContext): IDateCompletion[] {
       
     // day names
-    console.log(`DAY_NAMES_FR_REGEX ${DAY_NAMES_FR_REGEX}`)
+    console.log(`SUG_DAY_NAME ${SUG_DAY_NAME}`)
     const dayStep = context.query.match(SUG_DAY_NAME);
     if (dayStep) {
+      const weekRef = dayStep.groups["weekRef"];
+      console.log(`weekRef = ${weekRef}`)
+      console.log(`query = ${context.query}`)
       const startOfWeek = dayjs().hour(12).minute(0).second(0).millisecond(0).tz(context.ianaTimezone, true).locale(context.locale).startOf("week");
       const target = dayStep[1];
       const dayIndex = findDayFromStartFr(target);
@@ -92,6 +129,25 @@ function getDaynamesSuggestions(context: ISuggestionContext): IDateCompletion[] 
       console.log(`${dayName} current  ${current}`)
       console.log(`${dayName} next week ${next}`)
       console.log(`${dayName} previous week ${previous}`)
+
+      let currentWeek = dayjs().week();
+      let weekNumbers = range(currentWeek + 1, currentWeek + 4)
+      const currentYear = dayjs().year()
+      if (weekRef && weekRef.match(/\d+/)) {
+        // weekref is a number
+        const weekNum = parseInt(weekRef)
+        console.log(`weeknum = ${weekNum}`)
+        if (weekNum == 5) {
+          weekNumbers = [ 5, 50, 51, 52, 53]
+        } else if (weekNum <= 4) {
+          weekNumbers = [ weekNum, ...range(weekNum*10, weekNum*10 + 9)]
+        } else {
+          weekNumbers = range(weekNum, weekNum + 4)
+        }
+      }
+      console.log("weekNumbers=",weekNumbers)
+      const weekNumbersSuggestions = weekNumbers.map(x => makeWeekSuggestionFr(context, currentYear, x, dayIndex));
+
       return [
         { label: `${dayName} de cette semaine (${current.format("D MMM")})`, 
           alias: `${dayName} de cette semaine`,
@@ -101,8 +157,9 @@ function getDaynamesSuggestions(context: ISuggestionContext): IDateCompletion[] 
           value:previous.toDate()}
         , { label: `${dayName} de la semaine prochaine (${next.format("D MMM")})`, 
           alias: `${dayName} de la semaine prochaine`,
-          value:next.toDate()}
-      ];
+          value:next.toDate()},
+          ...weekNumbersSuggestions
+      ].filter(x => !weekRef || x.label.contains(weekRef));
     }
 }
 function getNextDaynameSuggestions(context: ISuggestionContext): IDateCompletion[] {
@@ -131,7 +188,7 @@ function getNextDaynameSuggestions(context: ISuggestionContext): IDateCompletion
 }
 
 
-// like:  12 => 12 Januar/12 Februar...
+// like:  ce mardi.
 function getThisSuggestions(context: ISuggestionContext): IDateCompletion[] {
   
     // relative days
@@ -159,7 +216,7 @@ function getThisSuggestions(context: ISuggestionContext): IDateCompletion[] {
     }
 }
 
-// like:  12 => 12 Januar/12 Februar...
+/** like:  12 => 12 janvier /12 février... */ 
 function getNumberSuggestions(context: ISuggestionContext): IDateCompletion[] {
   const absoluteDate =
     context.query.match(/^(\d+)\s*(\w*)(?:\s+(.*))?/i);
@@ -189,7 +246,9 @@ function getNumberSuggestions(context: ISuggestionContext): IDateCompletion[] {
     ].filter((items) => monthFilter == "" || items.label.toLowerCase().contains(monthFilter));
   }
 }
-function getVorSuggestions(context: ISuggestionContext): IDateCompletion[] {
+
+/** il y a X  */
+function getIlyaSuggestions(context: ISuggestionContext): IDateCompletion[] {
       
   const relativeDatePast =
   context.query.match(/^il(?:\s+(?:y(?:\s+(?:a)?)?)?)?(?:\s+(\d+)?)?/i) || context.query.match(/^[-](\d+)/i);

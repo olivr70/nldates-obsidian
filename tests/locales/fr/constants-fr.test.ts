@@ -1,4 +1,4 @@
-import { DAY_NAMES_FR_REGEX, findDayFromStartFr, parseJourSemaineX, parseMonthNameFr } from "../../../src/locales/fr/constants-fr"
+import { DAY_NAMES_FR_REGEX, findDayFromStartFr, parseJourSemaineX, parseMonthNameFr, parseRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "../../../src/locales/fr/constants-fr"
 
 import "../../date-equality"
 
@@ -68,5 +68,32 @@ describe('constants-fr', () => {
             // 
             expect(parseJourSemaineX("mardi de la semaine prochaine", new Date(2024,8,18))).toEqual(new Date(2024,8,24,12))
         })
+    })
+})
+
+describe("RegRelativeDayFr", () => {
+    // Note : January, 8th of 2024 is a monday
+    describe("regexp", () => {
+        ["lundi en huit", "MARDI prochain", "Mercredi précédent","jeudi d'avant",
+            "vendredi suivant", "vendredi d'après", "samedi d avant", "dimanche précédent"]
+            .forEach(x => test(x, () => expect(REG_RELATIVE_DAY_FR.test(x)).toBeTruthy()))
+    })
+    test("prochain", () => {
+        expect(parseRegRelativeDayFr("mardi prochain", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+    })
+    test("suivant", () => {
+        expect(parseRegRelativeDayFr("mardi suivant", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+    })
+    test("d'après", () => {
+        expect(parseRegRelativeDayFr("mardi d'après", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+    })
+    test("en huit", () => {
+        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,8))).toEqual(new Date(2024,0,16))
+    })
+    test("précédent", () => {
+        expect(parseRegRelativeDayFr("mardi précédent", new Date(2024,0,8))).toEqual(new Date(2024,0,2))
+    })
+    test("from a sunday", () => {
+        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,7))).toEqual(new Date(2024,0,16))
     })
 })

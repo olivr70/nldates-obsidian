@@ -5,16 +5,15 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import { Chrono, Parser, Component } from "chrono-node";
 
-import { DayOfWeek, ChronoLocale } from "../../types";
+import { DayOfWeek, ChronoLocale, toDateComponents } from "../../types";
 import { NLDParserBase } from "../NLDParserBase";
 import {
   getLastDayOfMonth,
   getLocaleWeekStart,
   getWeekNumber,
-} from "../../utils";
-import { DAY_NAMES_FR_INTL, MONTH_NAME_PATTERN_FR, MONTH_NAMES_FR_INTL, MONTH_NAMES_MIX_FR_INTL_DICT, MONTH_NAMES_FR_PARTIAL3_REGEX, MONTH_NAMES_PARTIAL3_PATTERN_FR, ORDINAL_DATE_FR, ORDINAL_NUMBER_PATTERN_FR, ORDINAL_WORD_DICTIONARY_FR, parseOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX } from "./constants-fr"
-import { findPartialInDict } from "src/utils/months";
-import { getIntlWeekdayNames } from "src/utils/intl";
+} from "../../utils/tools";
+import { DAY_NAMES_FR_INTL, MONTH_NAME_PATTERN_FR, MONTH_NAMES_FR_INTL, MONTH_NAMES_MIX_FR_INTL_DICT, MONTH_NAMES_FR_PARTIAL4_REGEX, MONTH_NAMES_PARTIAL4_PATTERN_FR, ORDINAL_DATE_FR, ORDINAL_NUMBER_PATTERN_FR, ORDINAL_WORD_DICTIONARY_FR, parseOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX, extractRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "./constants-fr"
+import { getIntlWeekdayNames } from "../../utils/intl";
 
 
 dayjs.extend(localeData)
@@ -23,7 +22,7 @@ dayjs.extend(LocalizedFormat)
 export default class NLDParserFr extends NLDParserBase {
 
 
-  constructor(someLocale: ChronoLocale) {
+  constructor(someLocale: ChronoLocale = "fr") {
     super(someLocale)
   }
 
@@ -89,12 +88,13 @@ export default class NLDParserFr extends NLDParserBase {
     
     chrono.parsers.push({
       pattern: () => {
-        return /\bNouvel-An\b/i;
+        return /\bNouvel(?:\s+|\s*[-]\s*)An\b(?:\s+(?<year>\d{4}))?/i;
       },
-      extract: () => {
+      extract: (context, match) => {
         return {
           day: 1,
-          month: 0,
+          month: 1, // month are 1 based in dayjs
+          ...(match.groups["year"] ? { year: parseInt(match.groups["year"])} : {})
         };
       },
     });
@@ -112,6 +112,11 @@ export default class NLDParserFr extends NLDParserBase {
     chrono.parsers.push({
       pattern: () =>  REG_JOUR_SEMAINE_X,
       extract: (_context, match) => extractJourSemaineX(match, new Date())
+    } as Parser);
+    
+    chrono.parsers.push({
+      pattern: () =>  REG_RELATIVE_DAY_FR,
+      extract: (_context, match) => toDateComponents(extractRegRelativeDayFr(match, new Date()))
     } as Parser);
 
 
@@ -145,11 +150,11 @@ function logInfoAboutChrono() {
     console.log(REG_MONTH_FR.test("März"))
 
     
-    console.log(`MONTH_NAMES_FR_REGEX : ${MONTH_NAMES_FR_PARTIAL3_REGEX}`);
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("Juli"))
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("August"))
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("März"))
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("märz"))
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("mar"))
-    console.log(MONTH_NAMES_FR_PARTIAL3_REGEX.test("m"))
+    console.log(`MONTH_NAMES_FR_REGEX : ${MONTH_NAMES_FR_PARTIAL4_REGEX}`);
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("Juli"))
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("August"))
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("März"))
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("märz"))
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("mar"))
+    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("m"))
 }

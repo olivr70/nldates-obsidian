@@ -1,8 +1,8 @@
 import * as chrono from "chrono-node";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { Component } from "chrono-node";
 
-import { DateComponents } from "../../types";
+import { DateComponents, RELATIVE_DAY } from "../../types";
 import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
 import { findMostLikelyADYear } from "../../calculation/years";
 import { 
@@ -14,10 +14,11 @@ import {
   regSrc
 
 } from "../../utils/regex";
+import { dictFromArrays, stripDiacritics } from "../../utils/tools";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
+import { toIsoWeekDay } from "../../utils/days";
+import { computeRelativeDay } from "../../utils/weeks";
 import { findPartialInDict } from "../../utils/months";
-import { toIsoWeekDay } from "../../utils/weeks";
-import { dictFromArrays, stripDiacritics } from "../../utils";
 import { computeDateFromWeek } from "../common/constants";
 
 export const VARIANTS_FR = ["FR", "BE", "CH", "CA"];
@@ -114,11 +115,12 @@ export const ORDINAL_BASE_DICTIONARY_FR: { [word: string]: number } = {
 };
   
   
-  // accepts both 
+/** a french ordinal adjective word */
  export const ORDINAL_WORD_DICTIONARY_FR = Object.fromEntries(
         Object.entries(ORDINAL_BASE_DICTIONARY_FR));
   
   
+/** a french ordinal adjective : word or number */
  export const ORDINAL_NUMBER_PATTERN_FR = `(?<=\\W|^)(${matchAnyPattern(
     ORDINAL_WORD_DICTIONARY_FR, 
   )}|(1(er|ère)|[0-9]{1,2})[e]?)(?=\\W)`;
@@ -133,14 +135,34 @@ function parseOrdinalNumberPatternFr(match: string): number {
 
 export const DAY_NAMES_FR_INTL = getIntlWeekdayNames("fr", "long");
 export const DAY_NAMES_FR_DICT_INTL = dictFromArrays("fr", DAY_NAMES_FR_INTL, getIntlWeekdayNames("fr","short"))
+export function parseDayNameFr(partialText:string):number {
+  return findPartialInDict("fr",DAY_NAMES_FR_DICT_INTL, partialText, NaN);
+}
 
-
-export const DAY_NAMES_FR_PATTERN = matchPartialPattern(DAY_NAMES_FR_DICT_INTL,2,true);
+export const DAY_NAMES_FR_PATTERN = matchPartialPattern(DAY_NAMES_FR_DICT_INTL,2,{word:true});
 /** A day name in french */
 export const DAY_NAMES_FR_REGEX = matchPartialRegex(DAY_NAMES_FR_DICT_INTL,2);
 
 export const TIME_OF_DAYS_FR = [ "petit matin", "matin", "midi", "après-midi", "soirée", "nuit" ];
-export const TIME_OF_DAYS_PATTERN = matchPartialPattern(TIME_OF_DAYS_FR, 1);
+export const TIME_OF_DAYS_PATTERN = matchPartialPattern(TIME_OF_DAYS_FR, 2);
+
+
+
+export const RELATIVES_FOR_DAYS_DICTIONARY_FR: { [word: string]: RELATIVE_DAY } = {
+  "dernier": RELATIVE_DAY.PREVIOUS_OCCURING,
+  "d'avant": RELATIVE_DAY.PREVIOUS_OCCURING,
+  "d avant": RELATIVE_DAY.PREVIOUS_OCCURING,
+  "précédent": RELATIVE_DAY.PREVIOUS_OCCURING,
+  "en huit": RELATIVE_DAY.OF_NEXT_WEEK,
+  "d'après": RELATIVE_DAY.NEXT_OCCURING,
+  "prochain": RELATIVE_DAY.NEXT_OCCURING,
+  "suivant": RELATIVE_DAY.NEXT_OCCURING
+}
+export const RELATIVES_FOR_DAYS_REGEX = matchPartialRegex(RELATIVES_FOR_DAYS_DICTIONARY_FR,4);
+export function parseRelativeForDay(text:string) {
+  const offset = findPartialInDict<RELATIVE_DAY>("fr", RELATIVES_FOR_DAYS_DICTIONARY_FR, text, NaN);
+  return offset;
+}
 
 export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   "aujourd'hui" : "aujourd'hui",
@@ -154,7 +176,7 @@ export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   "apres demain" : "après-demain",
 }
 export const DAY_NAMES_RELATIVE_DE_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
-export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, true, true);
+export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true});
 
 /**  finds a day number (0-based) from it start, returns -1 if no match */
 export function findDayFromStartFr(key:string):number {
@@ -179,8 +201,8 @@ export const MONTH_NAMES_MIX_FR_INTL_DICT = dictFromArrays("fr",
   );
 
 export const MONTH_NAME_PATTERN_FR = `(${matchAnyPattern(MONTH_NAMES_MIX_FR_INTL_DICT)})`;
-export const MONTH_NAMES_PARTIAL3_PATTERN_FR = matchPartialPattern(MONTH_NAMES_MIX_FR_INTL_DICT,3);
-export const MONTH_NAMES_FR_PARTIAL3_REGEX = matchPartialRegex(MONTH_NAMES_MIX_FR_INTL_DICT,3);
+export const MONTH_NAMES_PARTIAL4_PATTERN_FR = matchPartialPattern(MONTH_NAMES_MIX_FR_INTL_DICT,4);
+export const MONTH_NAMES_FR_PARTIAL4_REGEX = matchPartialRegex(MONTH_NAMES_MIX_FR_INTL_DICT,4);
 
 // return -1 if no result
 export function parseMonthNameFr(name: string, def:number = -1): number {
@@ -253,10 +275,11 @@ export function parseUnitFr(match:string|RegExpExecArray): SupportedUnits | "" {
 }
 
 export const RELATIVE_FR = ["précédente","suivante","prochaine"]
-export const RELATIVE_PARTIAL_FR_PATTERN = matchPartialPattern(RELATIVE_FR, 2, true)
+export const RELATIVE_PARTIAL3_FR_PATTERN = matchPartialPattern(RELATIVE_FR, 3, {word:true})
 
 export const REG_RELATiVE_PERIOD = `${SUCCESIVE_UNIT_FR}`
 
+/** ex : mardi prochain */
 export const REG_FOLLOWING_DAY_FR = new RegExp(`${DAY_NAMES_FR_PATTERN}\\s+prochain`)
 export function parsePreviousDayFr(match:RegExpMatchArray) {
     return dateToComponents(previousDay(findDayFromStartFr(match[1])))
@@ -264,26 +287,25 @@ export function parsePreviousDayFr(match:RegExpMatchArray) {
 
 // dates with ordinal numbers
 
-export const ORDINAL_DATE_FR = new RegExp(`${ORDINAL_NUMBER_PATTERN_FR}(?:\\s+(${MONTH_NAMES_PARTIAL3_PATTERN_FR}))?`, "i");
+/** date with ordinal : 1er janvier, */
+export const ORDINAL_DATE_FR = new RegExp(`${ORDINAL_NUMBER_PATTERN_FR}(?:\\s+(${MONTH_NAMES_PARTIAL4_PATTERN_FR}))?`, "i");
 
 export function parseOrdinalDate(match:RegExpMatchArray):DateComponents {
   const dayInMonth = match[2] ? parseInt(match[2]): parseOrdinalNumberPatternFr(match[1])
   const month = match[3] ? parseMonthNameFr(match[3], dayjs().month()) : dayjs().month();
   const result:{[c in Component]?: number;} =  {
     day: dayInMonth,
-    month: month + 1, // dayjs months are 0 based
+    month: month + 1, // dayjs months are 1 based
     year: dayjs().year(),
   };
-  console.log(result)
   return result;
 }
 
-export const REG_JOUR_SEMAINE_X = new RegExp(`(${regSrc(DAY_NAMES_FR_REGEX)}(?:\\s+de\\s+la)?\\s+sem(?:aine)?` +
-  `\\s+(\\d\\d?|${matchPartialItemPattern('prochaine',3)}|${matchPartialItemPattern('précédente',3)})`+
-  `(\\s+(?:en\\s+|de\\s+(?:l'année\\s+)?)?(\\d{4}))?)`, "i")
+/** ex : mardi de la semaine 2 de l'année 2024 */
+export const REG_JOUR_SEMAINE_X = new RegExp(`(?<dayname>${regSrc(DAY_NAMES_FR_REGEX)}(?:\\s+de\\s+la)?\\s+sem(?:aine)?` +
+  `\\s+(?<week>\\d\\d?|${matchPartialItemPattern('prochaine',3)}|${matchPartialItemPattern('précédente',3)})`+
+  `(\\s+(?:en\\s+|de\\s+(?:l'année\\s+)?)?(?<year>\\d{4}))?)`, "i")
 export function extractJourSemaineX(match:RegExpMatchArray, refDate:Date, groupOffset = 0):DateComponents {
-  const dbg = REG_JOUR_SEMAINE_X
-  console.log("extractJourSemaineX(",match[0],",",refDate,")")
   if (match && match[groupOffset]) {
     const day = findDayFromStartFr(match[groupOffset + 2])
     const weekRef = match[groupOffset + 4].toLowerCase()
@@ -307,6 +329,22 @@ export function extractJourSemaineX(match:RegExpMatchArray, refDate:Date, groupO
 }
 export function parseJourSemaineX(text:string, refDate:Date = new Date()) {
   return extractJourSemaineX(REG_JOUR_SEMAINE_X.exec(text), refDate)
+}
+
+// ----------------------------------------------------------------
+/** ex : mardi prochain, lundi d'avant, mercredi en huit... */
+export const REG_RELATIVE_DAY_FR = new RegExp(`(?<day>${regSrc(DAY_NAMES_FR_REGEX)})\\s+(?<rel>${regSrc(RELATIVES_FOR_DAYS_REGEX)})`,"i")
+export function extractRegRelativeDayFr(match:RegExpMatchArray, from:Date) {
+  if (match) {
+    const dayNum = parseDayNameFr(match.groups["day"])
+    const dayRel = parseRelativeForDay(match.groups["rel"])
+    if (!isNaN(dayNum)) {
+      return computeRelativeDay(dayNum, dayRel, dayjs(from))
+    }
+  }
+}
+export function parseRegRelativeDayFr(text:string, from:Date = new Date()) {
+  return extractRegRelativeDayFr(REG_RELATIVE_DAY_FR.exec(text), from)
 }
 
 
