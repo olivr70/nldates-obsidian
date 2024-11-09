@@ -8,7 +8,7 @@ import { DateComponents } from "src/types";
 import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
 import { matchAnyPattern, matchPartialPattern, matchPartialRegex, regSrc } from "../../utils/regex";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
-import { dictFromArrays } from "../../utils";
+import { dictFromArrays } from "../../utils/tools";
 
 export const VARIANTS_DE = ["DE","AT","CH","LU","LI","BE"];
 
@@ -99,7 +99,7 @@ export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   uebermorgen : "übermorgen"
 }
 export const DAY_NAMES_RELATIVE_DE_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
-export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, true, true);
+export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true});
 
 
 export function findDayFromStart(key:string):number {
@@ -239,8 +239,8 @@ export const POD_NAME_DE_PATTERN = `(${matchAnyPattern(PARTS_OF_DAY_NAMES_DE_DIC
 export const POD_NAME_OR_VAL_DE_PATTERN= `(${POD_NAME_DE_PATTERN})|`
 export const POD_DE_REGEX = new RegExp(POD_NAME_OR_VAL_DE_PATTERN, "i");
 
-export const POD_PARTIAL3_PATTERN_DE = matchPartialPattern(PARTS_OF_DAY_NAMES_DE_DICT,3);
-export const POD_PARTIAL3_REGEX = matchPartialRegex(PARTS_OF_DAY_NAMES_DE_DICT,3);
+export const POD_PARTIAL5_PATTERN_DE = matchPartialPattern(PARTS_OF_DAY_NAMES_DE_DICT,5);
+export const POD_PARTIAL5_REGEX = matchPartialRegex(PARTS_OF_DAY_NAMES_DE_DICT,5);
 
 export function parsePartOfDayDe(match:string):DateComponents {
   const hour = findPartialInDict("de", PARTS_OF_DAY_NAMES_DE_DICT, match, NaN );

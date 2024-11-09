@@ -11,7 +11,7 @@ import {
   getLastDayOfMonth,
   getLocaleWeekStart,
   getWeekNumber,
-} from "../../utils";
+} from "../../utils/tools";
 import { MONTH_NAMES_DE_REG, MONTH_NAMES_DE_INTL_DICT, MONTH_NAMES_DE_PARTIAL3_REG, ORDINAL_DATE_DE, ORDINAL_NUMBER_REG_DE, ORDINAL_WORD_DICTIONARY_DE, extractOrdinalDate, parseVergangene, REG_VERGANGENE_TAG } from "./constants-de"
 import { findPartialInDict } from "../../utils/months";
 import { getIntlWeekdayNames } from "../../utils/intl";

@@ -8,8 +8,8 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 
 import { DateDisplay, IDateCompletion, INaturalLanguageDatesPlugin, ISuggestionContext, Suggester } from "../../types";
-import { iterateFrom } from "../../utils";
-import { DAY_NAMES_DE_INTL, DAY_NAMES_DE_REGEX, MONTH_NAMES_DE_INTL, LOCALES_DE, VARIANTS_DE, REG_VERGANGENE_TAG, DAY_NAME_RELATIVES_DICT, findDayFromStart, POD_PARTIAL3_REGEX, PARTS_OF_DAY_NAMES_DE_DICT } from "./constants-de"
+import { iterateFrom } from "../../utils/tools";
+import { DAY_NAMES_DE_INTL, DAY_NAMES_DE_REGEX, MONTH_NAMES_DE_INTL, LOCALES_DE, VARIANTS_DE, REG_VERGANGENE_TAG, DAY_NAME_RELATIVES_DICT, findDayFromStart, POD_PARTIAL5_REGEX, PARTS_OF_DAY_NAMES_DE_DICT } from "./constants-de"
 import { SuggestionMakerBase } from "../../suggest/suggestion-maker-base";
 import { getIsoWeekSuggestions, SUGGESTERS_COMMON } from "../common/suggestions-common";
 
@@ -111,7 +111,7 @@ export class SuggestionsMakerDe extends SuggestionMakerBase {
 
 
 function getTimeOfDaySuggestions(context: ISuggestionContext) : IDateCompletion[] {
-  const match = context.query.match(POD_PARTIAL3_REGEX)
+  const match = context.query.match(POD_PARTIAL5_REGEX)
   if (match) {
     const e=  Object.entries(PARTS_OF_DAY_NAMES_DE_DICT);
     return Object.entries(PARTS_OF_DAY_NAMES_DE_DICT).map(x => {
