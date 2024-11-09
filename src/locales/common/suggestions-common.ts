@@ -5,6 +5,8 @@ import isoWeeksInYear from "dayjs/plugin/isoWeeksInYear"
 import { IDateCompletion, ISuggestionContext } from "../../types";
 import { parseIsoWeekDate } from "./constants";
 import { ParsingComponents, ReferenceWithTimezone } from "chrono-node";
+import { range } from "../../utils/tools";
+import { formatWeekIso } from "../../../src/utils/weeks";
 
 dayjs.extend(isLeapYear)
 dayjs.extend(isoWeeksInYear)
@@ -19,31 +21,10 @@ export const SUGGESTERS_COMMON = [
 const ISO_WEEK_PARTIAL = /(?<year>\d{4})-?W(?:(?<week>\d{1,2})?(?<dayGroup>-(?<day>\d)?)?)?/
 // Groups                 1                   2                    3
 
-function range(begin:number,end:number,step:number = 1) {
-    const result = []
-    if (begin < end) {
-        for (let i = begin; i < end; i += step) {
-            result.push(i)
-        }
-    } else {
-        for (let i = begin; i > end; i -= step) {
-            result.push(i)
-        }
-    }
-    return result;
-}
 
-function formatWeek(year:number, week:number, day:number = undefined) {
-    const weekLimit = dayjs(`{year}-01-01`).isoWeeksInYear() + 1
-    let result = `${year + Math.floor(week / weekLimit)}-W${(week % weekLimit).toString().padStart(2,"0")}`
-    if (day && day > 0 && day < 8) {
-        result += `-${day}`
-    }
-    return result;
-}
 
 function makeWeekSuggestion(context: ISuggestionContext, year:number, week:number, day?:number):IDateCompletion {
-    const alias = formatWeek(year, week, day)
+    const alias = formatWeekIso(year, week, day)
     const mondayDate = new ParsingComponents(new ReferenceWithTimezone(), parseIsoWeekDate(alias)).date();
     return {
         label: `${alias} (${context.plugin.parser.getFormattedDate(mondayDate, "dddd LL")})`,
@@ -56,7 +37,6 @@ function makeWeekSuggestion(context: ISuggestionContext, year:number, week:numbe
 export function getIsoWeekSuggestions(context: ISuggestionContext) : IDateCompletion[] {
     const match = context.query.match(ISO_WEEK_PARTIAL)
     if (match) {
-        console.log("ISO WEEK SUGGESTIONS")
         const year = parseInt(match.groups.year)
         const weekLimit = dayjs(`{year}-01-01`).isoWeeksInYear() + 1
         console.log("year " + year, "# of weeks " + weekLimit)
@@ -67,7 +47,7 @@ export function getIsoWeekSuggestions(context: ISuggestionContext) : IDateComple
                 if (match.groups.day) {
                     return [ makeWeekSuggestion(context, year, week, parseInt(match.groups.day)) ]
                 } else { // no day specified
-                    const base = formatWeek(year, week)
+                    const base = formatWeekIso(year, week)
                     return range(1,8).map(d => makeWeekSuggestion(context, year, week, d) )
                 }
             } else {

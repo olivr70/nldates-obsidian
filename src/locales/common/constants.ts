@@ -1,7 +1,6 @@
-import { toIsoWeekDay } from "../../utils/weeks";
+import { toIsoWeekDay } from "../../utils/days";
 import { DateComponents } from "../../types";
 import { regSrc } from "../../utils/regex";
-import { timezoneOffset } from "src/utils/intl";
 
 /** 3 groups */
 export const REG_TZD = /(?<tzd>(?<zulu>Z)|(?<tzHour>[-+]\d{2}):?(?<tzMinute>\d{2})?)/
@@ -140,6 +139,9 @@ export function extractIsoWeekDate(match:RegExpMatchArray):DateComponents {
 export function parseIsoWeekDate(text:string):DateComponents {
     return extractIsoWeekDate(REG_ISO_WEEK_DATE.exec(text))
 }
+
+
+// ------------------------------------------------------------------------
 
 export const REG_ISO_WEEK_DATE_TZD = new RegExp(`${regSrc(REG_ISO_WEEK_DATE)}(?:${regSrc(REG_TZD)})?`);
 export function extractIsoWeekDateTzd(match:RegExpMatchArray, groupOffset = 0):DateComponents {
