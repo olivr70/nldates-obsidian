@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import moment from "moment"
 
 import { DayOfWeek, AllChronoLocales, ChronoLocale } from "./types";
-import { getLocaleWeekStart } from "./utils";
+import { getLocaleWeekStart } from "./utils/tools";
 import NaturalLanguageDates from "./main";
 
 

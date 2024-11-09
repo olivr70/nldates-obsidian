@@ -1,7 +1,7 @@
 import { MarkdownView, ObsidianProtocolData, Plugin } from "obsidian";
 
 import { INaturalLanguageDatesPlugin, INLDParser, NLDResult } from "./types";
-import { parseTruthy } from "./utils";
+import { parseTruthy } from "./utils/tools";
 import { getOrCreateDailyNote } from "./utilsObsidian";
 import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
 import { parserFactory } from "./parser";
