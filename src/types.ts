@@ -1,6 +1,6 @@
 
 import { EditorSuggestContext } from "obsidian";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { Dayjs, isDayjs } from "dayjs";
 import { Component, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
 import { NLDSettings } from "./settings";
 
@@ -12,7 +12,7 @@ export interface INaturalLanguageDatesPlugin {
 export type DateComponents = {[k in Component]? : number }
 
 export function isDateComponents(arg:any): arg is DateComponents {
-  if (typeof arg != "object") return false;
+  if (arg == null || typeof arg != "object") return false;
   if (!("year" in arg && "month" in arg) && !("hour" in arg)) return false;
   for (let k of ["year","month","day","hour","minute","second","millisecond","timezoneOffset"]) {
     const kType = typeof arg[k];
@@ -23,6 +23,14 @@ export function isDateComponents(arg:any): arg is DateComponents {
 
 export function dateComponentsToDate(arg: DateComponents):Date {
   return new ParsingComponents(new ReferenceWithTimezone(), arg).date()
+}
+
+export function toDateComponents(arg:Dayjs|Date) {
+  if (isDayjs(arg)) {
+    return { year: arg.year(), month: arg.month(), day: arg.daysInMonth()}
+  } else if (arg instanceof Date) {
+    return { year: arg.getFullYear(), month: arg.getMonth(), day: arg.getDate()}
+  }
 }
 
 // Source `chrono`:
@@ -42,6 +50,13 @@ export enum AllChronoLocales {
 }
 export type ChronoLocale = `${AllChronoLocales}`;
 
+/** reference to a day, relative to the current one */
+export enum RELATIVE_DAY {
+  OF_NEXT_WEEK,
+  OF_PREVIOUS_WEEK,
+  NEXT_OCCURING,
+  PREVIOUS_OCCURING,
+}
 
 export type DayOfWeek =
   | "sunday"

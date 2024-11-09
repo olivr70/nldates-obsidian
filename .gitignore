@@ -14,3 +14,6 @@ main.js
 
 # Obsidian
 data.json
+
+# coverage
+coverage/

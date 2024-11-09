@@ -1,4 +1,4 @@
-
+// ONLY MODULES DEPENDANCIES
 
 // return an array of month names for a locale
 export function getIntlMonthNames(locale:string, format: "long" | "short" | "narrow" |"numeric" | "2-digit") {
@@ -19,6 +19,7 @@ export function getIntlMonthNames(locale:string, format: "long" | "short" | "nar
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
   
+  /** builds a Dictionnary of day names to day numbers for a locale */
   export function getIntlWeekdayNames(locale:string, format: "long" | "short" | "narrow") {
     const formatter = new Intl.DateTimeFormat(locale, { weekday: format });
     const weekdays = [];

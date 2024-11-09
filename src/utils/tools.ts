@@ -1,10 +1,11 @@
+// ONLY MODULES OR ./types DEPENDANCIES
 
 import * as chrono from "chrono-node";
 import { Chrono } from "chrono-node";
-
-import { DayOfWeek, DictionaryLike } from "./types";
 import dayjs from "dayjs";
 import localeData from "dayjs/plugin/localeData";
+
+import { DayOfWeek, DictionaryLike } from "../types";
 
 dayjs.extend(localeData)
 
@@ -17,29 +18,35 @@ const daysOfWeek: Omit<DayOfWeek, "locale-default">[] = [
   "friday",
   "saturday",
 ];
+// ----------------------- COLLECTION TOOLS --------------------
 
-export function getFormattedDate(date: Date, format: string): string {
-  return dayjs(date).format(format);
+export function* iterateFrom<T>(items:T[], from:number): Generator<T> {
+  for (let i = 0; i < items.length; i++) {
+    yield items[(from + i) % items.length];
+}
 }
 
-export function getLastDayOfMonth(year: number, month: number) {
-  return new Date(year, month, 0).getDate();
+export function* iterateFromReverse<T>(items:T[], from:number): Generator<T> {
+  for (let i = items.length - 1; i >= 0; i--) {
+      yield items[(items.length+from - i) % items.length];
+  }
 }
 
-export function parseTruthy(flag: string): boolean {
-  return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
-}
 
-export function getWeekNumber(dayOfWeek: Omit<DayOfWeek, "locale-default">): number {
-  return daysOfWeek.indexOf(dayOfWeek);
-}
 
-export function getLocaleWeekStart(): Omit<DayOfWeek, "locale-default"> {
-  // @ts-ignore
-  const startOfWeek = dayjs.localeData().firstDayOfWeek();
-  return daysOfWeek[startOfWeek];
+export function range(begin:number,end:number,step:number = 1) {
+  const result = []
+  if (begin < end) {
+      for (let i = begin; i < end; i += step) {
+          result.push(i)
+      }
+  } else {
+      for (let i = begin; i > end; i -= step) {
+          result.push(i)
+      }
+  }
+  return result;
 }
-
 
 export function extractTerms(dictionary: DictionaryLike): string[] {
   let keys: string[];
@@ -54,10 +61,19 @@ export function extractTerms(dictionary: DictionaryLike): string[] {
   return keys;
 }
 
-  // removes all diacritics signs
-  export function stripDiacritics(str:string):string {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+export function extractEntries(dictionary: DictionaryLike): [string,unknown][] {
+  let entries: [string,unknown][];
+  if (dictionary instanceof Array) {
+    entries = dictionary.map((x,i) => [x,i]);
+  } else if (dictionary instanceof Map) {
+    entries = [...(dictionary as Map<string, unknown>).entries()];
+  } else {
+    entries = Object.keys(dictionary).map(p => [p, dictionary[p]]);
   }
+
+  return entries;
+}
+
 
   /** Creates a dictionnary from one or more arrays (the key is item, the value is the index)
    * keys are lowercased, and a stripped version is also included
@@ -79,6 +95,41 @@ export function dictFromArrays(locale:string, ...nameArrays:string[][]):{ [word:
   return result;
 }
 
+// ----------------------- DATE TOOLS --------------------
+
+export function getFormattedDate(date: Date, format: string): string {
+  return dayjs(date).format(format);
+}
+
+export function getLastDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
+}
+
+
+export function getWeekNumber(dayOfWeek: Omit<DayOfWeek, "locale-default">): number {
+  return daysOfWeek.indexOf(dayOfWeek);
+}
+
+export function getLocaleWeekStart(): Omit<DayOfWeek, "locale-default"> {
+  // @ts-ignore
+  const startOfWeek = dayjs.localeData().firstDayOfWeek();
+  return daysOfWeek[startOfWeek];
+}
+
+// ----------------------- STRING TOOLS --------------------
+
+export function parseTruthy(flag: string): boolean {
+  return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
+}
+
+// removes all diacritics signs
+export function stripDiacritics(str:string):string {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+
+
+// ----------------------- CHRONO TOOLS --------------------
 
 export function getLocalizedChrono(someLocale:string): Chrono {
   switch (someLocale.substring(0,2)) {
@@ -110,16 +161,5 @@ export function getLocalizedChrono(someLocale:string): Chrono {
 
 
 
-export function* iterateFrom<T>(items:T[], from:number): Generator<T> {
-  for (let i = 0; i < items.length; i++) {
-    yield items[(from + i) % items.length];
-}
-}
-
-export function* iterateFromReverse<T>(items:T[], from:number): Generator<T> {
-  for (let i = items.length - 1; i >= 0; i--) {
-      yield items[(items.length+from - i) % items.length];
-  }
-}
 
 
