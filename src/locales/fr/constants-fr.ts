@@ -169,14 +169,10 @@ export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   hier : "hier",
   demain:  "demain",
   "avant-hier" : "avant-hier",
-  "avant hier" : "avant-hier",
   "après-demain" : "après-demain",
-  "après demain" : "après-demain",
-  "apres-demain" : "après-demain",
-  "apres demain" : "après-demain",
 }
-export const DAY_NAMES_RELATIVE_DE_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
-export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true});
+export const DAY_NAMES_RELATIVE_FR_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
+export const DAY_NAMES_RELATIVE_FR_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true});
 
 /**  finds a day number (0-based) from it start, returns -1 if no match */
 export function findDayFromStartFr(key:string):number {

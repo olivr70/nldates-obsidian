@@ -9,7 +9,7 @@ import LocalizedFormat from "dayjs/plugin/localizedFormat";
 
 import { DateDisplay, IDateCompletion, INaturalLanguageDatesPlugin, ISuggestionContext, ISuggestionMaker, Suggester } from "../../types";
 import { iterateFrom } from "../../utils/tools";
-import { DAY_NAMES_FR_INTL, DAY_NAMES_FR_REGEX, MONTH_NAMES_FR_INTL, LOCALES_FR, VARIANTS_FR,  DAY_NAME_RELATIVES_DICT, findDayFromStartFr } from "./constants-fr"
+import { DAY_NAMES_FR_INTL, DAY_NAMES_FR_REGEX, MONTH_NAMES_FR_INTL, LOCALES_FR, VARIANTS_FR,  DAY_NAME_RELATIVES_DICT, findDayFromStartFr, DAY_NAMES_RELATIVE_FR_PARTIAL_REGEX } from "./constants-fr"
 import { SuggestionMakerBase } from "src/suggest/suggestion-maker-base";
 import { formatWeekIso } from "../../../src/utils/weeks";
 import { SUGGESTERS_COMMON } from "../common/suggestions-common";
@@ -37,6 +37,7 @@ const SUGGESTERS_FR:Suggester[] = [
   getCasualSuggestions, 
   getIlyaSuggestions,
   getInSuggestion, 
+  getRelativeDayNamesSuggestions
 ]
 
 export interface ISuggestionQuery {
@@ -64,13 +65,13 @@ export class SuggestionsMakerFr extends SuggestionMakerBase {
 }
 
 
-
+/** time: */
 function getTimeSuggestionsFr(context: ISuggestionContext): IDateCompletion[] {
   const zeit = context.query.match(/^(?:time:|h(?:e(?:u(?:re?)?)?)?:?)(.*)./i);
   if (zeit) {
     const adj = zeit[1];
     console.log(`heure : ${adj}`);
-    return ["maintenant", "metin", "midi","après-midi", "soirée", "nuit"]
+    return ["maintenant", "matin", "midi","après-midi", "soirée", "nuit"]
       .filter((item) => item.toLowerCase().contains(adj))
       .map((val) => ({ label: `${val}`,  display: DateDisplay.asTime }));
   }
@@ -108,6 +109,10 @@ function makeWeekSuggestionFr(context: ISuggestionContext, year:number, week:num
 // only when day name is first
 const SUG_DAY_NAME = new RegExp(`(?:^\\s*${regSrc(DAY_NAMES_FR_REGEX)})(?:\\s+de?(?:\\s+la?)?)?(?:\\s*${matchPartialItemPattern("semaine", 3)}\\s+(?<weekRef>\\d+|${matchPartialItemPattern("prochaine",3)}|${matchPartialItemPattern("précédente",3)})?)?`,"i")
 
+/** mardi
+ * - de la semaine 42
+ * 
+ */
 function getDaynamesSuggestions(context: ISuggestionContext): IDateCompletion[] {
       
     // day names
@@ -187,8 +192,18 @@ function getNextDaynameSuggestions(context: ISuggestionContext): IDateCompletion
     }
 }
 
+/** like aujourd'hui/demain/hier */
+function getRelativeDayNamesSuggestions(context:ISuggestionContext): IDateCompletion[] {
+  return Object.keys(DAY_NAME_RELATIVES_DICT)
+    .filter(
+    (k) => k.toLowerCase().startsWith(context.query))
+    .map(
+      x => ({ label: x})
+  )
+}
 
-// like:  ce mardi.
+
+/** like:  ce mardi.*/ 
 function getThisSuggestions(context: ISuggestionContext): IDateCompletion[] {
   
     // relative days
@@ -293,8 +308,8 @@ function getCasualSuggestions(context: ISuggestionContext): IDateCompletion[] {
     }
     return [
       { label: `${dayName}`, display: DateDisplay.asDate },
+      { label: `${dayName} aube`, display: DateDisplay.asTimestamp },
       { label: `${dayName} matin`, display: DateDisplay.asTimestamp },
-      { label: `${dayName} vormittag`, display: DateDisplay.asTimestamp },
       { label: `${dayName} midi`, display: DateDisplay.asTimestamp },
       { label: `${dayName} après-midi`, display: DateDisplay.asTimestamp },
       { label: `${dayName} soir`, display: DateDisplay.asTimestamp },
