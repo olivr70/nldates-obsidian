@@ -5,16 +5,14 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import { Chrono, Parser, Component } from "chrono-node";
 
-import { DayOfWeek, ChronoLocale } from "../../types";
+import { ChronoLocale } from "../../types";
 import { NLDParserBase } from "../NLDParserBase";
 import {
   getLastDayOfMonth,
-  getLocaleWeekStart,
-  getWeekNumber,
 } from "../../utils/tools";
 import { MONTH_NAMES_DE_REG, MONTH_NAMES_DE_INTL_DICT, MONTH_NAMES_DE_PARTIAL3_REG, ORDINAL_DATE_DE, ORDINAL_NUMBER_REG_DE, ORDINAL_WORD_DICTIONARY_DE, extractOrdinalDate, parseVergangene, REG_VERGANGENE_TAG } from "./constants-de"
 import { findPartialInDict } from "../../utils/months";
-import { getIntlWeekdayNames } from "../../utils/intl";
+import { getIntlWeekdayNames, getIntlWeekStart } from "../../utils/intl";
 
 
 dayjs.extend(localeData)
@@ -33,42 +31,35 @@ export default class NLDParserDe extends NLDParserBase {
   }
 
 
-  getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date {
+  getParsedDate(selectedText: string): Date {
     const myChrono = this.chrono;
     console.log("------------- DE.getParsedDate() ------------- ")
     console.log(`ChronoDE.parseDate ${selectedText}`)
 
     const initialParse = myChrono.parse(selectedText);
-    console.log(`initialParse result ${initialParse}`)
-    console.log(initialParse);
 
     const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
 
-    const weekStart =
-      weekStartPreference === "locale-default"
-        ? getLocaleWeekStart()
-        : weekStartPreference;
-
     const locale = {
-      weekStart: getWeekNumber(weekStart),
+      weekStart: getIntlWeekStart(this.locale),
     };
     
 
-    const thisDateMatch = selectedText.match(/diese[mnrs]?\s([\w]+)/i);
-    const nextDateMatch = selectedText.match(/n(ä|ae,)chsten\s([\w]+)/i);
-    const lastDayOfMatch = selectedText.match(/(letzer tag im|ende)\s*([^\n\r]*)/i);
-    const midOf = selectedText.match(/mid\s([\w]+)/i);
+    const thisDateMatch = selectedText?.match(/diese[mnrs]?\s([\w]+)/i);
+    const nextDateMatch = selectedText?.match(/n(ä|ae,)chsten\s([\w]+)/i);
+    const lastDayOfMatch = selectedText?.match(/(letzer tag im|ende)\s*([^\n\r]*)/i);
+    const midOf = selectedText?.match(/mid\s([\w]+)/i);
 
     const referenceDate = weekdayIsCertain
       ? dayjs().weekday(0).toDate()
       : new Date();
 
     if (thisDateMatch && thisDateMatch[1] === "week") {
-      return myChrono.parseDate(`this ${weekStart}`, referenceDate);
+      return myChrono.parseDate(`this ${locale.weekStart}`, referenceDate);
     }
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return myChrono.parseDate(`nächste ${weekStart}`, referenceDate, {
+      return myChrono.parseDate(`nächste ${locale.weekStart}`, referenceDate, {
         forwardDate: true,
       });
     }

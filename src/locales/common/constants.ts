@@ -1,21 +1,43 @@
 import { toIsoWeekDay } from "../../utils/days";
 import { DateComponents } from "../../types";
-import { regSrc } from "../../utils/regex";
+import { alt, group, named, opt, regSrc, seq } from "../../utils/regex";
 
-/** 3 groups */
-export const REG_TZD = /(?<tzd>(?<zulu>Z)|(?<tzHour>[-+]\d{2}):?(?<tzMinute>\d{2})?)/
+/** A day number in month, between 1 and 31, accepts 01 to 09 */
+export const REG_DAY_IN_MONTH = /(?:3[0-1]?|[12][0-9]?|0[1-9]|[4-9])/
+
+// patterns for a year
+  // copied from wanasit/chrono/src/locale/de/constants.ts
+  /** year on exactly 4 digits */
+  export const YEAR_VALUE_4_REG = /(?!0{4}\b)([0-9]{4}\b)/; // exclude four 0
+  /** year on 1 to 4 digits, excluding 0,00,000 and 0000 */
+  export const YEAR_VALUE_REG = /\b(?!0{1,4}\b)\d{1,4}\b/; // exclude list of 0 (00, 000, 0000)
+  /** signed year on 1 to 4 digits, excluding 0,00,000 and 0000 */
+  export const SIGNED_YEAR_REG = new RegExp(`([-+])?(${regSrc(YEAR_VALUE_REG)})`,"i");
+                // group 1 : optional sign (for BCE et CE)
+                // group 2 : year number
+export function parseYear(text:string, def:number = new Date().getFullYear()):number {
+    return parseInt(text) || def;
+}
+
+/** Parse Z, +02, -04:45 */
+export function regTzd(idx:string) {
+    return named(`tzd${idx}`, alt({},
+            named(`zulu${idx}`, /Z/),
+            group(named(`tzHour${idx}`, /[-+]\d{2}/), opt(/:?/, named(`tzMinute${idx}`, /\d{2}/)))))
+//  return /(?<tzd>(?<zulu>Z)|(?<tzHour>[-+]\d{2}):?(?<tzMinute>\d{2})?)/
+}
 //                      1      2          3                     4
 /** extract timezone offset information, or null if none  */ 
-export function extractTzd(match:RegExpMatchArray):DateComponents {
+export function extractTzd(match:RegExpMatchArray, idx:string):DateComponents {
     // The Zulu time zone (Z) is equivalent to UTC
     if (match) {
-        if (match.groups.tzd) {
+        if (match.groups[`tzd${idx}`]) {
             let timezoneOffset = undefined;
-            if (match.groups.zulu) {
+            if (match.groups[`zulu${idx}`]) {
                 timezoneOffset = 0; // default (if Z is present)
             } else {
-                timezoneOffset = parseInt(match.groups.tzHour) * 60 
-                const minuteOffset = parseInt(match.groups.tzMinute) || 0 ;
+                timezoneOffset = parseInt(match.groups[`tzHour${idx}`]) * 60 
+                const minuteOffset = parseInt(match.groups[`tzMinute${idx}`]) || 0 ;
                 if (timezoneOffset < 0) {
                     timezoneOffset -= minuteOffset;
                 } else {
@@ -28,71 +50,101 @@ export function extractTzd(match:RegExpMatchArray):DateComponents {
     return {};
 }
 export function parseTzd(text:string):number {
-    return extractTzd(REG_TZD.exec(text))?.timezoneOffset;
+    return extractTzd(regTzd("").exec(text),"")?.timezoneOffset;
 }
 
 /** a ISO time (requires hour and minutes) 
- * 5 groups
+ * Parse 10:10, 11:12.234 08:09Z
 */
+export function regIsoTime(idx:string):RegExp {
+    return group(/(?<!\d)/,
+            group(named(`hour${idx}`, /\d{2}/), /:/, named(`minute${idx}`, /\d{2}/)),
+            opt(/:/, 
+                named(`second${idx}`, /\d{2}/), 
+                opt(group(/\./, named(`fractions${idx}`, /\d{1,6}/)))), 
+            named(`timeZulu${idx}`, /Z?/))
+}
+
+/*
 export const REG_ISO_TIME = /(?<!\d)(?:(?<hour>\d{2}):(?<minute>\d{2})(?::(?<second>\d{2})(?:.(?<fractions>\d{1,6}))?)?|(?<timeZulu>Z))/
 //                                     1              2                   3                   4                         5
 //                                     hour           minute             second?            fractions                   Zulu
-export function extractIsoTime(match:RegExpMatchArray):DateComponents {
+*/
+export function extractIsoTime(match:RegExpMatchArray, idx:string):DateComponents {
     if (match) {
-        const result:DateComponents = {        }
-        if (match.groups.hour) result.hour = parseInt(match.groups.hour)
-        if (match.groups.minute) result.minute = parseInt(match.groups.minute)
-        if (match.groups.second) result.second = parseInt(match.groups.second)
-        if (match.groups.fractions) result.millisecond = parseInt(match.groups.fractions.substring(0,3).padEnd(3,"0"))
-        if (match.groups.timeZulu) result.timezoneOffset = 0
+        const hour = parseInt(match.groups[`hour${idx}`])
+        const minute = parseInt(match.groups[`minute${idx}`])
+        const second = parseInt(match.groups[`second${idx}`])
+        const millisecond = parseInt(match.groups[`fractions${idx}`]?.substring(0,3).padEnd(3,"0"))
+        const timeZulu = parseInt(match.groups[`timeZulu${idx}`])
+        const timezoneOffset = 0
+        const result:DateComponents = {        
+            ...(hour && { hour }),      
+            ...(minute && { minute }),      
+            ...(second && { second }),      
+            ...(millisecond && { millisecond }),
+            ...(timeZulu && { timezoneOffset: 0})
+        }
         return result;
     }
     return {}
 }
 export function parseIsoTime(text:string):DateComponents {
-    return extractIsoTime(REG_ISO_TIME.exec(text))
+    const dbg = regIsoTime("")
+    return extractIsoTime(regIsoTime("").exec(text), "")
 }
 
 /** 8 groups */
-export const REG_ISO_TIME_TZD = new RegExp(`(?:${regSrc(REG_ISO_TIME)}(?:${regSrc(REG_TZD)})?)`)
-export function extractIsoTimeTzd(match:RegExpMatchArray):DateComponents {
+export function regIsoTimeTzd(idx:string) { 
+    return group(regIsoTime(idx), opt(regTzd(idx)))
+}
+export function extractIsoTimeTzd(match:RegExpMatchArray, idx:string):DateComponents {
     if (match) {
-        return {...extractIsoTime(match), ...extractTzd(match) }
+        return {...extractIsoTime(match, idx), ...extractTzd(match, idx) }
     }
     return {}
 }
 export function parseIsoTimeTzd(text:string):DateComponents {
-    return extractIsoTimeTzd(REG_ISO_TIME_TZD.exec(text));
+    return extractIsoTimeTzd(regIsoTimeTzd("").exec(text),"");
 }
 
 /** an extended ISO date, with a sign, and negative years 
- * 3 groups
+ * Parse -1500/05/10
 */
-export const REG_ISO_DATE_ERA = /(?:(?<yearEra>[-+]\d{4,6})(?:-(?<monthEra>\d{2})(?:-(?<dayEra>\d{2}))?)?)/
-//                                  1                          2                     3
-//                                  year                       month?                day?
-export function extractIsoDateEra(match:RegExpMatchArray):DateComponents {
+export function regIsoDateEra(idx:string = "")  {
+    return group( 
+                named(`yearEra${idx}`, /[-+]\d{4,6}/), 
+                opt(
+                    /-/, 
+                    named(`monthEra${idx}`, /\d{2}/),
+                    opt( 
+                        /-/,
+                        named(`dayEra${idx}`, /\d{2}/))))
+}
+export function extractIsoDateEra(match:RegExpMatchArray, idx:string):DateComponents {
     if (match) {
-        let year = parseInt(match.groups.yearEra)
+        let year = parseInt(match.groups[`yearEra${idx}`])
         if (year == 0) year = -1    // special case for year 0000
-        const result:DateComponents = { year }
-        if (match.groups.monthEra) result.month = parseInt(match.groups.monthEra)
-        if (match.groups.dayEra) result.day = parseInt(match.groups.dayEra)
+        const month = parseInt(match.groups[`monthEra${idx}`]);
+        const day = parseInt(match.groups[`dayEra${idx}`]);
+        const result:DateComponents = { year ,
+            ...(month && { month }), 
+            ...(day && { day }) }
         return result;
     }
     return {}
 }
 export function parseIsoDateEra(text:string):DateComponents {
-    return extractIsoDateEra(REG_ISO_DATE_ERA.exec(text))
+    return extractIsoDateEra(regIsoDateEra().exec(text), "")
 }
 
-/** era date with time and timezone offset */
-export const REG_ISO_TIMESTAMP_ERA = new RegExp(`${regSrc(REG_ISO_DATE_ERA)}(?:T${regSrc(REG_ISO_TIME_TZD)})`)
-export function extractIsoTimestampEra(match:RegExpMatchArray):DateComponents {
-    return {...extractIsoDateEra(match), ...extractIsoTimeTzd(match) }
+/** era date with time and timezone offset, like */
+export function regIsoTimestampEra(idx:string = "") { return group(regIsoDateEra(idx),/T/, regIsoTimeTzd(idx)) }
+export function extractIsoTimestampEra(match:RegExpMatchArray, idx:string):DateComponents {
+    return {...extractIsoDateEra(match, idx), ...extractIsoTimeTzd(match, idx) }
 }
 export function parseIsoTimestampEra(text:string):DateComponents {
-    return extractIsoTimestampEra(REG_ISO_TIMESTAMP_ERA.exec(text));
+    return extractIsoTimestampEra(regIsoTimestampEra("").exec(text), "");
 }
 
 /**
@@ -117,6 +169,14 @@ export function computeDateFromWeek(year:number, isoWeek:number, dayInWeekJs:num
     } as DateComponents;
 }
 
+/** Parse 2023-W03-1*/
+export function regIsoWeekDate(idx:string) {
+    return named(`isoWeek${idx}`,
+        named(`wYear${idx}`, /[-+]?\d{4}/), 
+        /-?W/, 
+        named(`wWeek${idx}`, /0[0-9]|[1-4][0-9]|5[0-3]/),
+        opt(/-/, named(`wDay${idx}`, /\d(?!\d)/)))
+}
 /** 4 groups */
 export const REG_ISO_WEEK_DATE = /(?<isoWeek>(?<wYear>[-+]?\d{4})-?W(?<wWeek>0[0-9]|[1-4][0-9]|5[0-3])(?:-(?<wDay>\d(?!\d)))?)/
 //                                12                                3                                     4
@@ -125,32 +185,35 @@ export const REG_ISO_WEEK_DATE = /(?<isoWeek>(?<wYear>[-+]?\d{4})-?W(?<wWeek>0[0
 //                                                
     // note : (?!\d) because the day number is a single digit (otherwise there would a possible confusion
     // with a negative timezoneOffset)
-export function extractIsoWeekDate(match:RegExpMatchArray):DateComponents {
-    if (match && match.groups.isoWeek) {
+export function extractIsoWeekDate(match:RegExpMatchArray, idx:string):DateComponents {
+    if (match && match.groups[`isoWeek${idx}`]) {
         // ISO weeks always start on a Monday
-        const year = parseInt(match.groups.wYear)
-        const week = parseInt(match.groups.wWeek)
-        const dayRef = match.groups.wDay
-        const dayInWeekJs = dayRef !== undefined ? parseInt(dayRef) % 7 : 1 // monday
+        const year = parseInt(match.groups[`wYear${idx}`])
+        const week = parseInt(match.groups[`wWeek${idx}`])
+        const dayRef = match.groups[`wDay${idx}`]
+        const dayInWeekJs = dayRef !== undefined ? parseInt(dayRef) % 7 : 1 // monday (first day of week in ISO)
 
         return computeDateFromWeek(year, week, dayInWeekJs)
     }
 }
 export function parseIsoWeekDate(text:string):DateComponents {
-    return extractIsoWeekDate(REG_ISO_WEEK_DATE.exec(text))
+    return extractIsoWeekDate(regIsoWeekDate("").exec(text), "")
 }
 
 
 // ------------------------------------------------------------------------
-
-export const REG_ISO_WEEK_DATE_TZD = new RegExp(`${regSrc(REG_ISO_WEEK_DATE)}(?:${regSrc(REG_TZD)})?`);
-export function extractIsoWeekDateTzd(match:RegExpMatchArray, groupOffset = 0):DateComponents {
-    const result = { ...extractIsoWeekDate(match), ...extractTzd(match) };
+/** Parse 2023-W03-1+01:15 */
+export function regIsoWeekDateTzd(idx:string) {
+    return group(regIsoWeekDate(idx), opt(regTzd(idx)))
+} 
+//export const REG_ISO_WEEK_DATE_TZD = new RegExp(`${regSrc(REG_ISO_WEEK_DATE)}(?:${regSrc(REG_TZD)})?`);
+export function extractIsoWeekDateTzd(match:RegExpMatchArray, idx:string):DateComponents {
+    const result = { ...extractIsoWeekDate(match, idx), ...extractTzd(match, idx) };
     return result;
 }
 export function parseIsoWeekDateTzd(text:string):DateComponents {
-    const dbgReg = REG_ISO_WEEK_DATE_TZD
-    return extractIsoWeekDateTzd(REG_ISO_WEEK_DATE_TZD.exec(text));
+    const dbgReg = regIsoWeekDateTzd("")
+    return extractIsoWeekDateTzd(regIsoWeekDateTzd("").exec(text),"");
 }
 
 /** matches ISO date with a Z (zulu) timezone */

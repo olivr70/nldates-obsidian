@@ -11,23 +11,31 @@ import 'dayjs/locale/en-sg';
 import 'dayjs/locale/en-tt';
 import { Chrono, Parser } from "chrono-node";
 
+dayjs.locale("en")
+
+dayjs.locale("en-CA")
+dayjs.locale("en-GB")
+dayjs.locale("en-IE")
+dayjs.locale("en-IN")
+dayjs.locale("en-BZ")
+dayjs.locale("en-SG")
+dayjs.locale("en-TT")
+
 dayjs.extend(localizedFormat)
 
 import { 
-  DayOfWeek,
   ChronoLocale
 } from "../../types";
 import { NLDParserBase } from "../NLDParserBase"
 
 import {
-  getLastDayOfMonth,
-  getLocaleWeekStart,
-  getWeekNumber
+  getLastDayOfMonth
 } from "../../utils/tools";
 import { matchAnyPattern } from "../../utils/regex";
 import { IsoPatchParser } from "../common/IsoPatchParser";
 import { IsoPatchWeekDateTzdParser } from "../common/IsoPatchWeekDateTzdParser";
 import { IsoEraDateParser } from "../common/IsoEraDateParser";
+import { getIntlWeekStart } from "src/utils/intl";
 
 
 export default class NLDParserEn extends NLDParserBase {
@@ -46,18 +54,13 @@ export default class NLDParserEn extends NLDParserBase {
   }
 
 
-  getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date {
+  getParsedDate(selectedText: string): Date {
     const myChrono = this.chrono;
     const initialParse = myChrono.parse(selectedText);
     const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
 
-    const weekStart =
-      weekStartPreference === "locale-default"
-        ? getLocaleWeekStart()
-        : weekStartPreference;
-
     const locale = {
-      weekStart: getWeekNumber(weekStart),
+      weekStart: getIntlWeekStart(this.locale),
     };
 
     const thisDateMatch = selectedText.match(/this\s([\w]+)/i);
@@ -70,11 +73,11 @@ export default class NLDParserEn extends NLDParserBase {
       : new Date();
 
     if (thisDateMatch && thisDateMatch[1] === "week") {
-      return myChrono.parseDate(`this ${weekStart}`, referenceDate);
+      return myChrono.parseDate(`this ${locale.weekStart}`, referenceDate);
     }
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return myChrono.parseDate(`next ${weekStart}`, referenceDate, {
+      return myChrono.parseDate(`next ${locale.weekStart}`, referenceDate, {
         forwardDate: true,
       });
     }

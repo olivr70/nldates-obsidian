@@ -1,7 +1,7 @@
 import { Dayjs } from "dayjs";
 import { Chrono } from "chrono-node";
 
-import { DayOfWeek, INLDParser } from "../types"
+import { INLDParser } from "../types"
 import { getLocalizedChrono } from "../utils/tools"
 import { IsoPatchWeekDateTzdParser } from "./common/IsoPatchWeekDateTzdParser";
 import { IsoPatchParser } from "./common/IsoPatchParser";
@@ -20,14 +20,14 @@ export abstract class NLDParserBase implements INLDParser {
     get locale():string { return this._locale; }
 
     abstract moment(date:Date):Dayjs;
-    abstract getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date;
+    abstract getParsedDate(selectedText: string): Date;
     abstract getFormattedDate(date:Date, format: string):string;
 
     protected get chrono():Chrono { return this._chrono; }
 
     protected configureChrono(chrono:Chrono):Chrono {
         // add all standard ISO parsers
-        chrono.parsers.push(IsoPatchWeekDateTzdParser, IsoPatchParser, IsoEraDateParser)
+        chrono.parsers.push(new IsoPatchWeekDateTzdParser(), IsoPatchParser, IsoEraDateParser)
         return chrono;
     }
 }

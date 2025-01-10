@@ -9,6 +9,47 @@ export function regSrc(reg:RegExp):string {
   return str.slice(1, str.lastIndexOf("/"))
 }
 
+export type Cardinality = "" | "?" | "*" | "+"
+export type RegOptions = {name?:string, capture?:boolean, flags?:string, optional?:boolean, cardinality?:Cardinality}
+
+/** an alternative */
+export function alt(options:RegOptions, ...reg:RegExp[]):RegExp {
+  const prefix = options.name 
+    ? `(?<${options.name}>` 
+    : (options.capture ? "(" : "(?:");
+  const newPattern = prefix + reg.map(x => regSrc(x)).join("|") + ")" + (options.cardinality ?? "")
+  return new RegExp(newPattern, options.flags || "")
+}
+
+export function seq(options:RegOptions, ...reg:RegExp[]):RegExp {
+  const prefix = options.name 
+    ? `(?<${options.name}>` 
+    : (options.capture ? "(" : "(?:");
+  const newPattern = prefix + reg.map(x => regSrc(x)).join("") + ")"+ (options.cardinality ?? "")
+  return new RegExp(newPattern, options.flags || "")  
+}
+
+/** a named capturing */
+export function named(name:string, ...reg:RegExp[]) {
+  return seq({name}, ...reg)
+}
+/** a non-capturing sequence */
+export function group(...reg:RegExp[]) {
+  return seq({}, ...reg)
+}
+/** an optional (?) non-capturing sequence */
+export function opt(...reg:RegExp[]) {
+  return seq({cardinality:"?"}, ...reg)
+}
+/** an one or more (+) non-capturing sequence */
+export function oneOrMore(...reg:RegExp[]) {
+  return seq({cardinality:"+"}, ...reg)
+}
+/** an zero or more (*) non-capturing sequence */
+export function zeroOrMore(...reg:RegExp[]) {
+  return seq({cardinality:"*"}, ...reg)
+}
+
 export function matchAnyPattern(dictionary: DictionaryLike, prefix = "", suffix = ""): string {
     const joinedTerms = extractTerms(dictionary)
       .sort((a, b) => b.length - a.length)
@@ -108,4 +149,18 @@ export interface MPPOptions {
   export function matchPartialRegex(items:DictionaryLike, len:number, options:MPPOptions = {}):RegExp {
     return new RegExp(`${matchPartialPattern(items, len, options)}`,"i");
   }
+
+  /** finds the last match of regex in text */
+export  function findLastMatch(text:string, regex:RegExp) { 
+  if (!regex.flags.includes("g")) {
+    regex = new RegExp(regex.source, regex.flags + "g")
+  }
+  let lastMatch = null; 
+  let match; 
+  while ((match = regex.exec(text)) !== null) { 
+    lastMatch = match; 
+    regex.lastIndex = match.index + match.length;
+  }
+  return lastMatch; 
+}
   

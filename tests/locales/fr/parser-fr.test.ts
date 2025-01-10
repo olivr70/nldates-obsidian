@@ -9,18 +9,18 @@ describe('parser-fr', () => {
         p = new NLDParserFr()
     })
     test("jours nommés", () => {
-        expect(p.getParsedDate("nouvel an", "monday"))
+        expect(p.getParsedDate("nouvel an"))
             .toEqual(new Date(2024,0,1,12))
-        expect(p.getParsedDate("nouvel an 2023", "monday"))
+        expect(p.getParsedDate("nouvel an 2023"))
             .toEqual(new Date(2023,0,1,12))
-        expect(p.getParsedDate("Nouvel-An 2022", "monday"))
+        expect(p.getParsedDate("Nouvel-An 2022"))
             .toEqual(new Date(2022,0,1,12))
     })
     test("jour relatif", () => {
-        expect(p.getParsedDate("mardi de la semaine 2 de l'année 2024", "monday")).toEqual(new Date(2024,0,9,12))
+        expect(p.getParsedDate("mardi de la semaine 2 de l'année 2024")).toEqual(new Date(2024,0,9,12))
     })
     test("jour de semaine", () => {
-        expect(p.getParsedDate("mardi de la semaine 2 de l'année 2024", "monday"))
+        expect(p.getParsedDate("mardi de la semaine 2 de l'année 2024"))
             .toEqual(new Date(2024,0,9,12))
     })
 })

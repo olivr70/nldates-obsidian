@@ -11,5 +11,11 @@ export default {
     exports: "default",
   },
   external: ["obsidian"],
-  plugins: [nodeResolve({ browser: true }), commonjs(), typescript()],
+  plugins: [nodeResolve({ browser: true }),commonjs(), typescript(),
+    nodeResolve({only: "dayjs/locale/de"}),
+    nodeResolve({only: "dayjs/locale/es"}),
+    nodeResolve({only: "dayjs/locale/fr"}),
+    nodeResolve({only: "dayjs/locale/ja"}),
+    nodeResolve({only: "dayjs/locale/pt"}),
+    nodeResolve({only: "dayjs/locale/zh"})],
 };

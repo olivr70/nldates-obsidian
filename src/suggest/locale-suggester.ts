@@ -1,10 +1,10 @@
 
 import { SuggestionsMakerEn } from "../locales/en/suggestions-en";
 import { SuggestionsMakerDe } from "../locales/de/suggestions-de";
-import { IDateCompletion, ISuggestionMaker, NLDSuggestContext } from "src/types";
-import { ChronoLocale, INaturalLanguageDatesPlugin } from "src/types";
+import { IDateSuggestion, ISuggestionMaker, NLDSuggestContext } from "../types";
+import { ChronoLocale, IInternationalDatesPlugin } from "../types";
 import { EditorSuggestContext } from "obsidian";
-import { SuggestionsMakerFr } from "src/locales/fr/suggestions-fr";
+import { SuggestionsMakerFr } from "../locales/fr/suggestions-fr";
 
 
 const MAKERS:Record<string,ISuggestionMaker> = {
@@ -23,7 +23,7 @@ class MultiSuggestionMaker implements ISuggestionMaker {
     constructor(...suggesters:ISuggestionMaker[]) {
         this._suggesters = suggesters;
     }
-    getDateSuggestions(context: NLDSuggestContext): IDateCompletion[] {
+    getDateSuggestions(context: NLDSuggestContext): IDateSuggestion[] {
         let result = null;
         for (let s of this._suggesters) {
             result = s.getDateSuggestions(context);

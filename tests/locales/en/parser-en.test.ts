@@ -42,7 +42,7 @@ describe("NLDParserEn", () => {
     })
     describe("ISO dates", () => {
         test("date with Z suffix", () => {
-            const val = parser.getParsedDate("2024-01-01Z", "monday")
+            const val = parser.getParsedDate("2024-01-01Z")
             const exp = new Date("2024-01-01T12:00Z")   
             expect(val).toEqual(exp)   
         })
@@ -50,7 +50,7 @@ describe("NLDParserEn", () => {
             // compute the date for local (the test has to work in any timezone)
             const exp = new Date("2024-01-01T12:00" + timezoneOffset(undefined, new Date(2024,0,1))) 
               
-            expect(parser.getParsedDate("2024-01-01", "monday")).toEqual(exp)   
+            expect(parser.getParsedDate("2024-01-01")).toEqual(exp)   
         })
     })
 })

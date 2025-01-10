@@ -1,0 +1,42 @@
+/* styles.css */ 
+
+.nld-notice-error {
+    color: #cc0000; /* Dark red text */
+}
+.nld-notice-warning {
+    color: #e68804d7; /* Dark brown text */
+}
+
+.nld-example {
+    color: blueviolet; /* Dark brown text */
+
+}
+
+.nld-markdown {
+    background-color: aliceblue;
+    text-align: center;
+}
+
+.theme-dark .nld-markdown {
+    filter: brightness(1.2)
+}
+.theme-light .nld-markdown {
+    filter: brightness(0.8)
+}
+
+/* Add this CSS to your plugin's stylesheet or the Obsidian CSS file */ 
+.modal-content {
+    max-height: 400px; /* Set the maximum height for the modal content */ 
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.flex {
+    display: flex;
+}
+
+.box {
+    flex: 1;
+    border: 1px solid red;
+    padding: 10px;
+    background-color: #804040;
+}

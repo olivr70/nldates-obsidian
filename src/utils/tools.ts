@@ -5,19 +5,16 @@ import { Chrono } from "chrono-node";
 import dayjs from "dayjs";
 import localeData from "dayjs/plugin/localeData";
 
-import { DayOfWeek, DictionaryLike } from "../types";
+import { DictionaryLike } from "../types";
+import { debugNotif } from "./osbidian";
 
 dayjs.extend(localeData)
 
-const daysOfWeek: Omit<DayOfWeek, "locale-default">[] = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
+/** creates a single line string by replacing sequences of CR, LF by a single space */
+export function makeSingleLine(text:string) {
+  return text ? text.split(/[\n\r]+/).join(" ") : ""
+}
+
 // ----------------------- COLLECTION TOOLS --------------------
 
 export function* iterateFrom<T>(items:T[], from:number): Generator<T> {
@@ -106,14 +103,9 @@ export function getLastDayOfMonth(year: number, month: number) {
 }
 
 
-export function getWeekNumber(dayOfWeek: Omit<DayOfWeek, "locale-default">): number {
-  return daysOfWeek.indexOf(dayOfWeek);
-}
-
-export function getLocaleWeekStart(): Omit<DayOfWeek, "locale-default"> {
+export function getLocaleWeekStart(locale:string): number {
   // @ts-ignore
-  const startOfWeek = dayjs.localeData().firstDayOfWeek();
-  return daysOfWeek[startOfWeek];
+  return getIntlWeekStart(locale);
 }
 
 // ----------------------- STRING TOOLS --------------------
@@ -158,6 +150,21 @@ export function getLocalizedChrono(someLocale:string): Chrono {
   }
 }
 
+/** compute a unique name */
+export function findUniqueName(candidate:string, isUnique:(name:string) => boolean, max = 100):string {
+  if (isUnique(candidate)) return candidate;
+  const parts = /^(.*?)(\d+)?$/.exec(candidate)
+  const base = parts[1].trim()
+  let index = parseInt(parts[2] ?? "1") + 1
+  let name:string;
+  let triesLeft = max
+  do {
+    if (triesLeft-- == 0) { throw new Error("Too many tries to find a unique name")}
+    name = `${base} ${index}`
+    index++;
+  } while (!isUnique(name))
+  return name;
+}
 
 
 

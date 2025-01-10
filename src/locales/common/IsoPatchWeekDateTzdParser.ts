@@ -4,7 +4,8 @@ import weekOfYear from "dayjs/plugin/weekOfYear"
 
 import { Parser } from "chrono-node";
 import { DateComponents } from "src/types";
-import { extractIsoWeekDateTzd, REG_ISO_WEEK_DATE_TZD } from "./constants";
+import { extractIsoWeekDateTzd, regIsoWeekDateTzd } from "./constants";
+import { ParsingContext } from "chrono-node/dist/esm/chrono";
 
 dayjs.extend(weekday)
 dayjs.extend(weekOfYear)
@@ -17,12 +18,13 @@ dayjs.extend(weekOfYear)
  * 
  * This is not supported by current version of Chrono (2.7.6)
 */
-export const IsoPatchWeekDateTzdParser:Parser = {
-    pattern: () => {
-      return REG_ISO_WEEK_DATE_TZD;
-    },
-    extract: (_context, match) => {
-      return extractIsoWeekDateTzd(match, 0)
-    },
+export class IsoPatchWeekDateTzdParser implements Parser {
+  _parser = regIsoWeekDateTzd("0");
+    pattern()  {
+      return this._parser;
+    }
+    extract(context: ParsingContext, match: RegExpMatchArray) {
+      return extractIsoWeekDateTzd(match, "0")
+    }
 
 }

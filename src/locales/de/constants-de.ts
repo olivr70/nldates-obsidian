@@ -1,14 +1,18 @@
 import * as chrono from "chrono-node";
 import dayjs from "dayjs";
+import 'dayjs/locale/de';
 import { Component } from "chrono-node";
 
 import { findMostLikelyADYear } from "../../calculation/years";
 import { findPartialInDict } from "../../utils/months";
 import { DateComponents } from "src/types";
 import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
-import { matchAnyPattern, matchPartialPattern, matchPartialRegex, regSrc } from "../../utils/regex";
+import { matchAnyPattern, matchPartialPattern, matchPartialRegex, regSrc, seq } from "../../utils/regex";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
 import { dictFromArrays } from "../../utils/tools";
+import { REG_DAY_IN_MONTH, SIGNED_YEAR_REG } from "../common/constants";
+
+dayjs.locale("de")
 
 export const VARIANTS_DE = ["DE","AT","CH","LU","LI","BE"];
 
@@ -103,7 +107,7 @@ export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RE
 
 
 export function findDayFromStart(key:string):number {
-  return DAY_NAMES_DE_INTL.findIndex((x) => x.toLowerCase().startsWith(key));
+  return DAY_NAMES_DE_INTL.findIndex((x) => x.toLowerCase().startsWith(key.toLocaleLowerCase("de")));
 }
 
 // Months parsing
@@ -169,13 +173,19 @@ export function parseEraDe(match: string): "BCE" | "CE" | undefined {
 }
 
 // year parsing
-// pattern for a year, with 2 or 4 digits
-  // copied from wanasit/chrono/src/locale/de/constants.ts
-export const YEAR_VALUE_4_REG = /(?!0{4}\b)([0-9]{4}\b)/; // exclude four 0
-export const YEAR_VALUE_REG = /\b(?!0{1,4}\b)\d{1,4}\b/; // exclude list of 0 (00, 000, 0000)
-export const SIGNED_YEAR_REG = new RegExp(`([-+])?(${regSrc(YEAR_VALUE_REG)})`,"i");
-              // group 1 : optional sign (for BCE et CE)
-              // group 2 : year number
+
+/** reference to a year, including era (same as FULL_YEAR_REG_DE) */
+export function FULL_YEAR_DE(idx:string) {
+  seq(seq({name:`year_${idx}`}, SIGNED_YEAR_REG), seq({cardinality:"?"},/\s+/, seq({name:`era_${idx}`}, ERA_REG_DE)))
+}
+export function extractFullYearDe(match: RegExpExecArray, idx:string): number {
+  let yearValue = parseInt(match.groups[`year_${idx}`])
+  const suffixEra = parseEraDe(match.groups[`era_${idx}`])
+  const result = suffixEra == "BCE" && yearValue > 0 ? -yearValue : yearValue; 
+  return findMostLikelyADYear(result);
+}
+
+/** reference to a year, including era */
 export const FULL_YEAR_REG_DE = new RegExp(`${regSrc(SIGNED_YEAR_REG)}(?:\\s+(${regSrc(ERA_REG_DE)}))?`,"i");
               // group 1 : optional sign (for BCE et CE)
               // group 2 : year number
@@ -200,6 +210,30 @@ export function parseVergangene(match:RegExpMatchArray) {
     return dateToComponents(previousDay(findDayFromStart(match[2])))
 }
 
+// German long date, like December 10, 2024
+export const LONG_DATE_DE = seq({}
+  , seq({name:"month"},MONTH_NAMES_DE_PARTIAL3_REG)
+  , seq({cardinality:"?"}, 
+      /\s+/, 
+      seq({name: "dayNum"}, REG_DAY_IN_MONTH), 
+      seq({cardinality:"?"}, /\s+/, seq({name:"year"}, FULL_YEAR_REG_DE))))
+export function extractLongDateDe(match:RegExpMatchArray) {
+  if (match) {
+    const day = parseInt(match.groups["dayNum"])
+    const year = parseInt(match.groups["year"]) || new Date().getFullYear()
+    const month = match.groups["month"] ? parseMonthNameDe(match.groups["month"], dayjs().month()) : dayjs().month();
+    const result:{[c in Component]?: number;} =  {
+      day,
+      month: month + 1, // dayjs months are 0 based
+      year,
+    };
+    return result;
+  }
+}
+export function parseLongDateDe(text:string) {
+  return extractLongDateDe(LONG_DATE_DE.exec(text))
+}
+
 // dates with ordinal numbers
 
 export const ORDINAL_DATE_DE = new RegExp(`${regSrc(ORDINAL_NUMBER_REG_DE)}(?:\\s+(${regSrc(MONTH_NAMES_DE_PARTIAL3_REG)}))?`, "i");
@@ -210,7 +244,7 @@ export function extractOrdinalDate(match:RegExpMatchArray, offset = 0):DateCompo
   const result:{[c in Component]?: number;} =  {
     day: dayInMonth,
     month: month + 1, // dayjs months are 0 based
-    year: dayjs().year(),
+    year: new Date().getFullYear(),
   };
   console.log(result)
   return result;

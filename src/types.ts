@@ -1,12 +1,141 @@
 
-import { EditorSuggestContext } from "obsidian";
+import { App, EditorSuggestContext, EventRef, PluginManifest, Plugin } from "obsidian";
 import dayjs, { Dayjs, isDayjs } from "dayjs";
 import { Component, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
-import { NLDSettings } from "./settings";
 
-export interface INaturalLanguageDatesPlugin {
+
+export type FieldType<T, K extends keyof T> = T[K];
+
+/** a reference to a format, which can be either
+ * - a Intl.DateStyle
+ * - "iso" for an ISO 8601 date
+ * - the name of a user format
+ * - a moment.js format string
+ */
+export type FormatRef = "full" |"long"|"medium"|"short"|"iso"|string;
+
+type IPlugin = InstanceType<typeof Plugin>
+
+export interface IInternationalDatesPlugin extends IPlugin {
   get parser(): INLDParser;
-  get settings(): NLDSettings;
+  get settings(): InternationalDateSettings;
+
+  // #region IInternationalDatesPlugin.Manipulation of UserDateFormats
+  
+  findUniqueFormatName(base:string):string;
+  
+  /** return the default UserDateFormat from settings
+   * - if the format settings is the name, return this UserDateFormat
+   * - otherwise returns the UsetDateSetting based on the locale
+   * - of a default format with the "long" Intl format for the uset locale
+   */
+  getDefaultUserDateFormat():UserDateFormat;
+
+  /** return the first UserDateFormat matching **filter** */
+  findUserDateFormat(filter:(x:UserDateFormat) => boolean):UserDateFormat[];
+
+  /** return the first UserDateFormat matching :
+   * - with the exact same locale (with all parts)
+   * - starting with <key> (it may have additional specifiers)
+   *   Useful to handle Country of Script settings
+   * - with the same language (ignoring all other specifiers)
+   */
+  getFirstUserDateFormatFromLocale(someLocale:string):UserDateFormat;
+
+  /** return the first UsetDateFormat matching flags.
+   * Returns
+   * - name matching, if .format field is specified
+   * - locale matching (exact, same prefix and then only language)
+   */
+  getFirstUserDateFormatFromFlags(flags:IMarkdownFlags):UserDateFormat;
+  // #endregion
+
+  // #region Formating to Markdown -------------------------
+
+  /** generate the Markdown for a DateToDiplay */
+  generateMarkdownToInsert(date:MarkdownDateParts, ctrlKey?:boolean, altKey?:boolean, shiftKey?:boolean):string;
+
+  /** formats a DateSuggestion to Markdown */
+  suggestionToMarkdown(suggestion:IDateSuggestion):MarkdownDateParts;
+  /** formats a Date  */
+  dateToMarkdown(dateValue:Date, flags:IMarkdownFlags):MarkdownDateParts;
+  // #endregion
+
+  // #region IInternationalDatesPlugin:Formating dates to text  -------------------------
+
+    /** formats a Date to the specific format
+   * format can be:
+   * - iso/iso8601/8601 for ISO dates
+   * - an Intl dateStyle (full/long/medium/short or LLLL/LLL/LL/L)
+   * - the name of of a user defined format in the settings
+   * - a Moment.js format string
+   */
+  formatDate(dateValue:Date, formatToUse:FormatRef, locale?:string):FormattedDate;
+
+  /** formats the date with a UserDateFormat. 
+   * Uses the locale in the format, or defaults to locale in settings
+   */
+  formatDateWithUserFormat(userFormat:UserDateFormat, date:Date):string;
+  /** formats the date with a UserDateFormat. 
+   * Uses the locale in the format, or defaults to locale in settings
+   */
+  formatTimeWithUserFormat(userFormat:UserDateFormat, date:Date):string;
+  // #endregion
+
+  // #region IInternationalDatesPlugin.Settings manipulation -------------------
+  validateSettings():void;
+  validateAndSaveSettings():void;
+  validateAndSaveSettingsSync():void;
+
+  //#endregion
+
+  app: App;
+  manifest: PluginManifest;
+}
+
+/** a Intl.DateTimeFormatOptions with additional info for management */
+export interface UserDateFormat extends Intl.DateTimeFormatOptions {
+  name:string;
+  desc?:string;
+  locale:string;
+}
+
+export type DateStyle = FieldType<UserDateFormat, 'dateStyle'> // "full"|"long"|"medium"|"short";
+const DATE_STYLE_OPTIONS:Record<DateStyle|"none", string> = { "full": "Full", "long": 'Long',  'medium': 'Medium', 'short': 'Short', "none":'User defined' }
+
+export function isDateStyle(some:any):some is DateStyle {
+  return Object.keys(DATE_STYLE_OPTIONS).contains(some)
+}
+
+export type IntlYearFormat = FieldType<UserDateFormat, 'year'> // "numeric"|"2-digit"
+
+export type IntlMonthFormat = FieldType<UserDateFormat, 'month'> // "numeric"|"2-digit"|"long"|"short"|"narrow"
+
+export type IntlDayFormat = FieldType<UserDateFormat, 'day'> // "numeric"|"2-digit"
+
+export type IntlWeekDayFormat = FieldType<UserDateFormat, "weekday">
+
+
+export interface InternationalDateSettings {
+  autosuggestToggleLink: boolean;
+  autocompleteTriggerPhrase: string;
+  isAutosuggestEnabled: boolean;
+  
+  dateFormats: UserDateFormat[];
+  selectedFormat: string;
+
+  //format: string;
+  timeFormat: string;
+  separator: string;
+  locale: ChronoLocale;
+
+  modalToggleTime: boolean;
+  modalToggleLink: boolean;
+  linkToDailyNotes: boolean;
+  modalMomentFormat: string;
+
+  // obsolete
+  // weekStart: DayOfWeek;
 }
 
 export type DateComponents = {[k in Component]? : number }
@@ -58,63 +187,96 @@ export enum RELATIVE_DAY {
   PREVIOUS_OCCURING,
 }
 
-export type DayOfWeek =
-  | "sunday"
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "locale-default";
-
 export enum DateDisplay { asDate, asTime, asTimestamp}
 
 /** A dictionnary of names for DateDisplay. Used to localize prefix like time: or date: */
 export type DisplayDict = { [key:string]: DateDisplay};
 
-export interface IDateCompletion {
-  /** the menu item */
-  label: string;
-  /** the string to parse with Chrono */
-  alias?: string;
-  /** the date value to use */
-  value?: string | Date ;
+
+/** some flags which the user can specifiy on suggestion */
+export interface IMarkdownFlags {
+  /** the format : either a Intl format name, or a Moment.js format string */
+  format?:FormatRef;
   /** how to display the result */
-  display?: DateDisplay;
+  display?:DateDisplay;
+  /** the locale to use (override settings) */
+  locale?:string;
+  /** the user wants a link */
+  asLink?:boolean;
+  /** true is user wants the a link to target the daily note */
+  linkToDailyNotes?:boolean;
+  /** the text used to generated the suggestion */
+  text?:string;
+  /** the prefix of this suggestion */
+  prefix?:string;
+  /** the suffix of this suggestion */
+  suffix?:string;
+}
+
+/** a dzte suggestion from a suggester. It needs to be parsed and then formatted */
+export interface IDateSuggestion extends IMarkdownFlags {
+  /** the menu item */
+  label?: string;
+  /** a complementary information string for the user */
+  hint?: string;
+  /** true if suggestion is a flag */
+  isFlag?: boolean;
+  /** the date value to use */
+  value?: Date ;
+  /** the date string to parse (used only if value is undefined) */
+  valueString?: string ;
+}
+
+/** the text parts of a formated date*/
+export interface FormattedDate {
+  dateValue: Date;
+  dateStr:string;
+  timeStr:string;
+  timestampStr?:string;
 }
 
 
-export interface INLDParser {
-    get locale():string;
-    getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date;
-    getFormattedDate(date:Date, format: string):string;
-    moment(date:Date):Dayjs;
-  }
-  
 
 export interface NLDResult {
   formattedString: string;
   date: Date;
   moment: Dayjs;
 }
+
+/** a FromattedDate with additional display flags */
+export interface MarkdownDateParts extends FormattedDate, IMarkdownFlags {
+  display:DateDisplay;
+  asLink: boolean;
+  linkToDailyNotes: boolean;
+}
+
+/** the interface for all local date Parsers */
+export interface INLDParser {
+    get locale():string;
+    getParsedDate(selectedText: string): Date;
+    moment(date:Date):Dayjs;
+  }
+  
   
 /** Add the plugin to the context, to provide access to settings */
 export interface NLDSuggestContext extends EditorSuggestContext {
-  plugin: INaturalLanguageDatesPlugin;
+  plugin: IInternationalDatesPlugin;
+  last?:IDateSuggestion;
 }
   
+/** each locale can add its own ISuggestionMakers */
 export interface ISuggestionMaker {
     
-  getDateSuggestions(context: NLDSuggestContext): IDateCompletion[];
+  /** returns an array of suggestions from context */
+  getDateSuggestions(context: NLDSuggestContext): IDateSuggestion[];
 
   getNoSuggestPreceedingRange():number;
   getNoSuggestPreceedingChars():RegExp;
 }
 
   
-export interface ISuggestionContext {
-  plugin: INaturalLanguageDatesPlugin;
+export interface INLDSuggestionContext {
+  plugin: IInternationalDatesPlugin;
   query: string;
   now: Dayjs;
   ianaTimezone: string;
@@ -122,4 +284,6 @@ export interface ISuggestionContext {
 }
 
 /** Prototype of function who suggest dates */
-export type Suggester = (context:ISuggestionContext) => IDateCompletion[]
+export type Suggester = (context:INLDSuggestionContext) => IDateSuggestion[]
+
+

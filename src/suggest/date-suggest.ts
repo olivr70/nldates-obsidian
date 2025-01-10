@@ -8,18 +8,38 @@ import {
   TFile,
 } from "obsidian";
 
-import { DateDisplay, IDateCompletion, NLDSuggestContext } from "src/types";
-import type NaturalLanguageDates from "src/main";
-import { generateMarkdownLink } from "src/utilsObsidian";
-import { getSuggestionMaker } from "src/suggest/locale-suggester";
-import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
+import dayjs, { Dayjs } from "dayjs";
+import 'dayjs/locale';
+import localeData from "dayjs/plugin/localeData";
+import LocalizedFormat from "dayjs/plugin/localizedFormat";
+
+import { IDateSuggestion, NLDSuggestContext } from "../types";
+import { debug, enterLeave, watch } from "../utils/debug"
+import type InternationalDates from "../main";
+import { getSuggestionMaker } from "../suggest/locale-suggester";
+import { suggestionWithDefaults } from "./suggest-utils";
+import { showSuggestModal } from "./suggest-modal";
 
 
-export default class DateSuggest extends EditorSuggest<IDateCompletion> {
+
+dayjs.extend(localeData)
+dayjs.extend(LocalizedFormat)
+
+
+
+
+
+/**
+ * @see https://docs.obsidian.md/Reference/TypeScript+API/EditorSuggest
+ */
+export default class DateSuggest extends EditorSuggest<IDateSuggestion> {
   app: App;
-  private plugin: NaturalLanguageDates;
+  private plugin: InternationalDates;
 
-  constructor(app: App, plugin: NaturalLanguageDates) {
+  private _lastSuggestions:IDateSuggestion[]
+  private _tabbedSuggestion:IDateSuggestion;
+
+  constructor(app: App, plugin: InternationalDates) {
     super(app);
     this.app = app;
     this.plugin = plugin;
@@ -30,157 +50,184 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       this.suggestions.useSelectedItem(evt);
       return false;
     });
+    // @ts-ignore
+    this.scope.register(["Ctrl"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-ignore
+      this.suggestions.useSelectedItem(evt);
+      return false;
+    });
+    // @ts-ignore
+    this.scope.register(["Alt"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-ignore
+      this.suggestions.useSelectedItem(evt);
+      return false;
+    });
+    // @ts-ignore
+    this.scope.register(["Shift", "Alt"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-ignore
+      this.suggestions.useSelectedItem(evt);
+      return false;
+    });
+    this.scope.register([], "Tab", this.tabHandler);
 
-    if (this.plugin.settings.autosuggestToggleLink) {
-      this.setInstructions([{ command: "Shift", purpose: "Keep text as alias" }]);
+    this.setInstructions([{ command: "Alt", purpose: "Insert date as link" }]);
+    this.setInstructions([{ command: "Shift", purpose: "Show suggestion dialog" }]);
+  }
+
+  /** handle a tab while in the suggestion menu; Two possible situations
+   * - first tab : user selected the date string, and wants to add flags
+   * - next tabs : user wants to select current flag, and add a new one
+   */
+  private tabHandler = (evt: KeyboardEvent) => {
+    return enterLeave("tabHandler", () => {
+        // @ts-ignore : selectedItem is not officialy exposed in Obsidian API
+      const selectedItemIndex = this.suggestions.selectedItem;
+      const selectedItem = this._lastSuggestions[selectedItemIndex];
+      debug("selectedItem", selectedItemIndex, selectedItem)
+      debug("_tabbedSuggestion", this._tabbedSuggestion)
+
+      this.validateSelectedItem(selectedItem)
+      return false;
+    })
+  }
+
+  private validateSelectedItem(selectedItem:IDateSuggestion) {
+    const { editor, start, end } = this.context;
+    let tabbedText = ""
+    if (selectedItem.isFlag)  {
+      const currentSuffix = this._tabbedSuggestion.suffix
+      const newFlag = selectedItem.label;
+      const newSuffix = currentSuffix ? `${currentSuffix};${newFlag}` : newFlag
+      debug("currentSuffix=", currentSuffix)
+      debug("newFlag=", newFlag)
+      tabbedText = "@" + (this._tabbedSuggestion.text ?? this._tabbedSuggestion.label) + "@" + newSuffix + ";"
+      this._tabbedSuggestion.suffix = newSuffix
+    } else {
+      tabbedText = "@" + selectedItem.label + "@"
+      this._tabbedSuggestion = selectedItem;
+      this._tabbedSuggestion.suffix = ""
     }
+    editor.replaceRange(tabbedText, start, end);
+    const newPosition: EditorPosition = { line: start.line, ch: start.ch + tabbedText.length };
+    editor.setCursor(newPosition)
   }
 
-  getSuggestions(context: EditorSuggestContext): IDateCompletion[] {
-    const suggestions = this.getDateSuggestions(context);
-    if (suggestions && suggestions.length) {
-      return suggestions;
-    }
-
-    // catch-all if there are no matches
-    return [{ label: context.query }];
-  }
-
-  getDateSuggestions(context: EditorSuggestContext): IDateCompletion[] {
-    console.log("-------------------------------------------")
-    const nldContext:NLDSuggestContext = { plugin:this.plugin, ...context}
-    return getSuggestionMaker(this.plugin.settings.locale).getDateSuggestions(nldContext);
-  }
-
-  renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
-    el.setText(suggestion.label);
-  }
-
-  selectSuggestion(suggestion: IDateCompletion, event: KeyboardEvent | MouseEvent): void {
-    console.log("+++++++++++++++++++++++++++++++++++++++++++")
-    const { editor } = this.context;
-
-    console.log(`selectSuggestion()`)
-    console.log(suggestion);
-
-    // use the date provided by the suggester if set
-    const dateSuggestion:string|Date = suggestion.value !== undefined ? suggestion.value : suggestion.label;
-    let dateValue:Date = suggestion.value instanceof Date ? suggestion.value : undefined;
-
-    const includeAlias = event.shiftKey;
-    let dateStr = "";
-    let timeStr = "";
-    let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
-
-    
-
-    if (dateSuggestion instanceof Date) {
-      dateValue = dateSuggestion
-      switch(suggestion.display) {
-        case DateDisplay.asTime:
-          timeStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.timeFormat);
-          break;
-        case DateDisplay.asTimestamp:
-          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
-          timeStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.timeFormat);
-          break;
-        case DateDisplay.asDate:
-          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
-          break;
-        default:  // SAME AS asDate
-          dateStr = this.plugin.getFormattedDate(dateSuggestion, this.plugin.settings.format);
-          break;
-      }
-    } else {  // value was a string, or we are directly using the suggestion label
-      let display = suggestion.display || DateDisplay.asDate;
-      if (dateSuggestion.startsWith("time:")) {
-        const timePart = dateSuggestion.substring(5);
-        const timeValue = this.plugin.parseTime(timePart);
-        dateValue = timeValue.date;
-        dateStr = this.plugin.parseTime(timePart).formattedString;
-        display = DateDisplay.asTime;
-        makeIntoLink = false;
-      } else {
-        const parseResult = this.plugin.parseDate(dateSuggestion);
-        dateValue = parseResult.date;
-        dateStr = parseResult.moment.format(this.plugin.settings.format);
-        timeStr = parseResult.moment.format(this.plugin.settings.timeFormat)
-      }
-
-      switch (display) {
-        case DateDisplay.asTime:
-          dateStr = timeStr;
-          break;
-        case DateDisplay.asTimestamp:
-          dateStr = `${dateStr}${this.plugin.settings.separator}${timeStr}`;
-          break;
-        case DateDisplay.asDate:
-            // NOTHING MORE
-          break;
-        default:
-            // NOTHING MORE
-      }
-    }
-    console.log(`makeIntoLink ${makeIntoLink}`)
-    console.log(`dateStr ${dateStr}`)
-    console.log(`suggestion ${suggestion}`)
-    if (makeIntoLink) {
-      if (this.plugin.settings.linkToDailyNotes) {
-        const dailyNoteName = this.plugin.getFormattedDate(dateValue,getDailyNoteSettings().format);
-        console.log( "linkToDailyNote\n", dailyNoteName,"\n", `suggestion.alias=${suggestion.alias}`)
-        dateStr = generateMarkdownLink(
-          this.app,
-          dailyNoteName,
-          includeAlias ? (suggestion.alias ? suggestion.alias : dateStr) : undefined
-        );
-      } else {
-        dateStr = generateMarkdownLink(
-          this.app,
-          dateStr,
-          includeAlias ? (suggestion.alias ? suggestion.alias : suggestion.label) : undefined
-        );
-      }
-    }
-
-    editor.replaceRange(dateStr, this.context.start, this.context.end);
-  }
-
+  /**
+   * 
+   * @override
+   * @returns 
+   */
   onTrigger(
     cursor: EditorPosition,
     editor: Editor,
     file: TFile
   ): EditorSuggestTriggerInfo {
-    if (!this.plugin.settings.isAutosuggestEnabled) {
-      return null;
-    }
+    return enterLeave("onTrigger", () => {
+      if (!this.plugin.settings.isAutosuggestEnabled) {
+        return null;
+      }
 
-    const triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
-    const startPos = this.context?.start || {
-      line: cursor.line,
-      ch: cursor.ch - triggerPhrase.length,
-    };
+      const triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
+      const startPos = this.context?.start || {
+        line: cursor.line,
+        ch: cursor.ch - triggerPhrase.length,
+      };
 
-    if (!editor.getRange(startPos, cursor).startsWith(triggerPhrase)) {
-      return null;
-    }
+      if (!editor.getRange(startPos, cursor).startsWith(triggerPhrase)) {
+        return null;
+      }
 
-    const precedingChar = editor.getRange(
-      {
-        line: startPos.line,
-        ch: startPos.ch - 1,
-      },
-      startPos
-    );
+      const precedingChar = editor.getRange(
+        {
+          line: startPos.line,
+          ch: startPos.ch - 1,
+        },
+        startPos
+      );
 
-    // Short-circuit if `@` as a part of a word (e.g. part of an email address)
-    if (precedingChar && /[`a-zA-Z0-9]/.test(precedingChar)) {
-      return null;
-    }
+      // Short-circuit if `@` as a part of a word (e.g. part of an email address)
+      if (precedingChar && /[`a-zA-Z0-9]/.test(precedingChar)) {
+        return null;
+      }
 
-    return {
-      start: startPos,
-      end: cursor,
-      query: editor.getRange(startPos, cursor).substring(triggerPhrase.length),
-    };
+      return {
+        start: startPos,
+        end: cursor,
+        query: editor.getRange(startPos, cursor).substring(triggerPhrase.length),
+      };
+    })
+  }
+
+  /** @override */
+  getSuggestions(context: EditorSuggestContext): IDateSuggestion[] {
+    return enterLeave("--- getSuggestions ---", () => {
+      const suggestions = this.getDateSuggestions(context);
+      if (suggestions && suggestions.length) {
+        // preserve to handle Tab selection
+        this._lastSuggestions = suggestions;
+        console.log("DateSuggest.getSuggestions() = ", suggestions)
+        return suggestions;
+      } else {
+        // catch-all if there are no matches
+        this._lastSuggestions = [{ label: context.query }];;
+      }
+
+      return this._lastSuggestions
+    })
+  }
+
+  /** @override */
+  renderSuggestion(suggestion: IDateSuggestion, el: HTMLElement): void {
+    return enterLeave("--- renderSuggestion ---", () => {
+      const items = this.plugin.suggestionToMarkdown(suggestionWithDefaults(suggestion, this.plugin))
+      const newMarkdown = this.plugin.generateMarkdownToInsert(items, false, false, false)
+      const hintString = suggestion.hint ? ` (${suggestion.hint})` : ""
+      
+      el.setText(suggestion.label + hintString + " - " + newMarkdown);
+    })
+  }
+
+
+  /** @override */
+  selectSuggestion(suggestion: IDateSuggestion, event: KeyboardEvent | MouseEvent): void {
+    // get context info before showing the modal dialog
+    return enterLeave("--- selectSuggestion ---", () => {
+      const { editor } = this.context;
+      const { start, end } = this.context;
+      const items = this.plugin.suggestionToMarkdown(suggestionWithDefaults(suggestion, this.plugin))
+      if (event.shiftKey) {
+        // use the selected suggestion text
+        const finalSuggestion = {...suggestion, text: suggestion.label, value:items.dateValue }
+        const modal = showSuggestModal(finalSuggestion, this.plugin);
+        modal.onInsertWanted((m) => {
+          editor.replaceRange(m.markdown, start, end);
+          const newPosition: EditorPosition = { line: start.line, ch: start.ch + m.markdown.length };
+          editor.setCursor(newPosition)
+        })
+
+
+      } else {
+        
+        const newText = this.plugin.generateMarkdownToInsert(items, event.ctrlKey, event.altKey, event.shiftKey)
+        
+        editor.replaceRange(newText, start, end);
+      }
+      this.clearLastSuggestions()
+      
+    })
+  }
+
+  private clearLastSuggestions() {
+
+    this._lastSuggestions = undefined;
+    this._tabbedSuggestion = undefined;
+  }
+
+  private getDateSuggestions(context: EditorSuggestContext): IDateSuggestion[] {
+    return enterLeave("getDateSuggestions", () => {
+      debug("tabbedSuggestion" , this._tabbedSuggestion)
+      const nldContext:NLDSuggestContext = { plugin:this.plugin, ...context, last:this._tabbedSuggestion }
+      return getSuggestionMaker(this.plugin.settings.locale).getDateSuggestions(nldContext);
+    })
   }
 }

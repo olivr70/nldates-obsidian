@@ -25,15 +25,18 @@ export function findPartialInDict<T>(
 }
 
 
-  /** in <someDict>, looks for a hit with a partial key 
+  /** in <someDict>, looks for a hit with a partial key and return the value
+   * An exact match is always prefered
+   * If multiple results, returne undefined
    * 
    * filter: used to test if each key is a match (by default, invokes String.startWith)
   */
-  function findRawPartialInDict<T>(someDict:{[k:string]:T}, partialTraget: string, filter?:(key:string,target:string) => boolean): T | undefined {
+  function findRawPartialInDict<T>(someDict:{[k:string]:T}, partialKey: string, filter?:(key:string,target:string) => boolean): T | undefined {
     if (!filter) filter = (key,target) => key.startsWith(target)
-    const target = partialTraget
-    let val = someDict[target];
+    const target = partialKey
+    let val = someDict[target]; // look for exact match
     if (val === undefined) {
+      // no exact match
       const hits:T[] = Object.entries(someDict).reduce((h:T [], kv, i) => { if (filter(kv[0],target)) { h.push(kv[1]) } return h;}, [])
       val = hits[0]
       if (hits.length == 1) {

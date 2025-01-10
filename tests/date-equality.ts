@@ -31,8 +31,6 @@ function areDateEquals(a:any, b:any):boolean | undefined {
     if ((dayjs.isDayjs(a) || a instanceof Date) && (dayjs.isDayjs(b) || b instanceof Date)) {
         const A = dayjs(a); // .tz(myTz)
         const B = dayjs(b); // .tz(myTz)
-
-        console.log(`areDateEquals(${A.toISOString()}, ${B.toISOString()})`)
       
         const x = A.isSame(B, "seconds")
 

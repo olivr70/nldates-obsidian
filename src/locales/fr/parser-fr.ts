@@ -5,19 +5,15 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import { Chrono, Parser, Component } from "chrono-node";
 
-import { DayOfWeek, ChronoLocale, toDateComponents } from "../../types";
+import { ChronoLocale, toDateComponents } from "../../types";
 import { NLDParserBase } from "../NLDParserBase";
-import {
-  getLastDayOfMonth,
-  getLocaleWeekStart,
-  getWeekNumber,
-} from "../../utils/tools";
-import { DAY_NAMES_FR_INTL, MONTH_NAME_PATTERN_FR, MONTH_NAMES_FR_INTL, MONTH_NAMES_MIX_FR_INTL_DICT, MONTH_NAMES_FR_PARTIAL4_REGEX, MONTH_NAMES_PARTIAL4_PATTERN_FR, ORDINAL_DATE_FR, ORDINAL_NUMBER_PATTERN_FR, ORDINAL_WORD_DICTIONARY_FR, parseOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX, extractRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "./constants-fr"
-import { getIntlWeekdayNames } from "../../utils/intl";
+import { MONTH_NAME_PATTERN_FR, MONTH_NAMES_MIX_FR_INTL_DICT, MONTH_NAMES_FR_PARTIAL4_REGEX, MONTH_NAMES_PARTIAL4_PATTERN_FR, ORDINAL_DATE_FR, ORDINAL_NUMBER_PATTERN_FR, ORDINAL_WORD_DICTIONARY_FR, parseOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX, extractRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "./constants-fr"
+import { getIntlWeekdayNames, getIntlWeekStart } from "../../utils/intl";
 
 
 dayjs.extend(localeData)
 dayjs.extend(LocalizedFormat)
+dayjs.locale("fr")
 
 export default class NLDParserFr extends NLDParserBase {
 
@@ -32,24 +28,17 @@ export default class NLDParserFr extends NLDParserBase {
   }
 
 
-  getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date {
+  getParsedDate(selectedText: string): Date {
     const myChrono = this.chrono;
     console.log("------------- FR.getParsedDate() ------------- ")
     console.log(`ChronoFR.parseDate ${selectedText}`)
 
     const initialParse = myChrono.parse(selectedText);
-    console.log(`initialParse result ${initialParse}`)
-    console.log(initialParse);
 
     const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
-
-    const weekStart =
-      weekStartPreference === "locale-default"
-        ? getLocaleWeekStart()
-        : weekStartPreference;
-
+    
     const locale = {
-      weekStart: getWeekNumber(weekStart),
+      weekStart: getIntlWeekStart(this.locale),
     };
     
     const referenceDate = weekdayIsCertain

@@ -1,7 +1,7 @@
 
 import { Parser } from "chrono-node";
 import { DateComponents } from "src/types";
-import { extractIsoTimestampEra, REG_ISO_DATE_ERA, REG_ISO_TIMESTAMP_ERA } from "./constants";
+import { extractIsoTimestampEra, regIsoTimestampEra } from "./constants";
 /** a Parser which handles :
  * - signed years
  *    years from 10000 and above must have a + sign
@@ -14,10 +14,10 @@ import { extractIsoTimestampEra, REG_ISO_DATE_ERA, REG_ISO_TIMESTAMP_ERA } from 
 */
 export const IsoEraDateParser:Parser = {
     pattern: () => {
-      return REG_ISO_TIMESTAMP_ERA;
+      return regIsoTimestampEra("");
     },
     extract: (_context, match) => ({
       hour: 12, // default time of day in Chrono
-      ...extractIsoTimestampEra(match)
+      ...extractIsoTimestampEra(match, "")
       } as DateComponents)
 }

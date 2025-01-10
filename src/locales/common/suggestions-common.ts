@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import isLeapYear from "dayjs/plugin/isLeapYear"
 import weekOfYear from "dayjs/plugin/weekOfYear"
 import isoWeeksInYear from "dayjs/plugin/isoWeeksInYear"
-import { IDateCompletion, ISuggestionContext } from "../../types";
+import { IDateSuggestion, INLDSuggestionContext } from "../../types";
 import { parseIsoWeekDate } from "./constants";
 import { ParsingComponents, ReferenceWithTimezone } from "chrono-node";
 import { range } from "../../utils/tools";
@@ -23,18 +23,21 @@ const ISO_WEEK_PARTIAL = /(?<year>\d{4})-?W(?:(?<week>\d{1,2})?(?<dayGroup>-(?<d
 
 
 
-function makeWeekSuggestion(context: ISuggestionContext, year:number, week:number, day?:number):IDateCompletion {
-    const alias = formatWeekIso(year, week, day)
-    const mondayDate = new ParsingComponents(new ReferenceWithTimezone(), parseIsoWeekDate(alias)).date();
+function makeWeekSuggestion(context: INLDSuggestionContext, year:number, week:number, day?:number):IDateSuggestion {
+    const valueString = formatWeekIso(year, week, day)
+    const mondayDate = new ParsingComponents(new ReferenceWithTimezone(), parseIsoWeekDate(valueString)).date();
+    const hint = `${context.plugin.formatDate(mondayDate, "dddd LL").dateStr}`
+    console.log("hint=",hint)
     return {
-        label: `${alias} (${context.plugin.parser.getFormattedDate(mondayDate, "dddd LL")})`,
-        alias,
+        label: `${valueString}`,
+        hint,
+        valueString,
         value: mondayDate
     }
 }
 
 /** generate suggestions for weeks from 0000-W */
-export function getIsoWeekSuggestions(context: ISuggestionContext) : IDateCompletion[] {
+export function getIsoWeekSuggestions(context: INLDSuggestionContext) : IDateSuggestion[] {
     const match = context.query.match(ISO_WEEK_PARTIAL)
     if (match) {
         const year = parseInt(match.groups.year)

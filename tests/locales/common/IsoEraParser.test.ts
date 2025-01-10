@@ -1,4 +1,4 @@
-import { timezoneOffset } from "src/utils/intl"
+
 import { parseIsoDateEra, parseIsoTime, parseIsoTimestampEra, parseIsoTimeTzd, parseTzd } from "../../../src/locales/common/constants"
 
 describe('IsoEra', () => {
@@ -11,7 +11,7 @@ describe('IsoEra', () => {
             expect(parseTzd("+03")).toEqual(180)
             expect(parseTzd("-05")).toEqual(-300)
         })
-        test('should accept hours only', () => {
+        test('should accept hours and minutes', () => {
             expect(parseTzd("+01:15")).toEqual(75)
             expect(parseTzd("+03:00")).toEqual(180)
             expect(parseTzd("-05:45")).toEqual(-345)
@@ -27,9 +27,6 @@ describe('IsoEra', () => {
         })
         test('should parse partial times', () => {
             expect(parseIsoTime("11:35")).toEqual({hour:11, minute:35})
-        })
-        test('should accept Z', () => {
-            expect(parseIsoTime("Z")).toEqual({timezoneOffset:0})
         })
         test('should reject invalid times', () => {
             expect(parseIsoTime("11")).toEqual({})

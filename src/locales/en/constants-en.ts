@@ -12,7 +12,7 @@ import { dictFromArrays } from "../../utils/tools";
 
 export const VARIANTS_EN = ["GB", "US"];
 
-export const LOCALES_EN = VARIANTS_EN.map((x) => `de-${x}`);
+export const LOCALES_EN = VARIANTS_EN.map((x) => `en-${x}`);
 
 
 // constants from Chrono

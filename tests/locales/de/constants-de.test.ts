@@ -1,7 +1,8 @@
 
 
 import { regSrc } from "../../../src/utils/regex";
-import { DAY_NAMES_DE_REGEX, ERA_REG_DE, FULL_YEAR_REG_DE, MONTH_NAMES_DE_PARTIAL3_REG, NCHR_ZTR_REG, parseMonthNameDe, parseYearDe, SIGNED_YEAR_REG, VUDGZ_REG } from "../../../src/locales/de/constants-de";
+import { DAY_NAMES_DE_REGEX, ERA_REG_DE, FULL_YEAR_REG_DE, MONTH_NAMES_DE_PARTIAL3_REG, NCHR_ZTR_REG, parseMonthNameDe, parseYearDe, VUDGZ_REG } from "../../../src/locales/de/constants-de";
+import { SIGNED_YEAR_REG } from "../../../src/locales/common/constants";
 
 
 

@@ -1,10 +1,10 @@
 import { EditorSuggestContext } from "obsidian";
-import { IDateCompletion, ISuggestionMaker } from "../types";
+import { IDateSuggestion, ISuggestionMaker } from "../types";
 
 
 export class SuggestionsMakerFrOld implements ISuggestionMaker {
 
-    getDateSuggestions(context: EditorSuggestContext): IDateCompletion[] {
+    getDateSuggestions(context: EditorSuggestContext): IDateSuggestion[] {
         if (context.query.match(/^heure/)) {
           return ["maintenant", "dans 15 minutes", "dans 1 heure", "il y a 15 minutes", "il y a 1 heure"]
             .map((val) => ({ label: `time:${val}` }))

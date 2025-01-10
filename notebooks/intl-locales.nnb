@@ -70,21 +70,24 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
+                                "10 November 2024 (en-GB)",
+                                "November 10, 2024 (en-US)",
+                                "10 novembre 2024 (fr-FR)",
+                                "10 Νοεμβρίου 2024 (ell)",
+                                "# japan",
+                                "2024年11月10日 (ja-JP)",
+                                "令和6年11月10日 (ja-JP-u-ca-japanese)",
+                                "November 10, 6 Reiwa (en-GB-u-ca-japanese)",
+                                "# arabic",
+                                "١٠ نوفمبر ٢٠٢٤ (ara)",
+                                "٩ جمادى الأولى ١٤٤٦ هـ (ara-u-ca-islamic)",
+                                "9 Jumada I 1446 AH (en-GB-u-ca-islamic)",
+                                "# chinse",
+                                "2024年11月10日 (zh)",
+                                "12 (zh)",
                                 "",
                                 ""
                             ]
-                        }
-                    ]
-                },
-                {
-                    "items": [
-                        {
-                            "mime": "application/vnd.code.notebook.error",
-                            "value": {
-                                "name": "ReferenceError",
-                                "message": "lines is not defined",
-                                "stack": "    at <Cell 5> [20, 17]\n    at <Cell 5> [18, 46]\n    at Script.runInContext (node:vm:141:12)\n    at Script.runInNewContext (node:vm:146:17)\n    at Object.runInNewContext (node:vm:300:38)\n    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)\n    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)\n    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)\n    at k.emit (node:events:513:28)\n    at k.emit (node:domain:489:12)"
-                            }
                         }
                     ]
                 }
@@ -108,16 +111,16 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "22 August 2024 (eng-GB)",
-                                "August 22, 2024 (eng-US)",
-                                "٢٢ أغسطس ٢٠٢٤ (ara)",
-                                "٢٢ أغسطس ٢٠٢٤ (arb)",
-                                "2024年8月22日 (jpn)",
-                                "2024년 8월 22일 (kor)",
+                                "10 November 2024 (eng-GB)",
+                                "November 10, 2024 (eng-US)",
+                                "١٠ نوفمبر ٢٠٢٤ (ara)",
+                                "١٠ نوفمبر ٢٠٢٤ (arb)",
+                                "2024年11月10日 (jpn)",
+                                "2024년 11월 10일 (kor)",
                                 "special codes defaults to current locale",
-                                "22 août 2024 (mis)",
-                                "22 août 2024 (mul)",
-                                "22 août 2024 (und)",
+                                "10 novembre 2024 (mis)",
+                                "10 novembre 2024 (mul)",
+                                "10 novembre 2024 (und)",
                                 "",
                                 ""
                             ]
@@ -137,27 +140,27 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "2024年8月22日 (jpn-Hira)",
-                                "2024年8月22日 (jpn-Kana)",
-                                "2024年8月22日 (jpn-Hans)",
+                                "2024年11月10日 (jpn-Hira)",
+                                "2024年11月10日 (jpn-Kana)",
+                                "2024年11月10日 (jpn-Hans)",
                                 "# serbian",
-                                "22. avgust 2024. (srp-Latn)",
-                                "22. август 2024. (srp-Cyrl)",
+                                "10. novembar 2024. (srp-Latn)",
+                                "10. новембар 2024. (srp-Cyrl)",
                                 "# chinese",
-                                "2024年8月22日 (zho-Hans)",
-                                "2024年8月22日星期四 (zho-Hans)",
-                                "2024年8月22日 (zho-Hant)",
-                                "2024年8月22日 星期四 (zho-Hant)",
+                                "2024年11月10日 (zho-Hans)",
+                                "2024年11月10日星期日 (zho-Hans)",
+                                "2024年11月10日 (zho-Hant)",
+                                "2024年11月10日 星期日 (zho-Hant)",
                                 "# korean",
-                                "2024년 8월 22일 (kor-Hang)",
-                                "2024년 8월 22일 (kor-Hani)",
-                                "2024년 8월 22일 (kor-Kore)",
+                                "2024년 11월 10일 (kor-Hang)",
+                                "2024년 11월 10일 (kor-Hani)",
+                                "2024년 11월 10일 (kor-Kore)",
                                 "# Fulla",
-                                "𞥒𞥒 𞤔𞤵𞤳𞤮⹁ 𞥒𞥐𞥒𞥔 (ff-Adlm)",
-                                "22 juko 2024 (ff-Latn)",
+                                "𞥑𞥐 𞤔𞤮𞤤𞤮⹁ 𞥒𞥐𞥒𞥔 (ff-Adlm)",
+                                "10 jolal 2024 (ff-Latn)",
                                 "# Hausa",
-                                "22 Agusta, 2024 (ha)",
-                                "22 Agusta, 2024 (ha-Arab)",
+                                "10 Nuwamba, 2024 (ha)",
+                                "10 Nuwamba, 2024 (ha-Arab)",
                                 "",
                                 ""
                             ]
@@ -185,11 +188,11 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "buddhist,chinese,coptic,dangi,ethioaa,ethiopic,gregory,hebrew,indian,islamic,islamic-civil,islamic-rgsa,islamic-tbla,islamic-umalqura,iso8601,japanese,persian,roc",
-                                "22 août 2024 (fr-u-ca-gregory) / calendrier grégorien",
-                                "18 safar 1446 AH (fr-u-ca-islamic) / calendrier musulman",
-                                "16 safar 1446 AH (fr-u-ca-islamic-civil) / calendrier musulman (tabulaire, époque civile)",
-                                "19 qīyuè jia-chen (fr-u-ca-chinese) / calendrier chinois",
-                                "22 août 6 Reiwa (fr-u-ca-japanese) / calendrier japonais",
+                                "10 novembre 2024 (fr-u-ca-gregory) / calendrier grégorien",
+                                "9 joumada al oula 1446 AH (fr-u-ca-islamic) / calendrier musulman",
+                                "8 joumada al oula 1446 AH (fr-u-ca-islamic-civil) / calendrier musulman (tabulaire, époque civile)",
+                                "10 shíyuè jia-chen (fr-u-ca-chinese) / calendrier chinois",
+                                "10 novembre 6 Reiwa (fr-u-ca-japanese) / calendrier japonais",
                                 "",
                                 ""
                             ]
@@ -209,8 +212,8 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "22 أغسطس 2024 (ar-u-nu-latn)",
-                                "٢٢ أغسطس ٢٠٢٤ (ar-u-nu-arab)",
+                                "10 نوفمبر 2024 (ar-u-nu-latn)",
+                                "١٠ نوفمبر ٢٠٢٤ (ar-u-nu-arab)",
                                 "# numbers",
                                 "١٢٥ (ar-u-nu-arab)",
                                 "125 (fr-FR-u-nu-roman)",
@@ -240,9 +243,9 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "07:59:52 UTC+2 (fr-FR)",
-                                "07:59:52 AM UTC+2 (fr-FR-u-hc-h11)",
-                                "07:59:52 UTC+2 (fr-FR-u-hc-h23)",
+                                "16:36:41 UTC+1 (fr-FR)",
+                                "04:36:41 PM UTC+1 (fr-FR-u-hc-h11)",
+                                "16:36:41 UTC+1 (fr-FR-u-hc-h23)",
                                 "",
                                 ""
                             ]

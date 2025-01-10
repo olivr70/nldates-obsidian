@@ -1,11 +1,11 @@
 import { App, MarkdownView, Modal, Setting } from "obsidian";
 import { generateMarkdownLink } from "src/utilsObsidian";
-import type NaturalLanguageDates from "../main";
+import type InternationalDates from "../main";
 
 export default class DatePickerModal extends Modal {
-  plugin: NaturalLanguageDates;
+  plugin: InternationalDates;
 
-  constructor(app: App, plugin: NaturalLanguageDates) {
+  constructor(app: App, plugin: InternationalDates) {
     super(app);
     this.plugin = plugin;
   }
