@@ -10,7 +10,7 @@ import { NLDParserBase } from "../NLDParserBase";
 import {
   getLastDayOfMonth,
 } from "../../utils/tools";
-import { MONTH_NAMES_DE_REG, MONTH_NAMES_DE_INTL_DICT, MONTH_NAMES_DE_PARTIAL3_REG, ORDINAL_DATE_DE, ORDINAL_NUMBER_REG_DE, ORDINAL_WORD_DICTIONARY_DE, extractOrdinalDate, parseVergangene, REG_VERGANGENE_TAG } from "./constants-de"
+import { MONTH_NAMES_DE_REG, MONTH_NAMES_DE_INTL_DICT, MONTH_NAMES_DE_PARTIAL_REG, ORDINAL_DATE_DE, ORDINAL_NUMBER_REG_DE, ORDINAL_WORD_DICTIONARY_DE, extractOrdinalDate, parseVergangene, REG_VERGANGENE_TAG } from "./constants-de"
 import { findPartialInDict } from "../../utils/months";
 import { getIntlWeekdayNames, getIntlWeekStart } from "../../utils/intl";
 
@@ -168,11 +168,11 @@ function logInfoAboutChrono() {
     console.log(REG_MONTH_DE.test("März"))
 
     
-    console.log(`MONTH_NAMES_DE_REGEX : ${MONTH_NAMES_DE_PARTIAL3_REG}`);
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("Juli"))
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("August"))
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("März"))
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("märz"))
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("mar"))
-    console.log(MONTH_NAMES_DE_PARTIAL3_REG.test("m"))
+    console.log(`MONTH_NAMES_DE_REGEX : ${MONTH_NAMES_DE_PARTIAL_REG}`);
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("Juli"))
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("August"))
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("März"))
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("märz"))
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("mar"))
+    console.log(MONTH_NAMES_DE_PARTIAL_REG.test("m"))
 }

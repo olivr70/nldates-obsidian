@@ -1,9 +1,46 @@
-import { DAY_NAMES_FR_REGEX, findDayFromStartFr, parseJourSemaineX, parseMonthNameFr, parseRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "../../../src/locales/fr/constants-fr"
+import { testFullMatches, testNoMatches } from "../../regexTestTools"
+import { DAY_NAMES_FR_REGEX, findDayFromStartFr, ORDINAL_NUMBER_REG_FR, parseJourSemaineX, parseMonthNameFr, parseRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "../../../src/locales/fr/constants-fr"
 
 import "../../date-equality"
 
 describe('constants-fr', () => {
+    describe("ORDINAL_NUMBER_REG_FR", () => {
+        testFullMatches(ORDINAL_NUMBER_REG_FR,
+            "premier","deuxième","vingt-et-unième"
+        )
+        testFullMatches(ORDINAL_NUMBER_REG_FR,
+            "troisieme","VINGT-HUITIEME"
+        )
+        testFullMatches(ORDINAL_NUMBER_REG_FR,
+            "Premier","DEUXIÈME","VINGT-QUATRIÈME"
+        )
+        testFullMatches(ORDINAL_NUMBER_REG_FR,
+            "1er", "1ere", "1ère","2nd", "2nde","13ème","29e"
+        )
+        testFullMatches(ORDINAL_NUMBER_REG_FR,
+            "1ᵉʳ","1ᵉʳᵉ","2ⁿᵈ","13ᵉᵐᵉ","29ᵉ"
+        )
+    })
     describe('parsing day names', () => {
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"
+        )
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "LUNDI","MARDI","MERCREDI","JEUDI","VENDREDI","SAMEDI","DIMANCHE"
+        )
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"
+        )
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "Lun","Mar","Mer","Jeu","Ven","Sam","Dim"
+        )
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "Lun.","Mar.","Mer.","Jeu.","Ven.","Sam.","Dim."
+        )
+        testFullMatches(DAY_NAMES_FR_REGEX,
+            "L","Ma","Me","J","V","S","D"
+        )
+        testNoMatches(DAY_NAMES_FR_REGEX, "alundi", "lundia")
         test('DAY_NAMES_', () => {
             expect(DAY_NAMES_FR_REGEX.test("lundi")).toBeTruthy();
             expect(DAY_NAMES_FR_REGEX.test("mardi")).toBeTruthy();
@@ -79,21 +116,21 @@ describe("RegRelativeDayFr", () => {
             .forEach(x => test(x, () => expect(REG_RELATIVE_DAY_FR.test(x)).toBeTruthy()))
     })
     test("prochain", () => {
-        expect(parseRegRelativeDayFr("mardi prochain", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+        expect(parseRegRelativeDayFr("mardi prochain", new Date(2024,0,8))).toEqual(new Date(2024,0,9, 12))
     })
     test("suivant", () => {
-        expect(parseRegRelativeDayFr("mardi suivant", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+        expect(parseRegRelativeDayFr("mardi suivant", new Date(2024,0,8))).toEqual(new Date(2024,0,9, 12))
     })
     test("d'après", () => {
-        expect(parseRegRelativeDayFr("mardi d'après", new Date(2024,0,8))).toEqual(new Date(2024,0,9))
+        expect(parseRegRelativeDayFr("mardi d'après", new Date(2024,0,8))).toEqual(new Date(2024,0,9, 12))
     })
     test("en huit", () => {
-        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,8))).toEqual(new Date(2024,0,16))
+        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,8))).toEqual(new Date(2024,0,16, 12))
     })
     test("précédent", () => {
-        expect(parseRegRelativeDayFr("mardi précédent", new Date(2024,0,8))).toEqual(new Date(2024,0,2))
+        expect(parseRegRelativeDayFr("mardi précédent", new Date(2024,0,8))).toEqual(new Date(2024,0,2, 12))
     })
     test("from a sunday", () => {
-        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,7))).toEqual(new Date(2024,0,16))
+        expect(parseRegRelativeDayFr("mardi en huit", new Date(2024,0,7))).toEqual(new Date(2024,0,16, 12))
     })
 })

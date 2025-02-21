@@ -17,6 +17,25 @@
         {
             "language": "typescript",
             "source": [
+                "const lines = function(...items) {\r\n    console.log(items.join(\"\\n\"))\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
                 "\r\n\r\nconst DTF = function(loc:Intl.LocalesArgument, options?:Intl.DateTimeFormatOptions) { return new Intl.DateTimeFormat(loc || \"en-GB\", options) }\r\nconst FORMAT = function(date:Date, loc:Intl.LocalesArgument, options?:Intl.DateTimeFormatOptions) { return DTF(loc, options).format(date || new Date()) }\r\nconst U = undefined;\r\n\r\n\r\nconst WINTER_DATE = new Date(2024,1,15)\r\nconst SUMMER_DATE = new Date(2024,7,15)\r\n\r\nconst ConstantDateTimeFormat = function(message):Intl.DateTimeFormat  {\r\n    this.format = function(anyDate?:Date | number):string { return message }\r\n}\r\n\r\ntype TimezoneFormat = \"short\" | \"long\" | \"shortOffset\" | \"longOffset\" | \"shortGeneric\" | \"longGeneric\"\r\n\r\n// crates a DateTimeFormat returns a format for the zone \r\nconst formatForZone = function (locale:string, ianaZone:string, zoneFormat:TimezoneFormat):Intl.DateTimeFormat {\r\n    try {\r\n      return new Intl.DateTimeFormat(locale, {\r\n        timeZone: ianaZone,\r\n        timeZoneName: zoneFormat,\r\n      })\r\n    } catch (e) {\r\n      return new ConstantDateTimeFormat(e.message);\r\n    }\r\n  }\r\n\r\n  // returns the timezone for date\r\n  const timezoneOf = function(date:Date, locale:string, ianaZone:string, zoneFormat:TimezoneFormat):string {\r\n    const fmt = new Intl.DateTimeFormat(locale, {\r\n      timeZone: ianaZone,\r\n      timeZoneName: zoneFormat,\r\n    })\r\n    parts = fmt.formatToParts(date)\r\n    str = parts.map(x => x.value).join(\"\")\r\n    return parts.find((x) => x.type == \"timeZoneName\")?.value;\r\n  }\r\n"
             ],
             "outputs": [
@@ -51,7 +70,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "72.1",
+                                "75.1",
                                 "",
                                 ""
                             ]
@@ -71,7 +90,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "v18.16.0",
+                                "v22.11.0",
                                 "",
                                 ""
                             ]
@@ -111,7 +130,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "2022g",
+                                "2024b",
                                 "",
                                 ""
                             ]
@@ -146,16 +165,178 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "Now with different dateStyle",
-                                " short : 29/08/2024",
-                                "medium : 29 août 2024",
-                                "long : 29 août 2024",
-                                "full : jeudi 29 août 2024 ",
+                                " short : 11/01/2025",
+                                "medium : 11 janv. 2025",
+                                "long : 11 janvier 2025",
+                                "full : samedi 11 janvier 2025 ",
                                 "",
                                 "Now with different timeStyle",
-                                " short : 17:28",
-                                "medium : 17:28:04",
-                                "long : 17:28:04 MESZ",
-                                "full : 17:28:04 Mitteleuropäische Sommerzeit",
+                                " short : 06:44",
+                                "medium : 06:44:16",
+                                "long : 06:44:16 MEZ",
+                                "full : 06:44:16 Mitteleuropäische Normalzeit",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Relative date formats\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const dayOffsets = [-10,-3, -2,-1,0,1,2,3,10]\r\nconst relEnShort = new Intl.RelativeTimeFormat(\"en\", { style: \"short\" }); // \"long\", \"short\", \"narrow\" »,\r\nconst relEnNarrow = new Intl.RelativeTimeFormat(\"en\", { style: \"narrow\" });\r\nconst relEnLong = new Intl.RelativeTimeFormat(\"en\", { style: \"long\" });\r\nconst relFrShort = new Intl.RelativeTimeFormat(\"fr\", { style: \"narrow\" });\r\nconst relNlShort = new Intl.RelativeTimeFormat(\"nl\", { style: \"long\" });\r\n\r\nlines(\r\n    dayOffsets.map(x => relEnNarrow.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relEnShort.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relEnLong.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relFrShort.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relNlShort.format(x, \"days\")).join(\"/\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "10d ago/3d ago/2d ago/1d ago/in 0d/in 1d/in 2d/in 3d/in 10d",
+                                "10 days ago/3 days ago/2 days ago/1 day ago/in 0 days/in 1 day/in 2 days/in 3 days/in 10 days",
+                                "10 days ago/3 days ago/2 days ago/1 day ago/in 0 days/in 1 day/in 2 days/in 3 days/in 10 days",
+                                "-10 j/-3 j/-2 j/-1 j/+0 j/+1 j/+2 j/+3 j/+10 j",
+                                "10 dagen geleden/3 dagen geleden/2 dagen geleden/1 dag geleden/over 0 dagen/over 1 dag/over 2 dagen/over 3 dagen/over 10 dagen",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const relEnNumAuto = new Intl.RelativeTimeFormat(\"en\", { style: \"long\", numeric:\"auto\" }); // \"long\", \"short\", \"narrow\" »,\r\nconst relEnNumAlways = new Intl.RelativeTimeFormat(\"en\", { style: \"long\", numeric:\"always\"  });\r\nconst relFrNumAuto = new Intl.RelativeTimeFormat(\"fr\", { style: \"long\", numeric:\"auto\" }); // \"long\", \"short\", \"narrow\" »,\r\nconst relFrNumAlways = new Intl.RelativeTimeFormat(\"fr\", { style: \"long\", numeric:\"always\"  });\r\n\r\nlines(\r\n    dayOffsets.map(x => relEnNumAuto.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relEnNumAlways.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relFrNumAuto.format(x, \"days\")).join(\"/\"),\r\n    dayOffsets.map(x => relFrNumAlways.format(x, \"days\")).join(\"/\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "10 days ago/3 days ago/2 days ago/yesterday/today/tomorrow/in 2 days/in 3 days/in 10 days",
+                                "10 days ago/3 days ago/2 days ago/1 day ago/in 0 days/in 1 day/in 2 days/in 3 days/in 10 days",
+                                "il y a 10 jours/il y a 3 jours/avant-hier/hier/aujourd’hui/demain/après-demain/dans 3 jours/dans 10 jours",
+                                "il y a 10 jours/il y a 3 jours/il y a 2 jours/il y a 1 jour/dans 0 jour/dans 1 jour/dans 2 jours/dans 3 jours/dans 10 jours",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// getNumberingSystems() in recent, only supported from Chrome 130\r\n// (from v99, is was exposed as a property named *numberingSystems*)\r\n//  see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getNumberingSystems#supported_numbering_system_types\r\n\r\n// const someLocales = [\"fr\", \"ja\", \"ar\", \"th\"].map(x => new Intl.Locale(x))\r\n\r\nlines(new Intl.Locale(\"fr\").numberingSystems) // obsolete from 130, supported from Chrome 99\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "latn",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "\r\nconst someNumberingSystems = [ \"arab\", \"bali\", \"hanidec\", \"mathbold\", \"mathdbl\", \"mathsanb\", \"thai\"]\r\n    // from https://randombits.dev/articles/number-localization/numbering-systems\r\nconst formats = someNumberingSystems.map(x => new Intl.RelativeTimeFormat(\"en\", { numberingSystem: x}))\r\n// numbering system can also be set in the Locale string\r\nconst formatsInLocale = someNumberingSystems.map(x => new Intl.RelativeTimeFormat(\"en-u-nu-\" + x))\r\n\r\nlines(\r\n    \"numbering system specified using the 'numberingSystem' option\",\r\n    formats.map(f => `  ${f.resolvedOptions().numberingSystem}: ${f.format(10,\"day\")}`).join(\"\\n\"),\r\n    \"numbering system specified in the Locale string using '-u-nu' extension\",\r\n    formatsInLocale.map(f => `  ${f.resolvedOptions().numberingSystem}: ${f.format(10,\"day\")}`).join(\"\\n\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "numbering system specified using the 'numberingSystem' option",
+                                "  arab: in ١٠ days",
+                                "  bali: in ᭑᭐ days",
+                                "  hanidec: in 一〇 days",
+                                "  mathbold: in 𝟏𝟎 days",
+                                "  mathdbl: in 𝟙𝟘 days",
+                                "  mathsanb: in 𝟭𝟬 days",
+                                "  thai: in ๑๐ days",
+                                "numbering system specified in the Locale string using '-u-nu' extension",
+                                "  arab: in ١٠ days",
+                                "  bali: in ᭑᭐ days",
+                                "  hanidec: in 一〇 days",
+                                "  mathbold: in 𝟏𝟎 days",
+                                "  mathdbl: in 𝟙𝟘 days",
+                                "  mathsanb: in 𝟭𝟬 days",
+                                "  thai: in ๑๐ days",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// numbering systems which requires algorithmic computations (like roman numbers)\r\n// most of them are ancient, and only used in specific situations\r\n// NOT SUPPORTED in Intl library. The prefered numberingSystem for the language is used\r\n\r\nconst someNumberingSystems = [ \"cyrl\", \"grek\", \"hant\", \"hebr\", \"jpan\", \"roman\", \"romanlow\"]\r\n    // from https://randombits.dev/articles/number-localization/numbering-systems\r\nconst formats = someNumberingSystems.map(x => new Intl.RelativeTimeFormat(\"en\", { numberingSystem: x}))\r\n\r\nlines(\r\n    formats.map(f => `${f.resolvedOptions().numberingSystem}: ${f.format(10,\"day\")}`).join(\"\\n\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "latn: in 10 days",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Scripts"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "try {\r\n    const allScripts = Intl.supportedValuesOf(\"script\");\r\n} catch (err) {\r\n    console.log(\"As specified, a 'script' parameter is not supported for Intl.supportedValuesOf()\")\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "As specified, a 'script' parameter is not supported for Intl.supportedValuesOf()",
                                 "",
                                 ""
                             ]
@@ -238,10 +419,10 @@
                                 "  'Europe/Samara',     'Europe/San_Marino', 'Europe/Sarajevo',",
                                 "  'Europe/Saratov',    'Europe/Simferopol', 'Europe/Skopje',",
                                 "  'Europe/Sofia',      'Europe/Stockholm',  'Europe/Tallinn',",
-                                "  'Europe/Tirane',     'Europe/Ulyanovsk',  'Europe/Uzhgorod',",
-                                "  'Europe/Vaduz',      'Europe/Vatican',    'Europe/Vienna',",
-                                "  'Europe/Vilnius',    'Europe/Volgograd',  'Europe/Warsaw',",
-                                "  'Europe/Zagreb',     'Europe/Zaporozhye', 'Europe/Zurich'",
+                                "  'Europe/Tirane',     'Europe/Ulyanovsk',  'Europe/Vaduz',",
+                                "  'Europe/Vatican',    'Europe/Vienna',     'Europe/Vilnius',",
+                                "  'Europe/Volgograd',  'Europe/Warsaw',     'Europe/Zagreb',",
+                                "  'Europe/Zurich'",
                                 "]",
                                 "",
                                 ""
@@ -261,7 +442,7 @@
         {
             "language": "typescript",
             "source": [
-                "const currentIANATimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone\r\nconst tzFormater = formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" )\r\n\r\n\r\nconsole.log(\r\n    Intl.DateTimeFormat().resolvedOptions(), \"\\n\",\r\n    currentIANATimeZone, \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date()), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-07-15\")), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-01-15\")), \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-061\")), \"\\n\",\r\n    \r\n)"
+                "const currentIANATimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone\r\nconst tzFormater = formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" )\r\n\r\n\r\nconsole.log(\r\n    Intl.DateTimeFormat().resolvedOptions(), \"\\n\",\r\n    currentIANATimeZone, \"\\n\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date()), \"\\n\",\r\n    \"date in summer, UTC offset integrates daylight saving time\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-07-15\")), \"\\n\",\r\n    \"date in winter, no daylight saving time\",\r\n    formatForZone(\"fr-FR\", currentIANATimeZone, \"shortOffset\" ).format(new Date(\"2024-01-15\")), \"\\n\"\r\n    \r\n)"
             ],
             "outputs": [
                 {
@@ -269,21 +450,23 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
+                                "{",
+                                "  locale: 'fr-FR',",
+                                "  calendar: 'gregory',",
+                                "  numberingSystem: 'latn',",
+                                "  timeZone: 'Europe/Paris',",
+                                "  year: 'numeric',",
+                                "  month: '2-digit',",
+                                "  day: '2-digit'",
+                                "} ",
+                                " Europe/Paris ",
+                                " 11/01/2025 UTC+1 ",
+                                " date in summer, UTC offset integrates daylight saving time 15/07/2024 UTC+2 ",
+                                " date in winter, no daylight saving time 15/01/2024 UTC+1 ",
+                                "",
                                 "",
                                 ""
                             ]
-                        }
-                    ]
-                },
-                {
-                    "items": [
-                        {
-                            "mime": "application/vnd.code.notebook.error",
-                            "value": {
-                                "name": "RangeError",
-                                "message": "Invalid time value",
-                                "stack": "    at <Cell 18> [8, 17]\n    at <Cell 18> [6, 46]\n    at Script.runInContext (node:vm:141:12)\n    at Script.runInNewContext (node:vm:146:17)\n    at Object.runInNewContext (node:vm:300:38)\n    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)\n    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)\n    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)\n    at k.emit (node:events:513:28)\n    at k.emit (node:domain:489:12)"
-                            }
                         }
                     ]
                 }
@@ -371,11 +554,11 @@
                                 "  ],",
                                 "  [",
                                 "    'short for CET : 17/12/2021 UTC+1',",
-                                "    'long for CET : 17/12/2021 UTC+01:00',",
+                                "    'long for CET : 17/12/2021 heure normale d’Europe centrale',",
                                 "    'shortOffset for CET : 17/12/2021 UTC+1',",
                                 "    'longOffset for CET : 17/12/2021 UTC+01:00',",
-                                "    'shortGeneric for CET : 17/12/2021 UTC+1',",
-                                "    'longGeneric for CET : 17/12/2021 UTC+01:00'",
+                                "    'shortGeneric for CET : 17/12/2021 heure : Belgique',",
+                                "    'longGeneric for CET : 17/12/2021 heure d’Europe centrale'",
                                 "  ],",
                                 "  [",
                                 "    'short for Europe/Paris : 17/12/2021 UTC+1',",
@@ -430,12 +613,12 @@
                                 "    'longGeneric for Pacific Standard Time : Invalid time zone specified: Pacific Standard Time'",
                                 "  ],",
                                 "  [",
-                                "    'short for CET : 17/12/2021, GMT+1',",
-                                "    'long for CET : 17/12/2021, GMT+01:00',",
+                                "    'short for CET : 17/12/2021, CET',",
+                                "    'long for CET : 17/12/2021, Central European Standard Time',",
                                 "    'shortOffset for CET : 17/12/2021, GMT+1',",
                                 "    'longOffset for CET : 17/12/2021, GMT+01:00',",
-                                "    'shortGeneric for CET : 17/12/2021, GMT+1',",
-                                "    'longGeneric for CET : 17/12/2021, GMT+01:00'",
+                                "    'shortGeneric for CET : 17/12/2021, CET',",
+                                "    'longGeneric for CET : 17/12/2021, Central European Time'",
                                 "  ],",
                                 "  [",
                                 "    'short for Europe/Paris : 17/12/2021, CET',",
@@ -669,7 +852,7 @@
                                 "    shortOffset: 'GMT+2',",
                                 "    longOffset: 'GMT+02:00',",
                                 "    shortGeneric: 'EET',",
-                                "    longGeneric: 'Eastern European Standard Time',",
+                                "    longGeneric: 'Eastern European Time',",
                                 "    ianaZone: 'Africa/Cairo',",
                                 "    locale: 'en-GB'",
                                 "  },",
@@ -1398,7 +1581,7 @@
                                 "    long: 'Mountain Standard Time',",
                                 "    shortOffset: 'GMT-7',",
                                 "    longOffset: 'GMT-07:00',",
-                                "    shortGeneric: 'Ciudad Juarez Time',",
+                                "    shortGeneric: 'Ciudad Juárez Time',",
                                 "    longGeneric: 'Mountain Time',",
                                 "    ianaZone: 'America/Ciudad_Juarez',",
                                 "    locale: 'en-GB'",
@@ -1543,7 +1726,7 @@
                                 "    ianaZone: 'America/Eirunepe',",
                                 "    locale: 'en-GB'",
                                 "  },",
-                                "  ... 329 more items",
+                                "  ... 317 more items",
                                 "]",
                                 "",
                                 ""
@@ -1571,7 +1754,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "265 zones are OK. 164 have different shortGeneric names for en,en-US,en-GB",
+                                "263 zones are OK. 154 have different shortGeneric names for en,en-US,en-GB",
                                 "",
                                 " Africa/Algiers : en - Algeria Time,en-US - Algeria Time,en-GB - CET",
                                 "Africa/Cairo : en - Egypt Time,en-US - Egypt Time,en-GB - EET",
@@ -1641,19 +1824,16 @@
                                 "America/Montserrat : en - AST,en-US - AST,en-GB - Montserrat Time",
                                 "America/Nassau : en - ET,en-US - ET,en-GB - Bahamas Time",
                                 "America/New_York : en - ET,en-US - ET,en-GB - New York Time",
-                                "America/Nipigon : en - ET,en-US - ET,en-GB - Nipigon Time",
                                 "America/Nome : en - AKT,en-US - AKT,en-GB - Nome Time",
                                 "America/North_Dakota/Beulah : en - CT,en-US - CT,en-GB - Beulah, North Dakota Time",
                                 "America/North_Dakota/Center : en - CT,en-US - CT,en-GB - Center, North Dakota Time",
                                 "America/North_Dakota/New_Salem : en - CT,en-US - CT,en-GB - New Salem, North Dakota Time",
                                 "America/Ojinaga : en - MT,en-US - MT,en-GB - Ojinaga Time",
                                 "America/Panama : en - EST,en-US - EST,en-GB - Panama Time",
-                                "America/Pangnirtung : en - ET,en-US - ET,en-GB - Pangnirtung Time",
                                 "America/Phoenix : en - MST,en-US - MST,en-GB - Phoenix Time",
                                 "America/Port-au-Prince : en - ET,en-US - ET,en-GB - Haiti Time",
                                 "America/Port_of_Spain : en - AST,en-US - AST,en-GB - Trinidad & Tobago Time",
                                 "America/Puerto_Rico : en - AST,en-US - AST,en-GB - Puerto Rico Time",
-                                "America/Rainy_River : en - CT,en-US - CT,en-GB - Rainy River Time",
                                 "America/Rankin_Inlet : en - CT,en-US - CT,en-GB - Rankin Inlet Time",
                                 "America/Regina : en - CST,en-US - CST,en-GB - Regina Time",
                                 "America/Resolute : en - CT,en-US - CT,en-GB - Resolute Time",
@@ -1668,23 +1848,19 @@
                                 "America/Swift_Current : en - CST,en-US - CST,en-GB - Swift Current Time",
                                 "America/Tegucigalpa : en - CST,en-US - CST,en-GB - Honduras Time",
                                 "America/Thule : en - AT,en-US - AT,en-GB - Thule Time",
-                                "America/Thunder_Bay : en - ET,en-US - ET,en-GB - Thunder Bay Time",
                                 "America/Tijuana : en - PT,en-US - PT,en-GB - Tijuana Time",
                                 "America/Toronto : en - ET,en-US - ET,en-GB - Toronto Time",
                                 "America/Tortola : en - AST,en-US - AST,en-GB - British Virgin Islands Time",
                                 "America/Vancouver : en - PT,en-US - PT,en-GB - Vancouver Time",
                                 "America/Winnipeg : en - CT,en-US - CT,en-GB - Winnipeg Time",
                                 "America/Yakutat : en - AKT,en-US - AKT,en-GB - Yakutat Time",
-                                "America/Yellowknife : en - MT,en-US - MT,en-GB - Yellowknife Time",
                                 "Arctic/Longyearbyen : en - Svalbard & Jan Mayen Time,en-US - Svalbard & Jan Mayen Time,en-GB - CET",
                                 "Asia/Amman : en - Jordan Time,en-US - Jordan Time,en-GB - EET",
                                 "Asia/Aqtau : en - Aqtau Time,en-US - Aqtau Time,en-GB - Aktau Time",
                                 "Asia/Beirut : en - Lebanon Time,en-US - Lebanon Time,en-GB - EET",
                                 "Asia/Damascus : en - Syria Time,en-US - Syria Time,en-GB - EET",
-                                "Asia/Dubai : en - United Arab Emirates Time,en-US - United Arab Emirates Time,en-GB - GTS",
                                 "Asia/Gaza : en - Gaza Time,en-US - Gaza Time,en-GB - EET",
                                 "Asia/Hebron : en - Hebron Time,en-US - Hebron Time,en-GB - EET",
-                                "Asia/Muscat : en - Oman Time,en-US - Oman Time,en-GB - GTS",
                                 "Asia/Nicosia : en - Nicosia Time,en-US - Nicosia Time,en-GB - EET",
                                 "Atlantic/Bermuda : en - AT,en-US - AT,en-GB - Bermuda Time",
                                 "Atlantic/Canary : en - Canary Time,en-US - Canary Time,en-GB - WET",
@@ -1726,17 +1902,14 @@
                                 "Europe/Stockholm : en - Sweden Time,en-US - Sweden Time,en-GB - CET",
                                 "Europe/Tallinn : en - Estonia Time,en-US - Estonia Time,en-GB - EET",
                                 "Europe/Tirane : en - Albania Time,en-US - Albania Time,en-GB - CET",
-                                "Europe/Uzhgorod : en - Uzhhorod Time,en-US - Uzhhorod Time,en-GB - EET",
                                 "Europe/Vaduz : en - Liechtenstein Time,en-US - Liechtenstein Time,en-GB - CET",
                                 "Europe/Vatican : en - Vatican City Time,en-US - Vatican City Time,en-GB - CET",
                                 "Europe/Vienna : en - Austria Time,en-US - Austria Time,en-GB - CET",
                                 "Europe/Vilnius : en - Lithuania Time,en-US - Lithuania Time,en-GB - EET",
                                 "Europe/Warsaw : en - Poland Time,en-US - Poland Time,en-GB - CET",
                                 "Europe/Zagreb : en - Croatia Time,en-US - Croatia Time,en-GB - CET",
-                                "Europe/Zaporozhye : en - Zaporozhye Time,en-US - Zaporozhye Time,en-GB - EET",
                                 "Europe/Zurich : en - Switzerland Time,en-US - Switzerland Time,en-GB - CET",
                                 "Pacific/Honolulu : en - HST,en-US - HST,en-GB - Honolulu Time",
-                                "Pacific/Johnston : en - HAST,en-US - HAST,en-GB - Johnston Time",
                                 "",
                                 ""
                             ]
@@ -1764,15 +1937,15 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "ReferenceError: zoneNameOf is not defined",
-                                "    at <Cell 31> [39, 19]",
-                                "    at <Cell 31> [43, 46]",
-                                "    at Script.runInContext (node:vm:141:12)",
-                                "    at Script.runInNewContext (node:vm:146:17)",
-                                "    at Object.runInNewContext (node:vm:300:38)",
+                                "    at <Cell 34> [39, 19]",
+                                "    at <Cell 34> [43, 46]",
+                                "    at Script.runInContext (node:vm:149:12)",
+                                "    at Script.runInNewContext (node:vm:154:17)",
+                                "    at Object.runInNewContext (node:vm:310:38)",
                                 "    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)",
                                 "    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)",
                                 "    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)",
-                                "    at k.emit (node:events:513:28)",
+                                "    at k.emit (node:events:518:28)",
                                 "    at k.emit (node:domain:489:12)",
                                 "",
                                 ""
@@ -1801,7 +1974,7 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "Europe/Paris : MEZ / Central European Standard Time",
-                                "CET : GMT+1 / GMT+01:00",
+                                "CET : MEZ / Central European Standard Time",
                                 "PST : GMT-8 / Pacific Standard Time",
                                 "JST : GMT+9 / Japan Standard Time",
                                 "",
@@ -1837,7 +2010,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "8/24/2024, GMT-01:00",
+                                "1/11/2025, GMT-01:00",
                                 "",
                                 ""
                             ]
@@ -1985,15 +2158,15 @@
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
                                 "TypeError: arEG.getCalendars is not a function",
-                                "    at <Cell 45> [3, 11]",
-                                "    at <Cell 45> [10, 46]",
-                                "    at Script.runInContext (node:vm:141:12)",
-                                "    at Script.runInNewContext (node:vm:146:17)",
-                                "    at Object.runInNewContext (node:vm:300:38)",
+                                "    at <Cell 48> [3, 11]",
+                                "    at <Cell 48> [10, 46]",
+                                "    at Script.runInContext (node:vm:149:12)",
+                                "    at Script.runInNewContext (node:vm:154:17)",
+                                "    at Object.runInNewContext (node:vm:310:38)",
                                 "    at C (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:113345)",
                                 "    at t.execCode (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:114312)",
                                 "    at k.<anonymous> (c:\\Users\\ochev\\.vscode\\extensions\\donjayamanne.typescript-notebook-2.0.6\\out\\extension\\server\\index.js:2:142156)",
-                                "    at k.emit (node:events:513:28)",
+                                "    at k.emit (node:events:518:28)",
                                 "    at k.emit (node:domain:489:12)",
                                 "",
                                 ""
@@ -2021,7 +2194,7 @@
                         {
                             "mime": "application/vnd.code.notebook.stdout",
                             "value": [
-                                "samedi 24 août 2024 à 16:13:52 UTC+10",
+                                "samedi 11 janvier 2025 à 16:44:18 UTC+11",
                                 "",
                                 ""
                             ]

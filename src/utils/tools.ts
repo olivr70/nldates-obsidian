@@ -10,6 +10,17 @@ import { debugNotif } from "./osbidian";
 
 dayjs.extend(localeData)
 
+
+export function removeProperties<T extends Record<string,any>>(ioObject:T, filter:(x:any) => boolean) {
+  for (let [k,v] of Object.entries(ioObject)) {
+    if (filter(v)) {
+      delete ioObject[k]
+    }
+  }
+  return ioObject
+}
+
+
 /** creates a single line string by replacing sequences of CR, LF by a single space */
 export function makeSingleLine(text:string) {
   return text ? text.split(/[\n\r]+/).join(" ") : ""
@@ -127,6 +138,8 @@ export function getLocalizedChrono(someLocale:string): Chrono {
   switch (someLocale.substring(0,2)) {
     case "de":
       return new Chrono(chrono.de.createCasualConfiguration(true));
+    case "es":
+        return new Chrono(chrono.es.createCasualConfiguration());
     case "fr":
       return new Chrono(chrono.fr.createCasualConfiguration(true));
     case "ja":
@@ -135,18 +148,22 @@ export function getLocalizedChrono(someLocale:string): Chrono {
       return new Chrono(chrono.nl.createCasualConfiguration(true));
     case "pt":
       return new Chrono(chrono.pt.createCasualConfiguration(true));
+    case "ru":
+          return new Chrono(chrono.ru.createCasualConfiguration());
     case "zh":
       return new Chrono(chrono.zh.createCasualConfiguration());
     case "en":
       // default is english
-    default:
-      const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-      switch (locale) {
+      switch (someLocale.toLowerCase()) {
         case "en-gb":
           return chrono.en.GB.clone();
         default:
           return chrono.en.casual.clone();
       }
+    default:
+      // create a Chrono without any parser not refiners
+      // it does nothing. Caller must extend it by adding its own
+      return new Chrono({parsers:[],refiners:[]})
   }
 }
 
@@ -165,6 +182,8 @@ export function findUniqueName(candidate:string, isUnique:(name:string) => boole
   } while (!isUnique(name))
   return name;
 }
+
+
 
 
 

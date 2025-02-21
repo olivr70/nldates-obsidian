@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import "dayjs/locale"
 import { LLL } from "../i18n/localize";
 
+//#region Locales
+
 export interface LocaleInfo {
 	locale:string;
 	lang:string;
@@ -654,6 +656,8 @@ export function getIntlMonthNames(locale:string, format: "long" | "short" | "nar
   export function getUserTimezone() {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }
+//#endregion
+//#region weeks
   
   /** builds a Dictionnary of day names to day numbers for a locale */
   export function getIntlWeekdayNames(locale:string, format: "long" | "short" | "narrow") {
@@ -699,7 +703,7 @@ export function getIntlMonthNames(locale:string, format: "long" | "short" | "nar
 
 /** returns the first day of the week (0 is sunday)
  * 
- * is no info for <locale>, returns 1 (Monday) as it is the ISO standard
+ * is no info for **locale**, returns 1 (Monday) as it is the ISO standard
  */
 export function getIntlWeekStart(locale:string):number { 
 	return getIntlWeekInfo(locale)?.firstDay || 1;
@@ -721,7 +725,9 @@ export function getIntlWeekStart(locale:string):number {
     return match[0]
   }
 
-  
+  //#endregion
+//#region formatting
+
   /** format a **timestamp** with Intl
    * @param options the options to use (will be cleaned with @link cleanDateTimeFormat)
    * @param locale the locale to use for formatting
@@ -798,3 +804,182 @@ export function getIntlWeekStart(locale:string):number {
 	}
 	return result;
   }
+
+  //#endregion
+//#region scripts
+
+  export type UnicodeScript = "arab" | "latn" | "cyrl" | "grek" | "hebr"
+  	| "hira" | "japn" | "kana" | "hans" | "hant" | "deva" | "thai"
+
+  const SCRIPT_REGEXES:Record<UnicodeScript, RegExp> = {
+	"arab" : /[\p{Script=Arabic}]+/u,
+	"latn" : /[\p{Script=Latin}]+/u,
+	"cyrl" : /[\p{Script=Cyrillic}]+/u,
+	"grek" : /[\p{Script=Greek}]+/u,
+	"hebr" : /[\p{Script=Hebrew}]+/u,
+	"hira" : /[\p{Script=Hiragana}]+/u,
+	"kana" : /[\p{Script=Katakana}]+/u,
+	"japn" : /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]+/gu,
+	"hans" : /[\p{Script=Han}]+/u,
+	"hant" : /[\p{Script=Han}]+/u,
+	"deva" : /[\p{Script=Devanagari}]+/u,
+	"thai" : /[\p{Script=Thai}]+/u
+  }
+  const SCRIPT_REGEXES_FULL:Record<UnicodeScript, RegExp> = {
+	"arab" : /^[\p{Script=Arabic}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"cyrl" : /^[\p{Script=Cyrillic}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"latn" : /^[\p{Script=Latin}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"grek" : /^[\p{Script=Greek}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"hebr" : /^[\p{Script=Hebrew}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"hira" : /^[\p{Script=Hiragana}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"kana" : /^[\p{Script=Katakana}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"japn" : /^[\p{Script=Hiragana}\p{C}\p{M}\p{N}\p{S}\p{Z}\p{Script=Katakana}\p{Script=Han}]+$/gu,
+	"hans" : /^[\p{Script=Han}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"hant" : /^[\p{Script=Han}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"deva" : /^[\p{Script=Devanagari}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u,
+	"thai" : /^[\p{Script=Thai}\p{C}\p{M}\p{N}\p{S}\p{Z}]+$/u
+  }
+
+  const ALL_SCRIPTS = Object.keys(SCRIPT_REGEXES) as Array<keyof typeof SCRIPT_REGEXES>
+
+  /** returns true is all the letters of */
+  export function isScript(script:UnicodeScript, text:string):boolean {
+	return SCRIPT_REGEXES_FULL[script].test(text)
+  }
+  export function containsScripts(script:UnicodeScript, text:string):boolean {
+	return SCRIPT_REGEXES[script].test(text)
+  }
+
+  /** returns all Scripts known to the library
+   * 
+   * Some rare one may be missing
+   */
+  export function allScripts():UnicodeScript[] {
+	return ALL_SCRIPTS
+  }
+
+  /** returns all the scripts used in the string
+   * 
+   * WARNING: this is a rather costly operation, as it involves testing of multiple RegExp
+   */
+  export function listScripts(text:string):UnicodeScript[] {
+	return ALL_SCRIPTS.filter((r:UnicodeScript) => SCRIPT_REGEXES[r].test(text))
+  }
+
+  //#endregion
+
+  /// ------------ Collators ----------------
+
+//#region Collators
+
+ type CollatorUsage = "sort" | "search" | undefined;
+ type LocaleMatcher = "lookup" | "best fit" | undefined;
+ type CaseFirst= "upper" | "lower" | "false" | undefined;
+ type Sensitivity= "base" | "accent" | "case" | "variant" | undefined;
+ type Collation = "big5han" | "compat" | "dict" | "direct" | "ducet" | "emoji" | "eor" | "gb2312" | "phonebk" | "phonetic" | "pinyin" | "reformed" | "searchjl" | "stroke" | "trad" | "unihan" | "zhuyin" | undefined;
+
+ function toCollatorUsage(x:any):CollatorUsage {
+	return ["sort","search"].indexOf(x.toLowerCase()) != -1 ? x as CollatorUsage : undefined;
+ }
+ function toLocaleMatcher(x:any):LocaleMatcher {
+	return ["lookup","best fit"].indexOf(x.toLowerCase()) != -1 ? x as LocaleMatcher : undefined
+ }
+ function toCaseFirst(x:any):CaseFirst {
+	return ["upper", "lower", "false"].indexOf(x.toLowerCase()) != -1 ? x as CaseFirst : undefined
+ }
+ function toSensitivity(x:any):Sensitivity {
+	return ["base","accent","case","variant"].indexOf(x.toLowerCase()) != -1 ? x as Sensitivity : undefined
+ }
+ function toCollation(x:any):Collation {
+	return [
+		"big5han","compat","dict","direct","ducet","emoji","eor","gb2312", 
+		"phonebk","phonetic","pinyin","reformed","searchjl","stroke","trad","unihan","zhuyin"
+
+	].indexOf(x.toLowerCase()) != -1 ? x as Collation : undefined
+ }
+
+
+/** creates a new Collator from *collator*, changing some options */
+export function changeCollatorOptions(collator:Intl.Collator, newLocale:string, newOptions:Intl.CollatorOptions) {
+	const mergedOptions:Intl.CollatorOptions = { }
+	const current = collator.resolvedOptions()
+	mergedOptions.numeric = newOptions.numeric ?? current.numeric
+	mergedOptions.caseFirst = newOptions.caseFirst ?? toCaseFirst(current.caseFirst);
+	mergedOptions.sensitivity = newOptions.sensitivity ?? toSensitivity(current.sensitivity)
+	mergedOptions.usage = newOptions.usage ?? toCollatorUsage(current.usage);
+	mergedOptions.ignorePunctuation = newOptions.ignorePunctuation ?? current.ignorePunctuation;
+	//mergedOptions.collation = newOptions.collation ?? toCollation(current.collation);
+	return new Intl.Collator(newLocale ?? current.locale, mergedOptions)
+}
+
+/** a strict locale neutral Collator  (à != a , A != a) */
+export const NEUTRAL_COLLATOR_STRICT = new Intl.Collator("und", { sensitivity:"variant"})
+/** a lenient locale neutral Collator, only considers base characters (a = A, à = a) */
+export const NEUTRAL_COLLATOR_LENIENT = new Intl.Collator("und", { sensitivity: "base"})
+/** a case-sensitive locale neutral Collator, ignoring diacritics (à = a but a != A) */
+export const NEUTRAL_COLLATOR_CASE_SENSITIVE = new Intl.Collator("und", { sensitivity: "case"})
+/** a case-insensitve locale neutral Collator (a = A, à != a) */
+export const NEUTRAL_COLLATOR_DIACRITICS_SENSITIVE = new Intl.Collator("und", { sensitivity: "accent"})
+
+export function startsWith(text:string, prefix:string) {
+	return startsWithUsingCollator(text,prefix, NEUTRAL_COLLATOR_STRICT)
+}
+
+export function startsWithCaseSensitive(text:string, prefix:string) {
+	return startsWithUsingCollator(text,prefix, NEUTRAL_COLLATOR_CASE_SENSITIVE)
+}
+export function startsWithLenient(text:string, prefix:string) {
+	return startsWithUsingCollator(text,prefix, NEUTRAL_COLLATOR_LENIENT)
+}
+
+export function makeStartsWith(col:Intl.Collator):(a:string,b:string) => boolean {
+	return (a:string,b:string) => startsWithUsingCollator(a,b, col)
+}
+/** return true is *text* starts with the codepoints of *prefix*, using a Collator to compare
+ * 
+ * WARNING : it only works with length-preserving collators. The following options are not supported
+ * - ignorePunctuation : true
+ * - collation : compat, 
+ * 
+ * @throws RangeError if collator does not preserve length
+ */
+export function startsWithUsingCollator(text:string, prefix:string, col:Intl.Collator) {
+	checkIfCollatorIsLengthPreserving(col)
+	const iterText = text[Symbol.iterator]()
+	const iterPrefix = prefix[Symbol.iterator]()
+	let textCP = iterText.next()
+	let prefixCP = iterPrefix.next()
+	let result = []
+  
+	while (!prefixCP.done) {
+		if (textCP.done) 
+		{ // Prefix has more codepoints than text
+			return false; 
+		}
+		const comp = col.compare(prefixCP.value, textCP.value)
+		if (comp != 0) {
+			return false;
+		}
+		textCP = iterText.next()
+		prefixCP = iterPrefix.next()
+	}
+	return true;
+}
+
+
+/**
+ * 
+ * @param collator 
+ * @throws RangeError
+ */
+function checkIfCollatorIsLengthPreserving(collator:Intl.Collator): void {
+    const options = collator.resolvedOptions();
+    if (options.ignorePunctuation) {
+      throw new RangeError("Collator does not preserve length (ignorePunctuation is true")
+    }
+    if (["compat","phonetic"].indexOf(options.collation) != -1) {
+      throw new RangeError("Collator does not preserve length (collation is " + options.collation + ")")
+    }
+  }
+
+//#endregion

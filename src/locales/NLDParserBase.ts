@@ -1,4 +1,4 @@
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { Chrono } from "chrono-node";
 
 import { INLDParser } from "../types"
@@ -6,6 +6,7 @@ import { getLocalizedChrono } from "../utils/tools"
 import { IsoPatchWeekDateTzdParser } from "./common/IsoPatchWeekDateTzdParser";
 import { IsoPatchParser } from "./common/IsoPatchParser";
 import { IsoEraDateParser } from "./common/IsoEraDateParser";
+import { getIntlWeekStart } from "../utils/intl";
 
 export abstract class NLDParserBase implements INLDParser {
     private _locale:string;
@@ -20,8 +21,33 @@ export abstract class NLDParserBase implements INLDParser {
     get locale():string { return this._locale; }
 
     abstract moment(date:Date):Dayjs;
-    abstract getParsedDate(selectedText: string): Date;
-    abstract getFormattedDate(date:Date, format: string):string;
+    
+    getParsedDate(selectedText: string, referenceDate?:Date): Date {
+        const myChrono = this.chrono;
+        console.log("------------- getParsedDate() ------------- ")
+        console.log(`NLDParserBase.parseDate ${selectedText}`)
+
+        const initialParse = myChrono.parse(selectedText);
+
+        const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
+        
+        const locale = {
+            weekStart: getIntlWeekStart(this.locale),
+        };
+        
+        if (typeof referenceDate === "undefined") {
+            // no reference date
+            referenceDate = weekdayIsCertain
+                ? dayjs().weekday(0).toDate()
+                : new Date();
+        }
+
+        return myChrono.parseDate(selectedText, referenceDate );
+    }
+
+    getFormattedDate(date:Date, format: string):string {
+        return this.moment(date).format(format);
+    }
 
     protected get chrono():Chrono { return this._chrono; }
 

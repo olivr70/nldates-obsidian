@@ -21,11 +21,14 @@ export function formatWeekIso(year:number, week:number, day:number = undefined) 
  */
 export function getISOWeekNumber(date:Date):[number,number] {
     const tempDate = new Date(date.valueOf());
+    // ISO uses Monday as the first day of week
     const dayNumber = (date.getDay() + 6) % 7;
     tempDate.setDate(tempDate.getDate() - dayNumber + 3);
     if (tempDate.getFullYear() < date.getFullYear()) {
+        // this date belongs to the last week of the previous year
         return getISOWeekNumber(tempDate)
     } else if (tempDate.getFullYear() > date.getFullYear()) {
+        // this date belongs to the first week of the following year
         return [date.getFullYear() + 1, 1]
     } else {
         const firstThursday = tempDate.valueOf();
@@ -57,7 +60,7 @@ export function computeRelativeDay(jsDay:number, rel:RELATIVE_DAY, from:Dayjs = 
             // on monday (1), next tuesday (2) : 7 + 2 - 1 = 8 = 1
             // on monday (1), next monday (1) : 7 + 1 - 1 = 7 
             const nextDay = (from.day() + 1) % 7
-            return from.add(1+((7 + jsDay - nextDay) % 7), "d")
+            return from.add(1+((7 + jsDay - nextDay) % 7), "d").hour(12)
         case RELATIVE_DAY.PREVIOUS_OCCURING :
             // offset from 7 to 1
             
@@ -66,11 +69,18 @@ export function computeRelativeDay(jsDay:number, rel:RELATIVE_DAY, from:Dayjs = 
             // on monday (1), previous monday (1) : 7 + 1 - 1 = 7 
             const previousDay = (7 + from.day() - 1) % 7
             const dbgOffset = 1+((7 + previousDay - jsDay) % 7)
-            return from.subtract(1+((7 + previousDay - jsDay) % 7), "d")
+            const dayBefore = from.subtract(1,"d")
+            const dayBefore2 = from.subtract(2,"d")
+            const debgResult = from.subtract(dbgOffset,"d")
+            return from.subtract(1+((7 + previousDay - jsDay) % 7), "d").hour(12)
         case RELATIVE_DAY.OF_NEXT_WEEK :
-            return startOfWeek.add(1,"w").day(jsDay)
+            return startOfWeek.add(1,"w").day(jsDay).hour(12)
         case RELATIVE_DAY.OF_PREVIOUS_WEEK :
-            return startOfWeek.subtract(1,"w").day(jsDay)
+            return startOfWeek.subtract(1,"w").day(jsDay).hour(12)
+        case RELATIVE_DAY.OF_CURRENT_WEEK :
+            const offset = (6+jsDay) % 7
+            let dd = startOfWeek.add(offset, "d")
+            return startOfWeek.add((6+jsDay) % 7, "d").hour(12)
     }
     return undefined
 }

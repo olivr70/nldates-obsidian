@@ -11,6 +11,11 @@ import 'dayjs/locale/en-sg';
 import 'dayjs/locale/en-tt';
 import { Chrono, Parser } from "chrono-node";
 
+/** english */
+const LOC= "en"
+/** EN : lenient collator for generic english */
+const COLLATOR_LENIENT = new Intl.Collator(LOC, { sensitivity: "base"})
+
 dayjs.locale("en")
 
 dayjs.locale("en-CA")
@@ -32,10 +37,8 @@ import {
   getLastDayOfMonth
 } from "../../utils/tools";
 import { matchAnyPattern } from "../../utils/regex";
-import { IsoPatchParser } from "../common/IsoPatchParser";
-import { IsoPatchWeekDateTzdParser } from "../common/IsoPatchWeekDateTzdParser";
-import { IsoEraDateParser } from "../common/IsoEraDateParser";
-import { getIntlWeekStart } from "src/utils/intl";
+import { getIntlWeekStart } from "../../utils/intl";
+import { findPartialInDict } from "../..//utils/months";
 
 
 export default class NLDParserEn extends NLDParserBase {
@@ -149,7 +152,7 @@ export default class NLDParserEn extends NLDParserBase {
       pattern: () => new RegExp(ORDINAL_NUMBER_PATTERN_EN),
       extract: (_context, match) => {
         return {
-          day: parseOrdinalNumberPattern(match[0]),
+          day: parseOrdinalNumberPatternEn(match[0]),
           month: dayjs().month(),
         };
       },
@@ -208,12 +211,12 @@ const ORDINAL_NUMBER_PATTERN_EN = `(?:${matchAnyPattern(
   ORDINAL_WORD_DICTIONARY
 )}|[0-9]{1,2}(?:st|nd|rd|th)?)`;
 
-function parseOrdinalNumberPattern(match: string): number {
-  let num = match.toLowerCase();
-  if (ORDINAL_WORD_DICTIONARY[num] !== undefined) {
-    return ORDINAL_WORD_DICTIONARY[num];
+function parseOrdinalNumberPatternEn(match: string): number {
+  let result = findPartialInDict(ORDINAL_WORD_DICTIONARY, match, NaN, [ COLLATOR_LENIENT ])
+  if (result) {
+    return result;
   }
-
-  num = num.replace(/(?:st|nd|rd|th)$/i, "");
+  // remove suffixes
+  const num = match.trim().replace(/(?:st|nd|rd|th)$/i, "");
   return parseInt(num);
 }

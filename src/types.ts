@@ -1,7 +1,7 @@
 
 import { App, EditorSuggestContext, EventRef, PluginManifest, Plugin } from "obsidian";
 import dayjs, { Dayjs, isDayjs } from "dayjs";
-import { Component, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
+import { Component, Parser, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
 
 
 export type FieldType<T, K extends keyof T> = T[K];
@@ -138,6 +138,8 @@ export interface InternationalDateSettings {
   // weekStart: DayOfWeek;
 }
 
+//#region Chrono
+
 export type DateComponents = {[k in Component]? : number }
 
 export function isDateComponents(arg:any): arg is DateComponents {
@@ -156,9 +158,10 @@ export function dateComponentsToDate(arg: DateComponents):Date {
 
 export function toDateComponents(arg:Dayjs|Date) {
   if (isDayjs(arg)) {
-    return { year: arg.year(), month: arg.month(), day: arg.daysInMonth()}
+    // month() is 0 based
+    return { year: arg.year(), month: arg.month() + 1, day: arg.date()}
   } else if (arg instanceof Date) {
-    return { year: arg.getFullYear(), month: arg.getMonth(), day: arg.getDate()}
+    return { year: arg.getFullYear(), month: arg.getMonth() + 1, day: arg.getDate()}
   }
 }
 
@@ -179,13 +182,26 @@ export enum AllChronoLocales {
 }
 export type ChronoLocale = `${AllChronoLocales}`;
 
+/** relative reference to a day,  */
+export enum RELATIVE_REL {
+  NEXT = 1,
+  PREVIOUS = -1
+}
+
 /** reference to a day, relative to the current one */
 export enum RELATIVE_DAY {
-  OF_NEXT_WEEK,
   OF_PREVIOUS_WEEK,
+  OF_CURRENT_WEEK,
+  OF_NEXT_WEEK,
   NEXT_OCCURING,
   PREVIOUS_OCCURING,
 }
+
+export interface NamedChronoParser extends Parser {
+  name: string;
+}
+
+//#endregion
 
 export enum DateDisplay { asDate, asTime, asTimestamp}
 

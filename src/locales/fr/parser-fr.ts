@@ -7,8 +7,8 @@ import { Chrono, Parser, Component } from "chrono-node";
 
 import { ChronoLocale, toDateComponents } from "../../types";
 import { NLDParserBase } from "../NLDParserBase";
-import { MONTH_NAME_PATTERN_FR, MONTH_NAMES_MIX_FR_INTL_DICT, MONTH_NAMES_FR_PARTIAL4_REGEX, MONTH_NAMES_PARTIAL4_PATTERN_FR, ORDINAL_DATE_FR, ORDINAL_NUMBER_PATTERN_FR, ORDINAL_WORD_DICTIONARY_FR, parseOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX, extractRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "./constants-fr"
-import { getIntlWeekdayNames, getIntlWeekStart } from "../../utils/intl";
+import { ORDINAL_DATE_FR, extractOrdinalDate, parsePreviousDayFr, REG_FOLLOWING_DAY_FR, REG_JOUR_SEMAINE_X, extractJourSemaineX, extractRegRelativeDayFr, REG_RELATIVE_DAY_FR } from "./constants-fr"
+import { getIntlWeekStart } from "../../utils/intl";
 
 
 dayjs.extend(localeData)
@@ -90,7 +90,7 @@ export default class NLDParserFr extends NLDParserBase {
 
     chrono.parsers.push({
       pattern: () =>  ORDINAL_DATE_FR,
-      extract: (_context, match) => parseOrdinalDate(match)
+      extract: (_context, match) => extractOrdinalDate(match)
     } as Parser);
     
     chrono.parsers.push({
@@ -111,39 +111,4 @@ export default class NLDParserFr extends NLDParserBase {
 
     return chrono;
   }
-}
-
-
-
-
-function logInfoAboutChrono() {
-  console.log("Week day names (computed)");
-    console.log(getIntlWeekdayNames("de", "long"));
-    console.log(getIntlWeekdayNames("de", "short"));
-    console.log(getIntlWeekdayNames("de", "narrow"));
-    console.log("Month names (constant)");
-    console.log(MONTH_NAMES_MIX_FR_INTL_DICT);
-
-    const REG_ORDINAL_FR = new RegExp(ORDINAL_NUMBER_PATTERN_FR, "i");
-    console.log(REG_ORDINAL_FR);
-    console.log(REG_ORDINAL_FR.test("1."))
-    console.log(REG_ORDINAL_FR.test("8."))
-    console.log(REG_ORDINAL_FR.test("ertse"))
-    console.log(REG_ORDINAL_FR.test("achten"))
-
-    
-    const REG_MONTH_FR = new RegExp(MONTH_NAME_PATTERN_FR, "i");
-    console.log(REG_MONTH_FR);
-    console.log(REG_MONTH_FR.test("Juli"))
-    console.log(REG_MONTH_FR.test("August"))
-    console.log(REG_MONTH_FR.test("März"))
-
-    
-    console.log(`MONTH_NAMES_FR_REGEX : ${MONTH_NAMES_FR_PARTIAL4_REGEX}`);
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("Juli"))
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("August"))
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("März"))
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("märz"))
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("mar"))
-    console.log(MONTH_NAMES_FR_PARTIAL4_REGEX.test("m"))
 }

@@ -3,15 +3,16 @@ import dayjs, { Dayjs } from "dayjs";
 import { DateComponents } from "../types"
 
 
-  
-  export function previousDay(daynum:number, ref = dayjs()):Dayjs {
-    const diff = (ref.day() - daynum + 8) % 7;
-    return ref.subtract(diff)
+  /** computes the date of the previous Day, from ref */
+  export function previousDay(daynum:number, refDate = dayjs()):Dayjs {
+    const diff = (refDate.day() - daynum + 8) % 7;
+    return refDate.subtract(diff)
   }
   
-  export function followingDay(daynum:number, ref = dayjs()):Dayjs {
-    const diff = (ref.day() - daynum + 8) % 7;
-    return ref.add(diff)
+  /** computes the date of the next occuring occuring Day, from ref */
+  export function followingDay(daynum:number, refDate = dayjs()):Dayjs {
+    const diff = (refDate.day() - daynum + 8) % 7;
+    return refDate.add(diff)
   }
   
   export function dateToComponents(date:Dayjs): DateComponents {
@@ -24,12 +25,4 @@ import { DateComponents } from "../types"
   
   export function dateTimeToComponents(date:Dayjs): { [c in Component]? : number } {
     return { year: date.year(), month: date.month(), day: date.daysInMonth() }
-  }
-  
-  export function parseOrdinalNumberPattern(ordinals:{[k:string]:number},match: string): number {
-    let num = match.toLowerCase();
-    if (  ordinals[num] !== undefined) {
-      return   ordinals[num];
-    }
-    return NaN;
   }

@@ -1,7 +1,7 @@
 
 
 import { regSrc } from "../../../src/utils/regex";
-import { DAY_NAMES_DE_REGEX, ERA_REG_DE, FULL_YEAR_REG_DE, MONTH_NAMES_DE_PARTIAL3_REG, NCHR_ZTR_REG, parseMonthNameDe, parseYearDe, VUDGZ_REG } from "../../../src/locales/de/constants-de";
+import { DAY_NAMES_DE_REGEX, ERA_REG_DE, FULL_YEAR_REG_DE, MONTH_NAMES_DE_PARTIAL_REG, NCHR_ZTR_REG, parseMonthNameDe, parseYearDe, VUDGZ_REG } from "../../../src/locales/de/constants-de";
 import { SIGNED_YEAR_REG } from "../../../src/locales/common/constants";
 
 
@@ -135,29 +135,29 @@ describe("years", () => {
 
 describe("MONTH_NAMES_DE_REGEX should", () => {
     test('match long names', () => {
-        const reg = MONTH_NAMES_DE_PARTIAL3_REG
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Februar")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("März")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.exec("März")[0]).toEqual("März");
-        const x = MONTH_NAMES_DE_PARTIAL3_REG.exec("Juni");
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.exec("Juni")[0]).toEqual("Juni");
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.exec("Juli")[0]).toEqual("Juli");
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Dezember")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.exec("Mai")[0]).toEqual("Mai");
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Jänner")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Febber")).toBeTruthy();
+        const reg = MONTH_NAMES_DE_PARTIAL_REG
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Februar")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("März")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.exec("März")[0]).toEqual("März");
+        const x = MONTH_NAMES_DE_PARTIAL_REG.exec("Juni");
+        expect(MONTH_NAMES_DE_PARTIAL_REG.exec("Juni")[0]).toEqual("Juni");
+        expect(MONTH_NAMES_DE_PARTIAL_REG.exec("Juli")[0]).toEqual("Juli");
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Dezember")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.exec("Mai")[0]).toEqual("Mai");
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Jänner")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Febber")).toBeTruthy();
     });
     test('match lowercase names', () => {
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("märz")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("märz")).toBeTruthy();
     });
     test('match stripped names', () => {
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Marz")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("marz")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Marz")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("marz")).toBeTruthy();
     });
     test('match short names', () => {
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Mär")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Jän")).toBeTruthy();
-        expect(MONTH_NAMES_DE_PARTIAL3_REG.test("Feb")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Mär")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Jän")).toBeTruthy();
+        expect(MONTH_NAMES_DE_PARTIAL_REG.test("Feb")).toBeTruthy();
         expect(parseMonthNameDe("mar")).toBe(2);
     });
     describe('parseMonthNameDe() should', () => {

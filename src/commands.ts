@@ -8,6 +8,9 @@ import { makeSingleLine } from "./utils/tools";
 import { isEmptyRange, isEmptySelection, notifyWarning } from "./utils/osbidian";
 import { showSuggestModal } from "./suggest/suggest-modal";
 
+
+import { LLL } from "./i18n/localize";
+
 export interface IParseArgs {
   mode: "replace" | "link" | "clean" | "time" | "user" | "locale" | "dialog";
   format?: string;
@@ -47,6 +50,13 @@ export function getParseCommand(plugin: IInternationalDatesPlugin, args: IParseA
     for (let sel of editor.listSelections()) {
       debug("sel=", sel)
       const [suggestion, adjustedSel] = selectionToSuggestion(plugin, sel) 
+      console.log(suggestion)
+      if (suggestion.value == undefined || isNaN(suggestion.value.getDate())) {
+        const [from,to] = sortPositions(adjustedSel.anchor,adjustedSel.head)
+        const text = editor.getRange(from,to)
+        notifyWarning(LLL.notifications.NOT_A_DATE({text}))
+        continue;
+      }
       debug("adjustedSel=", adjustedSel)
       const sugWithDefaults = suggestionWithDefaults(suggestion, plugin)
       console.log("suggestion=", suggestion)

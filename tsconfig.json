@@ -6,19 +6,17 @@
     "module": "ESNext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2018",
+    "target": "ES2022",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "lib": [
       "dom",
-      "es5",
+      "ES2022",
       "scripthost",
-      "es2015"
     ]
   },
   "include": [
-    "**/*.ts"
-  ]
+    "**/*.ts" ]
 }

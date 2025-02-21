@@ -1,9 +1,12 @@
 
 import { DateDisplay, IDateSuggestion, IInternationalDatesPlugin, IMarkdownFlags, InternationalDateSettings } from "../types";
-import { alt, findLastMatch, group, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
-import { localeIsCompatibleWith, mayBeLocale, REG_ISO, REG_LOCALE } from "../utils/intl";
+import { alt, findLastMatch, group, matchPartialItem, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
+import { localeIsCompatibleWith, mayBeLocale, NEUTRAL_COLLATOR_LENIENT, REG_ISO, REG_LOCALE } from "../utils/intl";
 import { findPartialInDict } from "../utils/months";
 import { debug, enterLeave, watch } from "../utils/debug";
+import { getAllParsers } from "../parser";
+
+const LOC = "en"
 
 /** how to display */
 // warning : ts (Tsonga), ti (Tigrigna), da (Danish) are valid language codes
@@ -30,7 +33,7 @@ export const INTL_DATE_STYLE_DICT: { [key:string] : string } = {
   "L" : "short"
 }
 
-const REG_INTL_DATE_FORMAT_NAME = matchPartialRegex(INTL_DATE_STYLE_NAMES, 3, { })
+const REG_INTL_DATE_FORMAT_NAME = matchPartialItem("en", INTL_DATE_STYLE_DICT, { flags: "i" })
 
 
 
@@ -95,7 +98,7 @@ export function parseSuggestionDetails(text:string, plugin?:IInternationalDatesP
     if (REG_ISO.test(p)) { result.format = "iso"; continue; }
     if (REG_DISPLAY_FORMAT.test(p) && result.display == undefined) { result.display = hintToDisplay(p); continue; }
     if (REG_INTL_DATE_FORMAT_NAME.test(p)) { 
-      result.format = findPartialInDict("en", INTL_DATE_STYLE_DICT, p, undefined)  || result.format
+      result.format = findPartialInDict(INTL_DATE_STYLE_DICT, p, undefined, [NEUTRAL_COLLATOR_LENIENT])  || result.format
       continue;
     }
     if (/L{1,4}/.test(p)) {
@@ -139,13 +142,18 @@ export const REG_SUGGESTION_PREFIX = seq({capture:false},
     /\s*:(?<more>.*)/
   )
 
-
+/** analyse the prefix parts of a suggestion key 
+ * - if ; is used a separator, the text is the last part, 
+ * - is no ; is found, the function looks for the first : (COLON) a the marker of the text
+*/
 export function parseSuggestionPrefix(info:ReturnType<typeof parseSuggestionDetails>, plugin?:IInternationalDatesPlugin):ReturnType<typeof parseSuggestionDetails> {
   return enterLeave("parseSuggestionPrefix", () => {
     let text = info.text
-  //const sep = text.indexOf(":")
-  const lastSep:RegExpExecArray = findLastMatch(text, /[;]/)
-  const sep = lastSep?.index ?? -1
+    let sep = text.indexOf(":")
+    if (sep == -1) {
+      const lastSep:RegExpExecArray = findLastMatch(text, /[;]/)
+      sep = lastSep?.index ?? -1
+    }
   if (sep != -1) {
     const prefix = text.substring(0,sep)
     const details = parseSuggestionDetails(prefix, plugin)
@@ -186,6 +194,20 @@ export function parseSuggestion(text:string, plugin?:IInternationalDatesPlugin):
   const value = plugin?.parser.getParsedDate(details.text)
   const suggestion:IDateSuggestion = { ...details, ...(value && {value}) }
   return suggestion;
+}
+
+export function parseAll(text:string, plugin:IInternationalDatesPlugin ) {
+  const seg = new Intl.Segmenter("und", { granularity: "word"}).segment(text)
+  const allParsers = getAllParsers();
+  for (const s of seg) {
+    const subText = text.substring(s.index)
+
+    // try all parsers at this position
+    for (let p of Object.values(allParsers)) {
+      let date = p.getParsedDate(subText)
+    }
+  }
+
 }
 
 

@@ -1,0 +1,32 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# unicode collation\r\nIntl offers advanced collation services, supporting multiple scripts and languages\r\n\r\nThe main class is Intl.Collator, which is created using a locale string (either just a language or a full locale string with scripts and options like the `-u` extensions)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Unicode principles\r\n\r\nIn Unicode, collation is done using the Unicode Collation Algorithm (UCA). It is described [Unicode Technical Standard #10](https://www.unicode.org/reports/tr10/)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## \r\n\r\nWhen creating a Intl.Collator, the \"collation\" option is used to indicate the collation method.\r\n\r\nIn the [CLDR](https://en.wikipedia.org/wiki/Common_Locale_Data_Repository), each language can define specific collation rules \r\n\r\npossible values are :\r\ntype Collation = \"big5han\", \"compat\", \"dict\", \"direct\", \"ducet\", \"emoji\", \"eor\", \"gb2312\", \"phonebk\", \"phonetic\", \"pinyin\", \"reformed\", \"searchjl\", \"stroke\", \"trad\", \"unihan\", \"zhuyin\"\r\n\r\n- **compat** – A compatibility collation that considers character compatibility mappings, often used for Unicode normalization.\r\n    -  is aligned with NFKD (Normalization Form KD), which decomposes characters into their canonical base form while also replacing compatibility variants.\r\n        - Example: ﬁ (U+FB01, the ligature for \"fi\") is decomposed into the separate characters f + i.\r\n    - examples\r\n        - The superscript \"²\" (U+00B2) and the digit \"2\" (U+0032) are treated as equivalent.\r\n        - ℌ (Blackletter H)\tU+210B\tH\r\n        - ㏂ (AM Symbol)\tU+33C2\tAM\r\n        - ① (Circled 1)\tU+2460\t1\r\n        - Ａ (Full-width A)\tU+FF21\tA\r\n- dict – A dictionary-based collation, typically used for sorting according to lexicographical rules of a given language.\r\n- **direct** – A straightforward collation that sorts based on direct binary comparison of Unicode code points.\r\n- **ducet** – The **Default Unicode Collation Element Table (DUCET)**, which provides a standard Unicode collation sequence.\r\n    - Provides a consistent sorting order for all Unicode characters.\r\n    - DUCET serves as a baseline, but languages can customize sorting rules.\r\n    - Accounts for combining characters, ligatures, and multi-character sequences.\r\n- **emoji** – A collation tailored for sorting emoji characters in a meaningful and standardized order.\r\n    - Since emoji are encoded in different Unicode blocks, sorting them naïvely by code point produces an illogical order.\r\n    - Groups emojis by their semantic categories (Faces & Emotions (😀, 😂, 😍), People & Body (👋, 👍, 🙌), Animals & Nature (🐶, 🌳, 🌍)...\r\n\r\n- **eor** – The European Ordering Rules (EOR), a collation standard designed for European multilingual sorting.\r\n    -  It provides a consistent ordering system across different languages, accommodating their specific alphabetic and linguistic rules.\r\n    - Example: It ensures that Swedish \"Å\", German \"ß\", and French \"œ\" are sorted correctly according to their respective language conventions.\r\n    - ✅ Greek & Cyrillic scripts appear later because Latin is prioritized.\r\n    - It ensures that letters with accents (such as é, è, ê) are correctly ordered within their respective base letters.\r\n        - French sorting: é, è, ê are considered variants of \"e\"\r\n        - Danish sorting: \"Æ\" is a distinct letter, placed after \"Z\"\r\n        - It recognizes letters such as Ł (Polish), Đ (Croatian), Þ (Icelandic)\r\n        - Example of different ordergins\r\n            - English\tA B C D E F G H I J K L M N O P Q R S T U V W X Y Z\r\n            - French\tA À Â B C Ç D E É È Ê F G H I Î J K L M N O Ô P Q R S T U Û V W X Y Ù Z\r\n            - Swedish\tA B C D E F G H I J K L M N O P Q R S T U V W X Y Z Å Ä Ö\r\n            - German\tA Ä B C D E F G H I J K L M N O Ö P Q R S T U Ü V W X Y Z ß\r\n            - Greek\tΑ Β Γ Δ Ε Ζ Η Θ Ι Κ Λ Μ Ν Ξ Ο Π Ρ Σ Τ Υ Φ Χ Ψ Ω\r\n            - Czech/Slovak\tA Á B C Č D Ď E É Ě F G H CH I Í J K L M N Ň O Ó P Q R Ř S Š T Ť U Ú Ů V W X Y Ý Z Ž\r\n\r\n- phonebk – A phonebook-style collation that sorts names and entries in a manner similar to phone directories.\r\n- **phonetic** – A collation that considers phonetic similarities, useful for languages with different spelling variations.\r\n    - Instead of using alphabetical order, phonetic collation organizes words based on how they are spoken.\r\n    - Used in genealogy databases, customer databases, and search engines to match names that sound similar but are spelled differently.\r\n        - In English, \"Smith\" and \"Smyth\" would be treated as equivalent since they sound the same\r\n        - \"Meyer\" and \"Meier\" in German would be treated as the same.\r\n        - \"Color\" (US English) and \"Colour\" (UK English) would be grouped together.\r\n\r\nMost are designed for asian languages\r\n- big5han – A collation order based on the Big5 character set, primarily used for Traditional Chinese characters.\r\n- gb2312 – A collation order based on the GB2312 character set, primarily used for Simplified Chinese characters.\r\n- pinyin – A collation that sorts Chinese characters based on their Pinyin (romanized Mandarin) pronunciation.\r\n- searchjl – A collation optimized for searching Hangul (Korean) based on initial consonant (Jamo) indexing.\r\n- stroke – A collation that sorts Chinese characters based on stroke count and stroke order.\r\n- trad – A collation that follows the traditional Chinese character sorting order.\r\n- unihan – A collation based on the Unicode Unihan database, which organizes CJK (Chinese, Japanese, Korean) characters in a structured way.\r\n- zhuyin – A collation based on Zhuyin (Bopomofo), a phonetic script used primarily in Taiwan to transcribe Mandarin pronunciation.\r\n\r\nThe DUCET \r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        }
+    ]
+}

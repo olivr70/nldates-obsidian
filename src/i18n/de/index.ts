@@ -21,7 +21,8 @@ const de: Translation = {
 	},
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : Verwendung von **{locale}** für die Benutzeroberfläche",
-		SETTINGS_LOADED: "Einstellungen geladen"
+		SETTINGS_LOADED: "Einstellungen geladen",
+		NOT_A_DATE : "Text '{text}' wird nicht als Datum erkannt"
 	},
 	modals: {
 		date_format: {

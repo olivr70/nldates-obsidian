@@ -83,6 +83,11 @@ type RootTranslation = {
 		 * S​e​t​t​i​n​g​s​ ​l​o​a​d​e​d
 		 */
 		SETTINGS_LOADED: string
+		/**
+		 * T​e​x​t​ ​'​{​t​e​x​t​}​'​ ​w​i​r​d​ ​n​i​c​h​t​ ​a​l​s​ ​D​a​t​u​m​ ​e​r​k​a​n​n​t
+		 * @param {string} text
+		 */
+		NOT_A_DATE: RequiredParams<'text'>
 	}
 	modals: {
 		date_format: {
@@ -286,6 +291,10 @@ export type TranslationFunctions = {
 		 * Settings loaded
 		 */
 		SETTINGS_LOADED: () => LocalizedString
+		/**
+		 * Text '{text}' wird nicht als Datum erkannt
+		 */
+		NOT_A_DATE: (arg: { text: string }) => LocalizedString
 	}
 	modals: {
 		date_format: {

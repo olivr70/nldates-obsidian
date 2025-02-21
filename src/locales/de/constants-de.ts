@@ -6,17 +6,22 @@ import { Component } from "chrono-node";
 import { findMostLikelyADYear } from "../../calculation/years";
 import { findPartialInDict } from "../../utils/months";
 import { DateComponents } from "src/types";
-import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
-import { matchAnyPattern, matchPartialPattern, matchPartialRegex, regSrc, seq } from "../../utils/regex";
+import { dateToComponents, previousDay } from "../../calculation/utils";
+import { matchAnyPattern, matchPartialPattern, matchPartialItem, regSrc, seq, matchAnyItem, named, opt, alt } from "../../utils/regex";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
 import { dictFromArrays } from "../../utils/tools";
-import { REG_DAY_IN_MONTH, SIGNED_YEAR_REG } from "../common/constants";
+import { DAY_IN_MONTH_REG, extractSignedYear, parseOrdinalNumberPattern, SIGNED_YEAR_REG } from "../common/constants";
 
 dayjs.locale("de")
 
+/** GERMAN */
+const LOC = "de"
+/** Collator for GERMAN, sensible only to "base" */
+const COLLATOR_LENIENT = new Intl.Collator(LOC, { sensitivity:"base"})
+
 export const VARIANTS_DE = ["DE","AT","CH","LU","LI","BE"];
 
-export const LOCALES_DE = VARIANTS_DE.map((x) => `de-${x}`);
+export const LOCALES_DE = VARIANTS_DE.map((x) => `${LOC}-${x}`);
 
 
 // constants from Chrono
@@ -80,18 +85,17 @@ export const ORDINAL_BASE_DICTIONARY_DE: { [word: string]: number } = {
 
   
 function parseOrdinalNumberPatternDe(match: string): number {
-  return parseOrdinalNumberPattern(ORDINAL_WORD_DICTIONARY_DE, match) 
+  return parseOrdinalNumberPattern(ORDINAL_WORD_DICTIONARY_DE, match, COLLATOR_LENIENT) 
         || parseInt(match.trim().replace(/[.]$/,""));
 }
 
 // Days parsing
 
-export const DAY_NAMES_DE_INTL = getIntlWeekdayNames("de", "long");
-export const DAY_NAMES_DE_DICT_INTL = dictFromArrays("de", DAY_NAMES_DE_INTL, getIntlWeekdayNames("de","short"))
+export const DAY_NAMES_DE_INTL = getIntlWeekdayNames(LOC, "long");
+export const DAY_NAMES_DE_DICT_INTL = dictFromArrays(LOC, DAY_NAMES_DE_INTL)
 
 
-export const DAY_NAMES_DE_PATTERN = matchPartialPattern(DAY_NAMES_DE_DICT_INTL,4);
-export const DAY_NAMES_DE_REGEX = matchPartialRegex(DAY_NAMES_DE_DICT_INTL,4);
+export const DAY_NAMES_DE_REGEX = matchPartialItem(LOC, DAY_NAMES_DE_DICT_INTL, {word:true});
 
 
 export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
@@ -102,12 +106,12 @@ export const DAY_NAME_RELATIVES_DICT: {[key in string] : string } = {
   "übermorgen" : "übermorgen",
   uebermorgen : "übermorgen"
 }
-export const DAY_NAMES_RELATIVE_DE_PATTERN = matchPartialPattern(DAY_NAME_RELATIVES_DICT,3);
-export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialRegex(DAY_NAME_RELATIVES_DICT,3, {word:true, followup:true});
+export const DAY_NAMES_RELATIVE_DE_PARTIAL_REGEX = matchPartialItem(LOC, DAY_NAME_RELATIVES_DICT, {word:true, followup:true});
 
 
 export function findDayFromStart(key:string):number {
-  return DAY_NAMES_DE_INTL.findIndex((x) => x.toLowerCase().startsWith(key.toLocaleLowerCase("de")));
+  return findPartialInDict(DAY_NAMES_DE_DICT_INTL, key, NaN, [COLLATOR_LENIENT])
+  return DAY_NAMES_DE_INTL.findIndex((x) => x.toLowerCase().startsWith(key.toLocaleLowerCase(LOC)));
 }
 
 // Months parsing
@@ -117,18 +121,18 @@ export function findDayFromStart(key:string):number {
 export const MONTH_NAMES_DE_INTL = getIntlMonthNames("de", "long");
 export const MONTH_NAMES_DE_INTL_DICT = dictFromArrays("de", 
     MONTH_NAMES_DE_INTL, 
-    getIntlMonthNames("de", "short"), 
-    getIntlMonthNames("de", "narrow"),
+    getIntlMonthNames(LOC, "short"), 
+    getIntlMonthNames(LOC, "narrow"),
    [ "jänner", "feber"], // austrian month names
    ["jän", "feb"] // austrian short month names
   );
   MONTH_NAMES_DE_INTL_DICT["mrz"] = 3;
 
-export const MONTH_NAMES_DE_REG = new RegExp(`(${matchAnyPattern(MONTH_NAMES_DE_INTL_DICT)})`);
-export const MONTH_NAMES_DE_PARTIAL3_REG = matchPartialRegex(MONTH_NAMES_DE_INTL_DICT,3);
+export const MONTH_NAMES_DE_REG = matchAnyItem(LOC, MONTH_NAMES_DE_INTL_DICT)
+export const MONTH_NAMES_DE_PARTIAL_REG = matchPartialItem(LOC, MONTH_NAMES_DE_INTL_DICT);
 
 export function parseMonthNameDe(name: string, def:number = NaN): number {
-  return findPartialInDict("de", MONTH_NAMES_DE_INTL_DICT, name, def);
+  return findPartialInDict(MONTH_NAMES_DE_INTL_DICT, name, def, [COLLATOR_LENIENT]);
 }
 
 
@@ -157,7 +161,9 @@ Read more: http://www.time.com/time/magazine/article/0,9171,759195,00.html#ixzz0
 export const NCHR_ZTR_REG = /[vn]\.?\s*(?:C(?:hr?)?\.?|(?:Z(?:tr?)?\.?))/i  // https://regex101.com/r/wDTbG4/1
 export const VUDGZ_REG = /(?:v\.?\s*)?u\.?(?:\s*d\.?)?(?:\s*g\.?)?\s*z\.?/i
 
-export const ERA_REG_DE = new RegExp(`(?:${regSrc(NCHR_ZTR_REG)}|${regSrc(VUDGZ_REG)})`, "i")
+/** @deprecated */
+export const ERA_REG_DE_OLD = new RegExp(`(?:${regSrc(NCHR_ZTR_REG)}|${regSrc(VUDGZ_REG)})`, "i")
+export const ERA_REG_DE = alt({flags:"i"}, NCHR_ZTR_REG, VUDGZ_REG)
 
 export function parseEraDe(match: string): "BCE" | "CE" | undefined {
   if (/\bv/i.test(match)) {
@@ -186,16 +192,22 @@ export function extractFullYearDe(match: RegExpExecArray, idx:string): number {
 }
 
 /** reference to a year, including era */
-export const FULL_YEAR_REG_DE = new RegExp(`${regSrc(SIGNED_YEAR_REG)}(?:\\s+(${regSrc(ERA_REG_DE)}))?`,"i");
+export const FULL_YEAR_REG_DE_OLD = new RegExp(`${regSrc(SIGNED_YEAR_REG)}(?:\\s+(${regSrc(ERA_REG_DE)}))?`,"i");
+export const FULL_YEAR_REG_DE = seq(named("year_fy",SIGNED_YEAR_REG), opt(/\s+/, named("era_fy",ERA_REG_DE)))
               // group 1 : optional sign (for BCE et CE)
               // group 2 : year number
               // group 3 : era string
+/** extract year and era, if match of {@link FULL_YEAR_REG_DE}  
+ *  if year is signed (- or +), era is ignored
+ *  if no sign, use era in suffix
+*/
 export function extractYearDe(match: RegExpExecArray, offset = 0): number {
-    const signEra = match[1] ? (match[1 + offset] == "-" ? "BCE" : "CE") : undefined;
-    const suffixEra = parseEraDe(match[3 + offset])
+
+  const [yearSign, yearValue] = extractSignedYear(match.groups["year_fy"])
+    const signEra = (yearSign == "-" ? "BCE" : (yearSign == "+" ? "CE" : undefined))
+    const suffixEra = parseEraDe(match.groups["era_fy"])
     const era = signEra || suffixEra || "CE"
-    const yearValue = parseInt(match[2 + offset])
-    const result = era == "BCE" ? -yearValue : yearValue; 
+    const result = era == "BCE" ? -Math.abs(yearValue) : Math.abs(yearValue); 
     return findMostLikelyADYear(result);
 }
 export function parseYearDe(text: string) {
@@ -212,10 +224,10 @@ export function parseVergangene(match:RegExpMatchArray) {
 
 // German long date, like December 10, 2024
 export const LONG_DATE_DE = seq({}
-  , seq({name:"month"},MONTH_NAMES_DE_PARTIAL3_REG)
+  , seq({name:"month"},MONTH_NAMES_DE_PARTIAL_REG)
   , seq({cardinality:"?"}, 
       /\s+/, 
-      seq({name: "dayNum"}, REG_DAY_IN_MONTH), 
+      seq({name: "dayNum"}, DAY_IN_MONTH_REG), 
       seq({cardinality:"?"}, /\s+/, seq({name:"year"}, FULL_YEAR_REG_DE))))
 export function extractLongDateDe(match:RegExpMatchArray) {
   if (match) {
@@ -236,7 +248,7 @@ export function parseLongDateDe(text:string) {
 
 // dates with ordinal numbers
 
-export const ORDINAL_DATE_DE = new RegExp(`${regSrc(ORDINAL_NUMBER_REG_DE)}(?:\\s+(${regSrc(MONTH_NAMES_DE_PARTIAL3_REG)}))?`, "i");
+export const ORDINAL_DATE_DE = new RegExp(`${regSrc(ORDINAL_NUMBER_REG_DE)}(?:\\s+(${regSrc(MONTH_NAMES_DE_PARTIAL_REG)}))?`, "i");
 
 export function extractOrdinalDate(match:RegExpMatchArray, offset = 0):DateComponents {
   const dayInMonth = match[2+offset] ? parseInt(match[2+offset]): parseOrdinalNumberPatternDe(match[1+offset])
@@ -273,11 +285,10 @@ export const POD_NAME_DE_PATTERN = `(${matchAnyPattern(PARTS_OF_DAY_NAMES_DE_DIC
 export const POD_NAME_OR_VAL_DE_PATTERN= `(${POD_NAME_DE_PATTERN})|`
 export const POD_DE_REGEX = new RegExp(POD_NAME_OR_VAL_DE_PATTERN, "i");
 
-export const POD_PARTIAL5_PATTERN_DE = matchPartialPattern(PARTS_OF_DAY_NAMES_DE_DICT,5);
-export const POD_PARTIAL5_REGEX = matchPartialRegex(PARTS_OF_DAY_NAMES_DE_DICT,5);
+export const POD_PARTIAL5_REGEX = matchPartialItem(LOC, PARTS_OF_DAY_NAMES_DE_DICT);
 
 export function parsePartOfDayDe(match:string):DateComponents {
-  const hour = findPartialInDict("de", PARTS_OF_DAY_NAMES_DE_DICT, match, NaN );
+  const hour = findPartialInDict(PARTS_OF_DAY_NAMES_DE_DICT, match, NaN );
   return hour > 0 ? { hour } : { hour: dayjs().hour(), minute : dayjs().minute()}
 }
 

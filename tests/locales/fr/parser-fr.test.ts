@@ -10,7 +10,7 @@ describe('parser-fr', () => {
     })
     test("jours nommés", () => {
         expect(p.getParsedDate("nouvel an"))
-            .toEqual(new Date(2024,0,1,12))
+            .toEqual(new Date(new Date().getFullYear(),0,1,12))
         expect(p.getParsedDate("nouvel an 2023"))
             .toEqual(new Date(2023,0,1,12))
         expect(p.getParsedDate("Nouvel-An 2022"))

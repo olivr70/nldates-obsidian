@@ -1,0 +1,201 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# All about handling arabic"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "Les lettres arabes ont la particularité d'avoir un glyphe qui change selon que la lettre en début, au milieu ou en fin de mot\r\n\r\n![ex](https://cours-arabe-debutant.fr/wp-content/uploads/2023/02/lettre-debut-milieu-fin.jpg)"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "Certaines lettres comme أ, د, ذ, ر, ز, و n'ont pas de formes initiale ou médiane, car elles ne se lient pas à la lettre suivante dans un mot. Si vous avez besoin du tableau dans un format particulier (comme Excel), je peux le fournir.\r\n\r\n| **Lettre** | **Nom**        | **ISO 233-1** | **Code Unicode** | **Forme isolée** | **Forme initiale** | **Forme médiane** | **Forme finale** |\r\n|------------|----------------|--------------------------------|------------------|-------------------|---------------------|--------------------|------------------|\r\n| أ          | Alif Hamza     | ʾ                              | U+0623           | أ                 | ---                 | ---                | ---              |\r\n| ب          | Baʾ           | b                              | U+0628           | ب                 | بـ                  | ـبـ               | ـب               |\r\n| ت          | Taʾ           | t                              | U+062A           | ت                 | تـ                  | ـتـ               | ـت               |\r\n| ث          | Thaʾ          | ṯ                              | U+062B           | ث                 | ثـ                  | ـثـ               | ـث               |\r\n| ج          | Jim           | ǧ                              | U+062C           | ج                 | جـ                  | ـجـ               | ـج               |\r\n| ح          | Ḥaʾ           | ḥ                              | U+062D           | ح                 | حـ                  | ـحـ               | ـح               |\r\n| خ          | Khaʾ          | ẖ                              | U+062E           | خ                 | خـ                  | ـخـ               | ـخ               |\r\n| د          | Dal           | d                              | U+062F           | د                 | ---                 | ---                | ---              |\r\n| ذ          | Dhal          | ḏ                              | U+0630           | ذ                 | ---                 | ---                | ---              |\r\n| ر          | Raʾ           | r                              | U+0631           | ر                 | ---                 | ---                | ---              |\r\n| ز          | Zay           | z                              | U+0632           | ز                 | ---                 | ---                | ---              |\r\n| س          | Sin           | s                              | U+0633           | س                 | سـ                  | ـسـ               | ـس               |\r\n| ش          | Shin          | š                              | U+0634           | ش                 | شـ                  | ـشـ               | ـش               |\r\n| ص          | Ṣad           | ṣ                              | U+0635           | ص                 | صـ                  | ـصـ               | ـص               |\r\n| ض          | Ḍad           | ḍ                              | U+0636           | ض                 | ضـ                  | ـضـ               | ـض               |\r\n| ط          | Ṭaʾ           | ṭ                              | U+0637           | ط                 | طـ                  | ـطـ               | ـط               |\r\n| ظ          | Ẓaʾ           | ẓ                              | U+0638           | ظ                 | ظـ                  | ـظـ               | ـظ               |\r\n| ع          | ʿAyn          | ʿ                              | U+0639           | ع                 | عـ                  | ـعـ               | ـع               |\r\n| غ          | Ghayn         | ġ                              | U+063A           | غ                 | غـ                  | ـغـ               | ـغ               |\r\n| ف          | Faʾ           | f                              | U+0641           | ف                 | فـ                  | ـفـ               | ـف               |\r\n| ق          | Qaf           | q                              | U+0642           | ق                 | قـ                  | ـقـ               | ـق               |\r\n| ك          | Kaf           | k                              | U+0643           | ك                 | كـ                  | ـكـ               | ـك               |\r\n| ل          | Lam           | l                              | U+0644           | ل                 | لـ                  | ـلـ               | ـل               |\r\n| م          | Mim           | m                              | U+0645           | م                 | مـ                  | ـمـ               | ـم               |\r\n| ن          | Nun           | n                              | U+0646           | ن                 | نـ                  | ـنـ               | ـن               |\r\n| ه          | Haʾ           | h                              | U+0647           | ه                 | هـ                  | ـهـ               | ـه               |\r\n| و          | Waw           | w                              | U+0648           | و                 | ---                 | ---                | ---              |\r\n| ي          | Yaʾ           | y                              | U+064A           | ي                 | يـ                  | ـيـ               | ـي               |"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Transliteration\r\n\r\nA module to transliterate in ascii. https://www.npmjs.com/package/transliteration/v/1.1.11"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "Il existe plusieurs systèmes de translitération\r\n\r\n1. Système de l'Organisation Internationale de Normalisation (ISO)\r\nISO 233 : Ce système est utilisé pour la translittération académique et scientifique. Il est très précis et utilise des diacritiques pour représenter les sons arabes.\r\n\r\nISO 233-2 : Une version simplifiée de l'ISO 233, utilisée principalement pour les bibliothèques et les catalogues.\r\n\r\n2. Système de la Bibliothèque du Congrès (Library of Congress)\r\nALA-LC : Utilisé par les bibliothèques et les institutions académiques aux États-Unis. Il est similaire à l'ISO 233 mais avec quelques différences dans les diacritiques.\r\n\r\n3. Système de l'Académie des Inscriptions et Belles-Lettres (AIBL)\r\nUtilisé principalement en France pour les travaux académiques et les publications scientifiques.\r\n\r\n4. Système de l'Organisation des Nations Unies (ONU)\r\nUNGEGN : Utilisé pour la normalisation des noms géographiques. Il est conçu pour être simple et facile à utiliser.\r\n\r\n5. Système de la Société des Orientalistes Allemands (DMG)\r\nUtilisé principalement en Allemagne pour les études orientales. Il est très précis et utilise des diacritiques pour représenter les sons arabes.\r\n\r\n6. Système de la Translittération Simplifiée\r\nUtilisé dans les contextes informels et pour les utilisateurs non spécialisés. Il ne suit pas de règles strictes et vise à être facile à lire et à écrire."
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const AR_MONTH = [\r\n            \"يناير\", // (Yanāyir) - Janvier\r\n            \"فبراير\", //  (Fibrāyir) - Février\r\n            \"مارس\", // (Māris) - Mars\r\n            \"أبريل\", // (Abrīl) - Avril\r\n            \"مايو\", // (Māyū) - Mai\r\n            \"يونيو\", // (Yūniyū) - Juin\r\n            \"يوليو\", // (Yūliyū) - Juillet\r\n            \"أغسطس\", // (Aghusṭus) - Août\r\n            \"سبتمبر\", //  (Sibtambir) - Septembre\r\n            \"أكتوبر\", //  (Uktūbir) - Octobre\r\n            \"نوفمبر\", //  (Nūfambir) - Novembre\r\n            \"ديسمبر\", //  (Dīsambir) - Décembre\r\n]"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const iso2332Map = { 'ا': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'ḥ', 'خ': 'kh',\r\n     'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 'ṣ', \r\n     'ض': 'ḍ', 'ط': 'ṭ', 'ظ': 'ẓ', 'ع': 'ʿ', 'غ': 'gh', 'ف': 'f', 'ق': 'q', \r\n     'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'و': 'w', 'ي': 'y', \r\n     'ء': 'ʾ', 'آ': 'ā', 'أ': 'a', 'ؤ': 'u', 'إ': 'i', 'ئ': 'i', 'ى': 'ā', \r\n     'ة': 'h', 'َ': 'a', 'ُ': 'u', 'ِ': 'i', 'ً': 'an', 'ٌ': 'un', 'ٍ': 'in', 'ْ': '', 'ّ': '' }; \r\n     \r\nfunction transliterateISO2332(text) {\r\n    return text.split('').map(char => iso2332Map[char] || char).join('')\r\n}\r\n\r\nconsole.log(AR_MONTH.map(transliterateISO2332).join(\",\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "ynayr,fbrayr,mars,abryl,mayw,ywnyw,ywlyw,aghsṭs,sbtmbr,aktwbr,nwfmbr,dysmbr",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const aiblMap = { 'ا': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'dj', 'ح': 'ḥ', 'خ': 'kh', 'د': 'd',\r\n     'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 'ṣ', 'ض': 'ḍ', 'ط': 'ṭ', \r\n     'ظ': 'ẓ', 'ع': 'ʿ', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', \r\n     'ن': 'n', 'ه': 'h', 'و': 'w', 'ي': 'y', 'ء': 'ʾ', 'آ': 'ā', 'أ': 'a', 'ؤ': 'u', \r\n     'إ': 'i', 'ئ': 'i', 'ى': 'ā', 'ة': 'h', 'َ': 'a', 'ُ': 'u', 'ِ': 'i', 'ً': 'an', 'ٌ': 'un', \r\n     'ٍ': 'in', 'ْ': '', 'ّ': '' }; \r\n\r\n\r\nfunction transliterateAIBL(text) { \r\n    return text.split('').map(char => aiblMap[char] || char).join('')\r\n}\r\n\r\nconsole.log(AR_MONTH.map(transliterateAIBL).join(\",\"))"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "ynayr,fbrayr,mars,abryl,mayw,ywnyw,ywlyw,aghsṭs,sbtmbr,aktwbr,nwfmbr,dysmbr",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "Le module **transliteration** offers its own transliteration method for arabic, by removing vowels sounds"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const transliteration = require(\"transliteration\")\r\nconst tr = transliteration.transliterate\r\n\r\nconsole.log(AR_MONTH.map(tr).join(\", \") "
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "ynyr, fbryr, mrs, 'bryl, myw, ywnyw, ywlyw, 'GsTs, sbtmbr, 'ktwbr, nwfmbr, dysmbr",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Translitering dates\r\n\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const arDate = new Intl.DateTimeFormat(\"ar\",{ dateStyle:\"full\"}).format(new Date(2023,10,2))\r\n\r\nconst arDateTransl = transliterateISO2332(arDate)\r\n\r\nconsole.log(\r\n    arDate,\"\\n\", arDate.split(\"\"),\"\\n\",\r\n    arDateTransl,\"\\n\",arDate.split(\"\").map(transliterateISO2332)\r\n)\r\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "الخميس، ٢ نوفمبر ٢٠٢٣ ",
+                                " [",
+                                "  'ا', 'ل', 'خ', 'م', 'ي',",
+                                "  'س', '،', ' ', '٢', ' ',",
+                                "  'ن', 'و', 'ف', 'م', 'ب',",
+                                "  'ر', ' ', '٢', '٠', '٢',",
+                                "  '٣'",
+                                "] ",
+                                " alkhmys، ٢ nwfmbr ٢٠٢٣ ",
+                                " [",
+                                "  'a', 'l', 'kh', 'm', 'y',",
+                                "  's', '،', ' ',  '٢', ' ',",
+                                "  'n', 'w', 'f',  'm', 'b',",
+                                "  'r', ' ', '٢',  '٠', '٢',",
+                                "  '٣'",
+                                "]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// How arabic character compose\r\na1 = \"الخمي٢\"\r\na1 = \"\""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# handling of bidirectionnal text\r\n\r\nAll is expained in [Annex #9 Unicode Bidirectional Algorithm](https://www.unicode.org/reports/tr9/)\r\n\r\nLes grandes lignes :\r\n- le texte est découpé en paragraphes, puis en lignes. Chacun est analysée\r\n- la première passe identifie les caractères qui sont explicitement LtR ou RtL\r\n- des caractères spéciaux (ou du markup) peuvent marquer des zones d'insertion\r\n- les caractères dit neutres (chiffres, espaces) sont déterminés à partir de leur entourage\r\n\r\nThe LTR mark is \\u200F"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "console.log(\"12 \\u200FA\\u200FB 34\")"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "12 ‏A‏B 34",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

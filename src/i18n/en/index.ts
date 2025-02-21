@@ -21,7 +21,8 @@ const en: BaseTranslation = {
 	},
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : user interface language changed to **{locale}**",
-		SETTINGS_LOADED: "Settings loaded"
+		SETTINGS_LOADED: "Settings loaded",
+		NOT_A_DATE : "Text '{text:string}' wird nicht als Datum erkannt"
 	},
 	modals: {
 		date_format: {

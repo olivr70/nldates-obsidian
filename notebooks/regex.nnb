@@ -1,0 +1,100 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "Notebook for advanced regex recipes"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Utils"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const lines = function(...items) {\r\n    console.log(items.join(\"\\n\"))\r\n}"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# Parsing numbers\r\n\r\nthe \\p{N} category can parse numbers. But is very wide. It includes :\r\n- \\p{Nd} all decimal numbers, but in many numbering systems\r\n- \\p{Nl} all letter numbers (like Roman numerals)\r\n- \\p{No} all other numbers (fractions, supercript and subscript)\r\n\r\nRessources:\r\n- [All numbers in Unicode](https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=%5B%3ANUMBER%3A%5D&ucd=on&g=&i=)\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "const decimals = /\\p{Nd}+/gu\r\n\r\nconst someNumberingSystems = [ \"arab\", \"hanidec\", \"mathbold\", \"mathdbl\", \"mathsanb\", \"thai\"]\r\nconst partialNumberingSystems = [ \"bali\", \"hanidec\", \"mathbold\", \"mathdbl\", \"mathsanb\", \"thai\"]\r\nconst failingNumberingSystems = [ \"bali\", \"mathbold\", \"mathdbl\", \"mathsanb\", \"thai\"]\r\n\r\nconst showDecimals = (s) => { decimals.lastIndex = 0; return decimals.exec(s)?.[0] }\r\n\r\nconst allDigitsOf = (sys:string) => {\r\n    return \"{\" + (new Intl.NumberFormat(\"en\", { numberingSystem: sys, compactDisplay:\"short\", useGrouping:false}).format(1234567890)) + \"}\"\r\n}\r\n\r\nlines(\r\n    showDecimals(\"𝟜𝟝𝟞\"),\r\n    someNumberingSystems.map(x => `${x} : ${allDigitsOf(x)} : ${showDecimals(allDigitsOf(x))}`).join(\"\\n\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "𝟜𝟝𝟞",
+                                "arab : {١٢٣٤٥٦٧٨٩٠} : ١٢٣٤٥٦٧٨٩٠",
+                                "hanidec : {一二三四五六七八九〇} : undefined",
+                                "mathbold : {𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟎} : 𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟎",
+                                "mathdbl : {𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟘} : 𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟘",
+                                "mathsanb : {𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵𝟬} : 𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵𝟬",
+                                "thai : {๑๒๓๔๕๖๗๘๙๐} : ๑๒๓๔๕๖๗๘๙๐",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "# codepoints are supported in RegExp\r\n\r\nThe syntax \\u{1F600} allows to insert a codepoint in a Regexp. Bu they are supported as such"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "// codepoints are supported in \r\nconst r1 = /[😊🌟]+/\r\nconst x = [...\"😊🌟\"]\r\nconst codepoitns = x.map( xx => xx.codePointAt(0)?.toString(16))\r\n\r\nconst strip = (text) => text.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\r\n\r\nconsole.log(\r\n    \"Codepoints display\", x, \"\\n\", \r\n    \"Codepoints  values:\", codepoitns, \"\\n\", \r\n    \"Stripped string\", strip(\"ô😊ë🌟\"), \"\\n\",\r\n    // alternates in Regexp properly handle codepoints\r\n    \"Résultat de exec\", r1.exec(\"😊😊😊\")\r\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "application/vnd.code.notebook.stdout",
+                            "value": [
+                                "Codepoints display [ '😊', '🌟' ] ",
+                                " Codepoints  values: [ '1f60a', '1f31f' ] ",
+                                " Stripped string o😊e🌟 ",
+                                " Résultat de exec [ '😊😊😊', index: 0, input: '😊😊😊', groups: undefined ]",
+                                "",
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

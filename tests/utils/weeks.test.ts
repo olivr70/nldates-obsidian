@@ -24,58 +24,58 @@ describe('getISOWeekNumber()', () => {
 describe('computeRelativeDay', () => {
     test('NEXT_OCCURING', () => {
         // on friday (5), next tuesday (2) : 7 + 2 - 5 = 4
-        expect(computeRelativeDay(2,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,12)))).toEqual(new Date(2024,0,16))
+        expect(computeRelativeDay(2,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,12)))).toEqual(new Date(2024,0,16, 12))
             // on monday (1), next tuesday (2) : 7 + 2 - 1 = 8 = 1
-        expect(computeRelativeDay(2,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,8)))).toEqual(new Date(2024,0,9))
+        expect(computeRelativeDay(2,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,8)))).toEqual(new Date(2024,0,9, 12))
             // on monday (1), next monday (1) : 7 + 1 - 1 = 7
-        expect(computeRelativeDay(1,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,8)))).toEqual(new Date(2024,0,15))
+        expect(computeRelativeDay(1,RELATIVE_DAY.NEXT_OCCURING, dayjs(new Date(2024,0,8)))).toEqual(new Date(2024,0,15, 12))
     })
     describe('PREVIOUS_OCCURING', () => {
         test('in same month', () => {
             // on friday (5), previous tuesday (2) : 5 - 2 = 3
             expect(computeRelativeDay(2,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,12))))
-                .toEqual(new Date(2024,0,9))
+                .toEqual(new Date(2024,0,9, 12))
             // on monday (1), previous tuesday (2) : 7 + 1-2 = 6
-            expect(computeRelativeDay(2,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,8))))
-                .toEqual(new Date(2024,0,2))
+            expect(computeRelativeDay(2,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,8, 12))))
+                .toEqual(new Date(2024,0,2, 12))
             // on monday (1), previous monday (1) : 7 + 1 - 1 = 7 
-            expect(computeRelativeDay(1,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,8))))
-                .toEqual(new Date(2024,0,1))
+            expect(computeRelativeDay(1,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,8, 12))))
+                .toEqual(new Date(2024,0,1, 12))
         })
         test('year overlaps', () => {
             // on tuesday (2), previous friday (2) : 7 + 2 - 5 = 4
-            expect(computeRelativeDay(5,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,2))))
-                .toEqual(new Date(2023,11,29))
+            expect(computeRelativeDay(5,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,2, 12))))
+                .toEqual(new Date(2023,11,29, 12))
             // on monday (1), previous tuesday (2) : 7 + 1-2 = 6
-            expect(computeRelativeDay(2,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,1))))
-                .toEqual(new Date(2023,11,26))
+            expect(computeRelativeDay(2,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,1, 12))))
+                .toEqual(new Date(2023,11,26, 12))
             // on monday (1), previous monday (1) : 7 + 1 - 1 = 7 
-            expect(computeRelativeDay(1,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,1))))
-                .toEqual(new Date(2023,11,25))
+            expect(computeRelativeDay(1,RELATIVE_DAY.PREVIOUS_OCCURING, dayjs(new Date(2024,0,1, 12))))
+                .toEqual(new Date(2023,11,25, 12))
         })
     })
     
     test('OF_NEXT_WEEK', () => {
         // on friday (5), next tuesday (2) : 
-        expect(computeRelativeDay(2,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,12))))
-            .toEqual(new Date(2024,0,16))
+        expect(computeRelativeDay(2,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,12, 12))))
+            .toEqual(new Date(2024,0,16, 12))
         // on monday (1), tuesday of next week (2) : 
-        expect(computeRelativeDay(2,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,8))))
-            .toEqual(new Date(2024,0,16))
+        expect(computeRelativeDay(2,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,8, 12))))
+            .toEqual(new Date(2024,0,16, 12))
             // on monday (1), next monday (1) : 7 + 1 - 1 = 7
-        expect(computeRelativeDay(1,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,8))))
-            .toEqual(new Date(2024,0,15))
+        expect(computeRelativeDay(1,RELATIVE_DAY.OF_NEXT_WEEK, dayjs(new Date(2024,0,8, 12))))
+            .toEqual(new Date(2024,0,15, 12))
     })
     
     test('OF_PREVIOUS_WEEK', () => {
         // on friday (5), tuesday of previous week (2) : 
         expect(computeRelativeDay(2,RELATIVE_DAY.OF_PREVIOUS_WEEK, dayjs(new Date(2024,0,12))))
-            .toEqual(new Date(2024,0,2))
+            .toEqual(new Date(2024,0,2, 12))
         // on monday (1), tuesday of previous week (2) : 
         expect(computeRelativeDay(2,RELATIVE_DAY.OF_PREVIOUS_WEEK, dayjs(new Date(2024,0,8))))
-            .toEqual(new Date(2024,0,2))
+            .toEqual(new Date(2024,0,2, 12))
             // on monday (1), monday of previous week (1) : 7 + 1 - 1 = 7
         expect(computeRelativeDay(1,RELATIVE_DAY.OF_PREVIOUS_WEEK, dayjs(new Date(2024,0,8))))
-            .toEqual(new Date(2024,0,1))
+            .toEqual(new Date(2024,0,1, 12))
     })
 })

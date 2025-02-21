@@ -11,7 +11,6 @@ import {
     NLDSuggestContext,
     IMarkdownFlags
 } from "../types";
-import { findPartialInDict } from "../utils/months";
 import { parseSuggestion, parseSuggestionDetails, parseSuggestionPrefix, parseSuggestionSuffix, REG_SUGGESTION_SEP } from "./suggest-utils";
 import { getLocalizedLanguageName, langFromLocale, MOST_LANGUAGE_CODES, MOST_LOCALES } from "../utils/intl";
 import { enterLeave, debug } from "../utils/debug";

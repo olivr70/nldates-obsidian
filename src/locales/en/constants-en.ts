@@ -5,10 +5,13 @@ import { Component } from "chrono-node";
 import { findMostLikelyADYear } from "../../calculation/years";
 import { findPartialInDict } from "../../utils/months";
 import { DateComponents } from "src/types";
-import { dateToComponents, parseOrdinalNumberPattern, previousDay } from "../../calculation/utils";
 import { matchAnyPattern, matchPartialPattern, matchPartialRegex } from "../../utils/regex";
 import { getIntlMonthNames, getIntlWeekdayNames } from "../../utils/intl";
 import { dictFromArrays } from "../../utils/tools";
+import { parseOrdinalNumberPattern } from "../common/constants";
+
+const LOC = "en"
+const COLLATOR_LENIENT = new Intl.Collator(LOC, { sensitivity:"base"})
 
 export const VARIANTS_EN = ["GB", "US"];
 
@@ -65,8 +68,8 @@ export const ORDINAL_BASE_DICTIONARY_EN: { [word: string]: number } = {
   )}|(\\b[0-9]{1,2}\\b)[.]?)`;
 
   
-function parseOrdinalNumberPatternDe(match: string): number {
-  return parseOrdinalNumberPattern(ORDINAL_WORD_DICTIONARY_EN, match) 
+function parseOrdinalNumberPatternEn(match: string): number {
+  return parseOrdinalNumberPattern(ORDINAL_WORD_DICTIONARY_EN, match, COLLATOR_LENIENT) 
         || parseInt(match.trim().replace(/[.]$/,""));
 }
 
@@ -113,7 +116,7 @@ export const MONTH_NAMES_PARTIAL1_PATTERN_EN = matchPartialPattern(MONTH_NAMES_E
 export const MONTH_NAMES_EN_PARTIAL1_REGEX = matchPartialRegex(MONTH_NAMES_EN_INTL_DICT,1, {allowAmbiguous:true});
 
 export function parseMonthNameEn(name: string, def:number = NaN): number {
-  return findPartialInDict("en", MONTH_NAMES_EN_INTL_DICT, name, def);
+  return findPartialInDict(MONTH_NAMES_EN_INTL_DICT, name, def, [COLLATOR_LENIENT]);
 }
 
 
@@ -148,7 +151,7 @@ export function parseYear(match: string): number {
 export const ORDINAL_DATE_EN = new RegExp(`${ORDINAL_NUMBER_PATTERN_EN}(?:\\s+(${MONTH_NAMES_PARTIAL1_PATTERN_EN}))?`, "i");
 
 export function parseOrdinalDate(match:RegExpMatchArray):DateComponents {
-  const dayInMonth = match[2] ? parseInt(match[2]): parseOrdinalNumberPatternDe(match[1])
+  const dayInMonth = match[2] ? parseInt(match[2]): parseOrdinalNumberPatternEn(match[1])
   const month = match[3] ? parseMonthNameEn(match[3], dayjs().month()) : dayjs().month();
   const result:{[c in Component]?: number;} =  {
     day: dayInMonth,

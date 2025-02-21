@@ -10,9 +10,10 @@ import { ParsingContext } from "chrono-node/dist/esm/chrono";
 dayjs.extend(weekday)
 dayjs.extend(weekOfYear)
 
-/** a Parser which handle ISO dates with Z indicator
- * like 2024-01-01Z, which although not ISO compliant, is supported by
- * Javascript new Date() and dayjs()
+/** a Parser which handle ISO week dates with a timezone offset
+ * like 2024-W02-1+01:15
+ * 
+ * @see {@link regIsoWeekDateTzd}
  * 
  *  To stick to Chrono choices, defaults to time 12:00 (noon)
  * 
