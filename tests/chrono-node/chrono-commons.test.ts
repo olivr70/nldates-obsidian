@@ -84,8 +84,10 @@ describe('ISOFormatParser should parse', () => {
     test('ISo dates are always parsed as UTC, never local ', () => {
         const localnewYear = new Date(2024,0,1); // not timezone info. Equal test
         // uses dayjs() bef
-        expect(parseDate("2024-01-01T00:00")).toEqual(new Date(Date.UTC(2024,0,1)))
-        expect(parseDate("2024-01-01T00:00")).not.toEqual(new Date(2024,0,1)) // this is local time
+        expect(parseDate("2024-01-01T00:00Z")).toEqual(new Date(Date.UTC(2024,0,1)))
+        expect(parseDate("2024-01-01T00:00")).toEqual(new Date(2024,0,1)) // this is local time
+        // default time of day in chrono is 12 (midday)
+        expect(parseDate("2024-01-01")).toEqual(new Date(2024,0,1,12)) // this is local time
         expect(parseDate("2024-01-01")).toEqual(new Date(Date.UTC(2024,0,1,11)))
     })
     test('ISo dates have a 12pm default time (stil UTC) ', () => {
@@ -101,8 +103,8 @@ describe('ISOFormatParser should parse', () => {
         console.log(parseDate("2024-01-01T12:01"))
         console.log(parseDate("2024-06-01T12:01"))
         expect(parseDate("2024-01-01T12:01Z")).toEqual(dayjs("2024-01-01T12:01Z"))
-        expect(parseDate("2024-01-01T12:01")).toEqual(new Date(Date.UTC(2024,0,1, 12, 1)))
-        expect(parseDate("2024-01-01T12:00:30")).toEqual(new Date(Date.UTC(2024,0,1, 12, 0,30)))
+        expect(parseDate("2024-01-01T12:01")).toEqual(new Date(2024,0,1, 12, 1))
+        expect(parseDate("2024-01-01T12:00:30")).toEqual(new Date(2024,0,1, 12, 0,30))
     })
     
 })

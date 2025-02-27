@@ -5,7 +5,7 @@ import { DateDisplay, MarkdownDateParts, FormattedDate, IDateSuggestion, IIntern
 import { findUniqueName, makeSingleLine, parseTruthy } from "./utils/tools";
 import { generateMarkdownLink, getOrCreateDailyNote } from "./utilsObsidian";
 import { NLDSettingsTab, DEFAULT_SETTINGS } from "./settings";
-import { parserFactory } from "./parser";
+import { getAllParsers, parserFactory } from "./parser";
 import DatePickerModal from "./modals/date-picker";
 import DateSuggest from "./suggest/date-suggest";
 import {
@@ -28,6 +28,8 @@ import { loadAllLocales } from "./i18n/i18n-util.sync";
 
 import { LLL } from "./i18n/localize";
 import { loadedLocales, locales } from "./i18n/i18n-util";
+import { ParsedResult } from "chrono-node";
+import { compareParseResult } from "./utils/chrono";
 
 
 
@@ -123,21 +125,34 @@ export default class InternationalDates extends Plugin implements IInternational
 
         this.addCommand({
           id: "id-now",
-          name: "Insert the current date and time",
+          name: LLL.commands.INSERT_CURRENT_DATE_AND_TIME(),
           callback: () => getNowCommand(this),
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-today",
-          name: "Insert the current date",
+          name: LLL.commands.INSERT_CURRENT_DATE(),
           callback: () => getCurrentDateCommand(this),
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-picker",
-          name: "Date picker",
+          name: LLL.commands.DATE_PICKER(),
+          checkCallback: (checking: boolean) => {
+            if (checking) {
+              return !!this.app.workspace.getActiveViewOfType(MarkdownView);
+            }
+            new DatePickerModal(this.app, this).open();
+          },
+          hotkeys: [],
+        });
+
+        
+        this.addCommand({
+          id: "id-parseall",
+          name: LLL.commands.PARSE_ALL_DATES(),
           checkCallback: (checking: boolean) => {
             if (checking) {
               return !!this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -279,6 +294,38 @@ export default class InternationalDates extends Plugin implements IInternational
 
       parseTime(dateString: string): NLDResult {
         return this.parse(dateString);
+      }
+
+      
+      /**  */
+      parseAll(text:string ) {
+        let results:ParsedResult[] = []
+        let alreadyConsumed = 0
+        const seg = new Intl.Segmenter("und", { granularity: "word"}).segment(text)
+        const allParsers = getAllParsers();
+        for (const s of seg) {
+          // ignore words which have already been consumed
+          if (s.index < alreadyConsumed) {
+            continue;
+          }
+          const subText = text.substring(s.index)
+      
+          // collect all candidates
+          let all:ParsedResult[] = []
+          // try all parsers at this position
+          for (let p of Object.values(allParsers)) {
+            let moreCandidates = p.parseAll(subText)
+            all.push(...moreCandidates)
+          }
+          // 
+          all.sort(compareParseResult)
+          if (all.length > 0) {
+            results.push(all[0])
+            // ignore words 
+            alreadyConsumed = all[0].index + all[0].text.length
+          }
+        }
+        return results;
       }
   //#endregion
 

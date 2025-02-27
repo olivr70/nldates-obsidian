@@ -12,12 +12,15 @@ const fr: Translation = {
 	},
 	commands: {
 		INSERT_CURRENT_DATE : "Insérer la date du jour",
-		PARSE_DATE : "Convertir selon les préférences",
+		INSERT_CURRENT_DATE_AND_TIME : "Insérer la date et l'heure",
+		DATE_PICKER: "Sélectionner une date...",
+		PARSE_DATE : "Convertir selon les préférences",		
 		PARSE_DATE_AS_LINK: "Convertir en lien",
 		PARSE_DATE_AS_TEXT : "Convertir en texte",
 		PARSE_AND_FORMAT_USER : "Convertir avec un format utilisateur",
 		PARSE_AND_FORMAT_LOCALE : "Convertir avec une locale",
-		PARSE_AND_FORMAT_DIALOG : "Convertir avec le dialogue de mise en forme..."
+		PARSE_AND_FORMAT_DIALOG : "Convertir avec le dialogue de mise en forme...",
+		PARSE_ALL_DATES : "Convertir toutes les dates"
 	},
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : Utilisation de la locale **{{locale}}** pour l'interface",

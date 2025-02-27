@@ -7,6 +7,7 @@ import { IsoPatchWeekDateTzdParser } from "./common/IsoPatchWeekDateTzdParser";
 import { IsoPatchParser } from "./common/IsoPatchParser";
 import { IsoEraDateParser } from "./common/IsoEraDateParser";
 import { getIntlWeekStart } from "../utils/intl";
+import { Z_FULL_FLUSH } from "zlib";
 
 export abstract class NLDParserBase implements INLDParser {
     private _locale:string;
@@ -19,6 +20,8 @@ export abstract class NLDParserBase implements INLDParser {
     }
 
     get locale():string { return this._locale; }
+    
+    protected get chrono():Chrono { return this._chrono; }
 
     abstract moment(date:Date):Dayjs;
     
@@ -45,11 +48,16 @@ export abstract class NLDParserBase implements INLDParser {
         return myChrono.parseDate(selectedText, referenceDate );
     }
 
+    /** @override */
+    parseAll(fullText:string, referenceDate?:Date) {
+        const candidates = this.chrono.parse(fullText, referenceDate)
+        return candidates;
+    }
+
     getFormattedDate(date:Date, format: string):string {
         return this.moment(date).format(format);
     }
 
-    protected get chrono():Chrono { return this._chrono; }
 
     protected configureChrono(chrono:Chrono):Chrono {
         // add all standard ISO parsers

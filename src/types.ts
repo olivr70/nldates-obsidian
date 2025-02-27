@@ -1,7 +1,7 @@
 
 import { App, EditorSuggestContext, EventRef, PluginManifest, Plugin } from "obsidian";
 import dayjs, { Dayjs, isDayjs } from "dayjs";
-import { Component, Parser, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
+import { Component, ParsedResult, Parser, ParsingComponents, ReferenceWithTimezone } from "chrono-node";
 
 
 export type FieldType<T, K extends keyof T> = T[K];
@@ -270,6 +270,8 @@ export interface MarkdownDateParts extends FormattedDate, IMarkdownFlags {
 export interface INLDParser {
     get locale():string;
     getParsedDate(selectedText: string): Date;
+    /** parse all possible date in *text* */
+    parseAll(selectedText: string, refDate?:Date):ParsedResult[];
     moment(date:Date):Dayjs;
   }
   

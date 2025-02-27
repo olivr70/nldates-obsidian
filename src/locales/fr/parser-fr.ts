@@ -27,28 +27,6 @@ export default class NLDParserFr extends NLDParserBase {
     return dayjs(date).locale(this.locale)
   }
 
-
-  getParsedDate(selectedText: string): Date {
-    const myChrono = this.chrono;
-    console.log("------------- FR.getParsedDate() ------------- ")
-    console.log(`ChronoFR.parseDate ${selectedText}`)
-
-    const initialParse = myChrono.parse(selectedText);
-
-    const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
-    
-    const locale = {
-      weekStart: getIntlWeekStart(this.locale),
-    };
-    
-    const referenceDate = weekdayIsCertain
-      ? dayjs().weekday(0).toDate()
-      : new Date();
-
-
-    return myChrono.parseDate(selectedText, referenceDate );
-  }
-
   
   getFormattedDate(date:Date, format: string):string {
     // console.log(`NLDParserDe.getFormattedDate ${date} ${format}`)

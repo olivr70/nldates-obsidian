@@ -49,6 +49,14 @@ type RootTranslation = {
 		 */
 		INSERT_CURRENT_DATE: string
 		/**
+		 * I​n​s​e​r​t​ ​t​h​e​ ​c​u​r​r​e​n​t​ ​d​a​t​e​ ​a​n​d​ ​t​i​m​e
+		 */
+		INSERT_CURRENT_DATE_AND_TIME: string
+		/**
+		 * D​a​t​e​ ​p​i​c​k​e​r​.​.​.
+		 */
+		DATE_PICKER: string
+		/**
 		 * P​a​r​s​e​ ​a​n​d​ ​f​o​r​m​a​t​ ​w​i​t​h​ ​s​e​t​t​i​n​g​s
 		 */
 		PARSE_DATE: string
@@ -72,6 +80,10 @@ type RootTranslation = {
 		 * P​a​r​s​e​ ​a​n​d​ ​s​h​o​w​ ​f​o​r​m​a​t​ ​d​i​a​l​o​g​.​.​.
 		 */
 		PARSE_AND_FORMAT_DIALOG: string
+		/**
+		 * P​a​r​s​e​ ​a​l​l​ ​d​a​t​e​s
+		 */
+		PARSE_ALL_DATES: string
 	}
 	notifications: {
 		/**
@@ -258,6 +270,14 @@ export type TranslationFunctions = {
 		 */
 		INSERT_CURRENT_DATE: () => LocalizedString
 		/**
+		 * Insert the current date and time
+		 */
+		INSERT_CURRENT_DATE_AND_TIME: () => LocalizedString
+		/**
+		 * Date picker...
+		 */
+		DATE_PICKER: () => LocalizedString
+		/**
 		 * Parse and format with settings
 		 */
 		PARSE_DATE: () => LocalizedString
@@ -281,6 +301,10 @@ export type TranslationFunctions = {
 		 * Parse and show format dialog...
 		 */
 		PARSE_AND_FORMAT_DIALOG: () => LocalizedString
+		/**
+		 * Parse all dates
+		 */
+		PARSE_ALL_DATES: () => LocalizedString
 	}
 	notifications: {
 		/**

@@ -39,6 +39,8 @@
     "chrono-node": "^2.7.6",
     "dayjs": "^1.11.12",
     "obsidian-daily-notes-interface": "0.9.4",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
     "transliteration": "^2.3.5",
     "typesafe-i18n": "^5.26.2",
     "unicode-trie": "^2.0.0"

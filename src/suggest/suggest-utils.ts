@@ -1,10 +1,11 @@
 
 import { DateDisplay, IDateSuggestion, IInternationalDatesPlugin, IMarkdownFlags, InternationalDateSettings } from "../types";
-import { alt, findLastMatch, group, matchPartialItem, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
+import { alt, compare, compareReverseWithLt, findLastMatch, group, matchPartialItem, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
 import { localeIsCompatibleWith, mayBeLocale, NEUTRAL_COLLATOR_LENIENT, REG_ISO, REG_LOCALE } from "../utils/intl";
 import { findPartialInDict } from "../utils/months";
 import { debug, enterLeave, watch } from "../utils/debug";
 import { getAllParsers } from "../parser";
+import { ParsedResult } from "chrono-node";
 
 const LOC = "en"
 
@@ -196,19 +197,6 @@ export function parseSuggestion(text:string, plugin?:IInternationalDatesPlugin):
   return suggestion;
 }
 
-export function parseAll(text:string, plugin:IInternationalDatesPlugin ) {
-  const seg = new Intl.Segmenter("und", { granularity: "word"}).segment(text)
-  const allParsers = getAllParsers();
-  for (const s of seg) {
-    const subText = text.substring(s.index)
-
-    // try all parsers at this position
-    for (let p of Object.values(allParsers)) {
-      let date = p.getParsedDate(subText)
-    }
-  }
-
-}
 
 
 

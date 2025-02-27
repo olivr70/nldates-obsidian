@@ -21,8 +21,17 @@ const LOCALE_PARSERS:Record<ChronoLocale,INLDParser> = {
   "zh" : new NLDParserEn("en")
 }
 
-export function getAllParsers() {
-  return LOCALE_PARSERS;
+const PARSING_LOCALES = Object.keys(LOCALE_PARSERS) as Array<keyof typeof  LOCALE_PARSERS>
+
+/** returns the parsers for *locales* for which there is one */
+export function getAllParsers(locales:ChronoLocale[] = PARSING_LOCALES) {
+  let result:INLDParser[] = []
+  for (const l of locales) {
+    const parserForLocale = LOCALE_PARSERS[l]
+    if (parserForLocale)
+      result.push(parserForLocale)
+  }
+  return result;
 }
 
 export function parserFactory(someLocale: ChronoLocale) {

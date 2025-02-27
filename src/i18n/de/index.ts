@@ -12,12 +12,15 @@ const de: Translation = {
 	},
 	commands: {
 		INSERT_CURRENT_DATE : "Das aktuelle Datum einfügen",
+		INSERT_CURRENT_DATE_AND_TIME : "Aktuelles Datum und Uhrzeit einfügen",
+		DATE_PICKER: "Datumspicker...",
 		PARSE_DATE	: "Parsing natürliches Sprachdatum",
 		PARSE_DATE_AS_LINK: "Parsing natürliches Sprachdatum (als Link)",
 		PARSE_DATE_AS_TEXT: "Parsing natürliches Sprachdatum (als reiner Text)",
 		PARSE_AND_FORMAT_USER : "Parsen und Formatieren mit Benutzerformat",
 		PARSE_AND_FORMAT_LOCALE : "Parsen und Formatieren mit Gebietsschema",
-		PARSE_AND_FORMAT_DIALOG : "Parsen und Anzeigen des Formatdialogs..."
+		PARSE_AND_FORMAT_DIALOG : "Parsen und Anzeigen des Formatdialogs...",
+		PARSE_ALL_DATES : "Alle Daten auswerten"
 	},
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : Verwendung von **{locale}** für die Benutzeroberfläche",

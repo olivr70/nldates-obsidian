@@ -287,8 +287,20 @@ export function matchPartialItemRegex(item:string, len:number, word:boolean = fa
 //#endregion
 
 //#region Generic utils
+export type CompareFunction<T> = (a:T,b:T) => -1|0|1
+
 export function compare<T>(a:T, b:T):-1|0|1 {
   return (a < b ? -1 : (a > b ? 1 : 0))
+}
+
+export function compareArrays<T>(a:T[], b:T[], comp:CompareFunction<T>):-1|0|1 {
+  const len = Math.min(a?.length ?? 0, b?.length ?? 0)
+  for (let i = 0; i < len; ++i) {
+    const res = comp(a[i], b[i])
+    if (res != 0) return res; // EXIT
+  }
+  // all common items are the same. THe shortest array comes first.
+  return compare(a?.length ?? 0, b?.length ?? 0)
 }
 
 export function compareWithLt<T>(x:T,y:T):-1|0|1  {

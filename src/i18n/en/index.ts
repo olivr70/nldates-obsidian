@@ -12,12 +12,15 @@ const en: BaseTranslation = {
 	},
 	commands: {
 		INSERT_CURRENT_DATE : "Insert the current date",
+		INSERT_CURRENT_DATE_AND_TIME : "Insert the current date and time",
+		DATE_PICKER: "Date picker...",
 		PARSE_DATE	: "Parse and format with settings",
 		PARSE_DATE_AS_LINK : "Parse and format as link",
 		PARSE_DATE_AS_TEXT : "Parse and format as plain text",
 		PARSE_AND_FORMAT_USER : "Parse and format with user format",
 		PARSE_AND_FORMAT_LOCALE : "Parse and format with locale",
-		PARSE_AND_FORMAT_DIALOG : "Parse and show format dialog..."
+		PARSE_AND_FORMAT_DIALOG : "Parse and show format dialog...",
+		PARSE_ALL_DATES : "Parse all dates"
 	},
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : user interface language changed to **{locale}**",

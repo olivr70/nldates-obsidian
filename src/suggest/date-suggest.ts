@@ -33,7 +33,6 @@ dayjs.extend(LocalizedFormat)
  * @see https://docs.obsidian.md/Reference/TypeScript+API/EditorSuggest
  */
 export default class DateSuggest extends EditorSuggest<IDateSuggestion> {
-  app: App;
   private plugin: InternationalDates;
 
   private _lastSuggestions:IDateSuggestion[]
