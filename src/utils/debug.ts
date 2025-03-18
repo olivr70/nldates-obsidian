@@ -16,13 +16,13 @@ export function debug(...args:any[]) {
     console.debug("  ".repeat(stack.length), ...args)
 }
 
-export function enter(name:string, ...args:any[]) {
-    debug(">".repeat(stack.length + 1) + " " + name + ">".repeat(stack.length + 1) )
+
+
+export function enterSilent(name:string, ...args:any[]) {
     stack.push(name)
-    // console.log("# enter", stack.join("/"))
 }
 
-export function leave(name?:string) {
+export function leaveSilent(name?:string) {
     // console.log("# leave", stack.join("/"))
     if (name) {
         const pos = stack.findIndex(x => x == name)
@@ -34,6 +34,17 @@ export function leave(name?:string) {
     } else {
         stack.pop()
     }
+}
+
+export function enter(name:string, ...args:any[]) {
+    debug(">".repeat(stack.length + 1) + " " + name + ">".repeat(stack.length + 1) )
+    enterSilent(name, ...args)
+    // console.log("# enter", stack.join("/"))
+}
+
+export function leave(name?:string) {
+    // console.log("# leave", stack.join("/"))
+    leaveSilent(name)
     debug("<".repeat(stack.length + 1) + " " + name + "<".repeat(stack.length + 1) )
 }
 
@@ -43,6 +54,16 @@ export function enterLeave<T>(name:string, func:() => T) {
         return watch(`${name}()=`,func())
     } finally {
         leave(name)
+    }
+}
+
+
+export function enterLeaveSilent<T>(name:string, func:() => T) {
+    try {
+        enterSilent(name)
+        return func()
+    } finally {
+        leaveSilent(name)
     }
 }
 

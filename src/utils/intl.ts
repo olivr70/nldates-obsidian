@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 
 import "dayjs/locale"
 import { LLL } from "../i18n/localize";
+import { watch } from "./debug";
 
 //#region Locales
 
@@ -520,7 +521,9 @@ export const MOST_LANGUAGE_CODES = [
 	  "zu-ZA"
   ]
 
+/** the supported languages by the current runetime of Obsidian */
 export const SUPPORTED_LANGUAGE_CODES = Intl.DateTimeFormat.supportedLocalesOf(MOST_LANGUAGE_CODES)
+/** the supported locales by the current runetime of Obsidian */
 export const SUPPORTED_LOCALES = Intl.DateTimeFormat.supportedLocalesOf(MOST_LOCALES)
 
 /** returns true if <text> may be a locale string

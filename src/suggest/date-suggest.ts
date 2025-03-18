@@ -14,7 +14,7 @@ import localeData from "dayjs/plugin/localeData";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 
 import { IDateSuggestion, NLDSuggestContext } from "../types";
-import { debug, enterLeave, watch } from "../utils/debug"
+import { debug, enterLeave, enterLeaveSilent, watch } from "../utils/debug"
 import type InternationalDates from "../main";
 import { getSuggestionMaker } from "../suggest/locale-suggester";
 import { suggestionWithDefaults } from "./suggest-utils";
@@ -121,7 +121,7 @@ export default class DateSuggest extends EditorSuggest<IDateSuggestion> {
     editor: Editor,
     file: TFile
   ): EditorSuggestTriggerInfo {
-    return enterLeave("onTrigger", () => {
+    return enterLeaveSilent("onTrigger", () => {
       if (!this.plugin.settings.isAutosuggestEnabled) {
         return null;
       }

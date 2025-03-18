@@ -11,6 +11,14 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    // "typeRoots": [
+    //   "./src/types",
+    //   "./node_modules/@types"
+    // ],
+    // "types": [
+    //   "jest"
+    //   //"moment"
+    // ],
     "lib": [
       "dom",
       "ES2022",
@@ -18,5 +26,6 @@
     ]
   },
   "include": [
-    "**/*.ts" ]
+    "**/*.ts",
+    "**/*.d.ts" ]
 }

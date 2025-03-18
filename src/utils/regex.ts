@@ -67,6 +67,45 @@ export function mergeRegexFlags(current:string, reg:RegExp[]) {
   return reg.reduce((v,r) => orRegexFlags(v, orRegexFlags(v, r.flags)), current)
 }
 
+/** return a new regex with the *flagsToSet* */
+export function setRegexFlags(reg:RegExp, flagsToSet:string) {
+  return new RegExp(reg.source, orRegexFlags(reg.flags, flagsToSet))
+}
+
+/** returns all occurences or regex */
+export function findAllMatches(text: string, regex: RegExp): RegExpExecArray[] {
+  const globalRegex = setRegexFlags(regex, "g")
+  const matches: RegExpExecArray[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = globalRegex.exec(text)) !== null) {
+      matches.push(match);
+  }
+
+  return matches;
+}
+/** returns the occurence of reg at pos */
+export function findMatchAt(text: string, regex: RegExp, pos:number): RegExpExecArray {
+  const globalRegex = setRegexFlags(regex, "g")
+  const matches: RegExpExecArray[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = globalRegex.exec(text)) !== null) {
+      const matchEnd = match.index + match[0].length
+      if (match.index <= pos && pos <= matchEnd) {
+        return match; // => exit
+      }
+      if (pos > matchEnd) {
+        break; // no need to go any further
+      }
+  }
+
+  return null;
+}
+
+
+//#region Creating RegExp
+
 /** grabs all the remaining characters */
 const FOLLOW_UP_REG = /(?:\s+(.*))?/
 
@@ -82,7 +121,6 @@ function groupPrefix(options:RegOptions) {
   return result;
 }
 
-//#region Creating RegExp
 /** an alternative 
  * Flags of subitems are merged (i: case insensitive, g: global, u:unicode..)
  * @see {@link orRegexFlags}
@@ -383,7 +421,7 @@ export  function findLastMatch(text:string, regex:RegExp) {
   return lastMatch; 
 }
 
-/** creates a RegExp which matches any item of the dictionnary */
+/** creates a RegExp which matches any item of the dictionnary, using a PrefixTree */
 export function matchAnyItem(locale:string, dictionary: DictionaryLike, options:RegOptions = undefined): RegExp {
   const tree = makePrefixTree(dictionary, new Intl.Collator(locale))
   const innerReg = makeRegexForItemsFromTree({ flags:options?.flags}, tree)

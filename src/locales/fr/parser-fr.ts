@@ -78,12 +78,12 @@ export default class NLDParserFr extends NLDParserBase {
     
     chrono.parsers.push({
       pattern: () =>  REG_JOUR_SEMAINE_X,
-      extract: (_context, match) => extractJourSemaineX(match, new Date())
+      extract: (_context, match) => extractJourSemaineX(match, _context.refDate)
     } as Parser);
     
     chrono.parsers.push({
       pattern: () =>  REG_RELATIVE_DAY_FR,
-      extract: (_context, match) => toDateComponents(extractRegRelativeDayFr(match, new Date()))
+      extract: (_context, match) => toDateComponents(extractRegRelativeDayFr(match, _context.refDate))
     } as Parser);
 
 

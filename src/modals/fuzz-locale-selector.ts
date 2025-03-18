@@ -1,9 +1,10 @@
 import { App, FuzzySuggestModal, Notice } from 'obsidian'; 
 import { IInternationalDatesPlugin, UserDateFormat } from '../types';
 import { LocaleInfo, makeDescriptionForLocale, parseLocale, SUPPORTED_LANGUAGE_CODES, SUPPORTED_LOCALES } from '../utils/intl';
+import { getObsidianLanguage } from '../utils/osbidian';
 
 
-
+/** the menu items are the supported languages and language codes */
 const ITEMS = [...SUPPORTED_LOCALES, ...SUPPORTED_LANGUAGE_CODES].sort().map(parseLocale)
 
 /** displays a fuzzy selector */
@@ -21,7 +22,7 @@ export class LocaleFuzzySuggestModal extends FuzzySuggestModal<LocaleInfo> {
         super(plugin.app);
         this.plugin = plugin;
         this.callback = callback;
-        this._displayLocale = window.localStorage?.getItem('language') ?? plugin.settings.locale
+        this._displayLocale = getObsidianLanguage()
     } 
 
     get displayLocale():string { return this._displayLocale }

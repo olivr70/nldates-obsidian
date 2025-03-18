@@ -2,7 +2,7 @@ import type { Translation } from '../i18n-types'
 
 const fr: Translation = {
 	// TODO: your translations go here
-	HI: 'Hi {name}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n',
+	HI: "Bonjour {name}",
 	utils: {
 		intl: {
 			localeDescriptionWithRegion: "{language} - {region}",
@@ -14,8 +14,10 @@ const fr: Translation = {
 		INSERT_CURRENT_DATE : "Insérer la date du jour",
 		INSERT_CURRENT_DATE_AND_TIME : "Insérer la date et l'heure",
 		DATE_PICKER: "Sélectionner une date...",
+		SELECT_DATE	: "Sélectionner la date sous le curseur",
 		PARSE_DATE : "Convertir selon les préférences",		
-		PARSE_DATE_AS_LINK: "Convertir en lien",
+		PARSE_DATE_AS_LINK: "Convertir et générer un lien",
+		LINK_TO_DAILY_NOTE : "Convertir en lien vers la note quotidienne",
 		PARSE_DATE_AS_TEXT : "Convertir en texte",
 		PARSE_AND_FORMAT_USER : "Convertir avec un format utilisateur",
 		PARSE_AND_FORMAT_LOCALE : "Convertir avec une locale",
@@ -25,7 +27,9 @@ const fr: Translation = {
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : Utilisation de la locale **{{locale}}** pour l'interface",
 		SETTINGS_LOADED: "International Dates : les préférences ont été lues",
-		NOT_A_DATE : "Le texte '{text}' n'est pas reconnu comme une date"
+		NOT_A_DATE : "Le texte '{text}' n'est pas reconnu comme une date",
+		UNABLE_TO_FORMAT_DATE :  "Une erreur s'est produite lors de la mise en forme de la date '{text}'",
+		UNABLE_TO_PROCESS_SELECTION :  "Une erreur s'est produite lors du traitement de la sélection"
 	},
 	modals: {
 		date_format: {

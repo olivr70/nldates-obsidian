@@ -1,22 +1,27 @@
 /** Get and set a global User Interface locale state
  * 
  */
+import debug from "debug";
 import { Locales, TranslationFunctions } from "./i18n-types";
-import { i18nString, i18nObject, baseLocale, isLocale } from "./i18n-util";
+import { i18nString as i18nStringGen, i18nObject as i18nObjectGen, baseLocale as baseLocaleGen, isLocale as isLocaleGen } from "./i18n-util";
 
 
-let currentuiLocale:Locales = baseLocale
-export let LLL: TranslationFunctions = i18nObject(currentuiLocale)
-console.log("LLL", LLL)
+/** our current locale, set using {@link setUiLocale}
+ * @global */
+let currentuiLocale:Locales = undefined
 
-/** sets the current locale to <newLocale>. Defaults to baseLocale if <newLocale> has no translation */
+/** the current translationFunctions */
+export let LLL: TranslationFunctions = i18nObjectGen(currentuiLocale)
+
+
+
+
+/** sets the current locale to <newLocale>. Defaults to "en" if we do not have any translation */
 export function setUiLocale(newLocale:string) {
-    const newSupportedLocale = isLocale(newLocale) ? newLocale : baseLocale
+    const newSupportedLocale = isLocaleGen(newLocale) ? newLocale : baseLocaleGen
     if (newSupportedLocale != currentuiLocale) {
-        console.log(`Will change from locale ${currentuiLocale} to ${newSupportedLocale}`)
         currentuiLocale = newSupportedLocale;
-        LLL = i18nObject(currentuiLocale)
-        console.log("message Settings Loaded", LLL.notifications.SETTINGS_LOADED())
+        LLL = i18nObjectGen(currentuiLocale)
     }
 }
 

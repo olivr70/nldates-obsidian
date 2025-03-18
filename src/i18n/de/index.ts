@@ -2,7 +2,7 @@ import type { Translation } from '../i18n-types'
 
 const de: Translation = {
 	// this is an example Translation, just rename or delete this folder if you want
-	HI: 'Hallo {name}! Bitte hinterlasse einen Stern, wenn dir das Projekt gefällt: https://github.com/ivanhofer/typesafe-i18n',
+	HI: 'Hallo {name}',
 	utils: {
 		intl: {
 			localeDescriptionWithRegion: "{language} in {region}",
@@ -14,8 +14,10 @@ const de: Translation = {
 		INSERT_CURRENT_DATE : "Das aktuelle Datum einfügen",
 		INSERT_CURRENT_DATE_AND_TIME : "Aktuelles Datum und Uhrzeit einfügen",
 		DATE_PICKER: "Datumspicker...",
+		SELECT_DATE	: "Datum am Cursor auswählen",
 		PARSE_DATE	: "Parsing natürliches Sprachdatum",
 		PARSE_DATE_AS_LINK: "Parsing natürliches Sprachdatum (als Link)",
+		LINK_TO_DAILY_NOTE : "In Link zu täglicher Notiz umwandeln",
 		PARSE_DATE_AS_TEXT: "Parsing natürliches Sprachdatum (als reiner Text)",
 		PARSE_AND_FORMAT_USER : "Parsen und Formatieren mit Benutzerformat",
 		PARSE_AND_FORMAT_LOCALE : "Parsen und Formatieren mit Gebietsschema",
@@ -25,7 +27,9 @@ const de: Translation = {
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : Verwendung von **{locale}** für die Benutzeroberfläche",
 		SETTINGS_LOADED: "Einstellungen geladen",
-		NOT_A_DATE : "Text '{text}' wird nicht als Datum erkannt"
+		NOT_A_DATE : "Text '{text}' wird nicht als Datum erkannt",
+		UNABLE_TO_FORMAT_DATE :  "Bei der Formatierung des Datums '{text}' ist ein Fehler aufgetreten.",
+		UNABLE_TO_PROCESS_SELECTION :  "Bei der Verarbeitung der Auswahl ist ein Fehler aufgetreten"
 	},
 	modals: {
 		date_format: {

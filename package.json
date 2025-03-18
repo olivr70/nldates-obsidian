@@ -36,6 +36,7 @@
     "unicode-name": "^1.0.4"
   },
   "dependencies": {
+    "@types/markdown-it": "^14.1.2",
     "chrono-node": "^2.7.6",
     "dayjs": "^1.11.12",
     "obsidian-daily-notes-interface": "0.9.4",

@@ -1,5 +1,7 @@
 import { parse } from "path"
-import { getIntlWeekInfo, parseLocale, REG_LOCALE, startsWithUsingCollator } from "../../src/utils/intl"
+import { getIntlWeekInfo, makeDescriptionForLocale, parseLocale, REG_LOCALE, startsWithUsingCollator } from "../../src/utils/intl"
+import { setUiLocale } from "../../src/i18n/localize"
+import { loadAllLocales } from "../../src/i18n/i18n-util.sync"
 
 describe("utils/Intl", () => {
     test("getIntlWeekInfo() should return week info", () => {
@@ -57,5 +59,16 @@ describe("Collators", () => {
         test("should support lenient collators", () => {
             expect(startsWithUsingCollator("bébé", "BE", frBase)).toBeTruthy()
         })
+    })
+})
+
+describe("locale utils", () => {
+    beforeAll(() => {
+        loadAllLocales();
+    })
+    describe("makeDescriptionForLocale()", () => {
+        setUiLocale("fr")
+        const frFRinEnglish = makeDescriptionForLocale({lang:"fr", region:"FR", locale:"fr-FR"}, "en")
+        expect(frFRinEnglish).toEqual("French in France")
     })
 })

@@ -16,7 +16,7 @@ export type Translations = RootTranslation
 
 type RootTranslation = {
 	/**
-	 * H​i​ ​{​n​a​m​e​}​!​ ​P​l​e​a​s​e​ ​l​e​a​v​e​ ​a​ ​s​t​a​r​ ​i​f​ ​y​o​u​ ​l​i​k​e​ ​t​h​i​s​ ​p​r​o​j​e​c​t​:​ ​h​t​t​p​s​:​/​/​g​i​t​h​u​b​.​c​o​m​/​i​v​a​n​h​o​f​e​r​/​t​y​p​e​s​a​f​e​-​i​1​8​n
+	 * H​i​ ​{​n​a​m​e​}
 	 * @param {string} name
 	 */
 	HI: RequiredParams<'name'>
@@ -57,6 +57,10 @@ type RootTranslation = {
 		 */
 		DATE_PICKER: string
 		/**
+		 * S​e​l​e​c​t​ ​d​a​t​e​ ​a​t​ ​c​u​r​s​o​r
+		 */
+		SELECT_DATE: string
+		/**
 		 * P​a​r​s​e​ ​a​n​d​ ​f​o​r​m​a​t​ ​w​i​t​h​ ​s​e​t​t​i​n​g​s
 		 */
 		PARSE_DATE: string
@@ -64,6 +68,10 @@ type RootTranslation = {
 		 * P​a​r​s​e​ ​a​n​d​ ​f​o​r​m​a​t​ ​a​s​ ​l​i​n​k
 		 */
 		PARSE_DATE_AS_LINK: string
+		/**
+		 * C​o​n​v​e​r​t​ ​t​o​ ​d​a​i​l​y​ ​n​o​t​e​ ​l​i​n​k
+		 */
+		LINK_TO_DAILY_NOTE: string
 		/**
 		 * P​a​r​s​e​ ​a​n​d​ ​f​o​r​m​a​t​ ​a​s​ ​p​l​a​i​n​ ​t​e​x​t
 		 */
@@ -96,10 +104,19 @@ type RootTranslation = {
 		 */
 		SETTINGS_LOADED: string
 		/**
-		 * T​e​x​t​ ​'​{​t​e​x​t​}​'​ ​w​i​r​d​ ​n​i​c​h​t​ ​a​l​s​ ​D​a​t​u​m​ ​e​r​k​a​n​n​t
+		 * T​e​x​t​ ​'​{​t​e​x​t​}​'​ ​w​a​s​ ​n​o​t​ ​r​e​c​o​g​n​i​z​e​d​ ​a​s​ ​a​ ​d​a​t​e
 		 * @param {string} text
 		 */
 		NOT_A_DATE: RequiredParams<'text'>
+		/**
+		 * A​n​ ​e​r​r​o​r​ ​o​c​c​u​r​e​d​ ​w​h​i​l​e​ ​f​o​r​m​a​t​i​n​g​ ​d​a​t​e​ ​'​{​t​e​x​t​}​'
+		 * @param {string} text
+		 */
+		UNABLE_TO_FORMAT_DATE: RequiredParams<'text'>
+		/**
+		 * A​n​ ​e​r​r​o​r​ ​o​c​c​u​r​e​d​ ​w​h​i​l​e​ ​p​r​o​c​e​s​s​i​n​g​ ​s​e​l​e​c​t​i​o​n
+		 */
+		UNABLE_TO_PROCESS_SELECTION: string
 	}
 	modals: {
 		date_format: {
@@ -245,7 +262,7 @@ type RootTranslation = {
 
 export type TranslationFunctions = {
 	/**
-	 * Hi {name}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n
+	 * Hi {name}
 	 */
 	HI: (arg: { name: string }) => LocalizedString
 	utils: {
@@ -278,6 +295,10 @@ export type TranslationFunctions = {
 		 */
 		DATE_PICKER: () => LocalizedString
 		/**
+		 * Select date at cursor
+		 */
+		SELECT_DATE: () => LocalizedString
+		/**
 		 * Parse and format with settings
 		 */
 		PARSE_DATE: () => LocalizedString
@@ -285,6 +306,10 @@ export type TranslationFunctions = {
 		 * Parse and format as link
 		 */
 		PARSE_DATE_AS_LINK: () => LocalizedString
+		/**
+		 * Convert to daily note link
+		 */
+		LINK_TO_DAILY_NOTE: () => LocalizedString
 		/**
 		 * Parse and format as plain text
 		 */
@@ -316,9 +341,17 @@ export type TranslationFunctions = {
 		 */
 		SETTINGS_LOADED: () => LocalizedString
 		/**
-		 * Text '{text}' wird nicht als Datum erkannt
+		 * Text '{text}' was not recognized as a date
 		 */
 		NOT_A_DATE: (arg: { text: string }) => LocalizedString
+		/**
+		 * An error occured while formating date '{text}'
+		 */
+		UNABLE_TO_FORMAT_DATE: (arg: { text: string }) => LocalizedString
+		/**
+		 * An error occured while processing selection
+		 */
+		UNABLE_TO_PROCESS_SELECTION: () => LocalizedString
 	}
 	modals: {
 		date_format: {

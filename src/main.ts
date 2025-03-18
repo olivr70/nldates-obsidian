@@ -1,62 +1,79 @@
-import { MarkdownView, ObsidianProtocolData, Plugin } from "obsidian";
+import { MarkdownView, ObsidianProtocolData, Plugin, View } from "obsidian";
 import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
 
 import { DateDisplay, MarkdownDateParts, FormattedDate, IDateSuggestion, IInternationalDatesPlugin, INLDParser, IMarkdownFlags, NLDResult, InternationalDateSettings, UserDateFormat, FormatRef } from "./types";
 import { findUniqueName, makeSingleLine, parseTruthy } from "./utils/tools";
 import { generateMarkdownLink, getOrCreateDailyNote } from "./utilsObsidian";
 import { NLDSettingsTab, DEFAULT_SETTINGS } from "./settings";
-import { getAllParsers, parserFactory } from "./parser";
+import { getAllParsers, parseAllFromTextWithLocales, parserFactory } from "./parser";
 import DatePickerModal from "./modals/date-picker";
 import DateSuggest from "./suggest/date-suggest";
 import {
   getParseCommand,
   getCurrentDateCommand,
-  getCurrentTimeCommand,
   getNowCommand,
 } from "./commands";
-import { debugNotif, notifyError, notifyMessage, setDevMode } from "./utils/osbidian";
+import { debugNotif, getObsidianLanguage, notifyError, notifyMessage, notifyWarning, setDevMode } from "./utils/osbidian";
 import dayjs from "dayjs";
 import { INTL_DATE_STYLE_DICT, isIntlDateStyle } from "./suggest/suggest-utils";
 import { formatDateTimeWithIntl, formatDateWithIntl, formatTimeWithIntl, langFromLocale, localeIsCompatibleWith, REG_ISO } from "./utils/intl";
-import { dayjsWithLocale } from "./utils/days";
 import { debug, enterLeave } from "./utils/debug";
 import { pickUserFormat } from "./modals/fuzz-user-format-selector";
 import { pickLocale } from "./modals/fuzz-locale-selector";
-import { getUiLocale, setUiLocale } from "./i18n/localize";
+import { setUiLocale } from "./i18n/localize";
 import { loadAllLocales } from "./i18n/i18n-util.sync";
 
 
 import { LLL } from "./i18n/localize";
-import { loadedLocales, locales } from "./i18n/i18n-util";
-import { ParsedResult } from "chrono-node";
-import { compareParseResult } from "./utils/chrono";
 
 
 
 export default class InternationalDates extends Plugin implements IInternationalDatesPlugin {
   private _parser: INLDParser;
+  private _noteTitleInput: HTMLElement = null;
+  private _propertyEditorInput: HTMLElement = null;
   public settings: InternationalDateSettings;
+
 
   public get parser(): INLDParser { return this._parser; }
 
+  public get isEditingNoteTitle(): boolean { return this._noteTitleInput != null; }
+  public get noteTitleInput(): HTMLElement { return this._noteTitleInput; }
+  public get isEditingProperty(): boolean { return this._propertyEditorInput != null; }
+  public get propertyEditorInput(): HTMLElement { return this._propertyEditorInput; }
+  /** true if use is editing the text of note
+   * 
+   * Used to enable or disable some commands
+   */
+  public get isEditingNote(): boolean {
+    console.log(!!this.app.workspace.getActiveViewOfType(MarkdownView), `inTitle :${this.isEditingNoteTitle}`, `inProp ${this.isEditingProperty}`) 
+    return !!this.app.workspace.getActiveViewOfType(MarkdownView) 
+    && !this.isEditingNoteTitle && !this.isEditingProperty;
+  }
 
   //#region lifecycle
       async onload(): Promise<void> {
-        console.log("locales", locales)
-        console.log("loadedLocales", loadedLocales)
         loadAllLocales();
-        setUiLocale(window.localStorage.getItem('language'));
-        console.log("getUiLocale", getUiLocale())
-
-        console.log("loadedLocales", loadedLocales)
-        console.log("LLL", LLL)
-        console.log("PARSE_DATE_AS_TEXT", LLL.commands.PARSE_DATE_AS_TEXT())
-        console.log("HI", LLL.HI({name:"John"}))
+        setUiLocale(getObsidianLanguage());
 
         notifyMessage("Setting loaded")
         await this.loadSettings();
         this.validateSettings();
+        this.addAllCommands();
 
+        this.addSettingTab(new NLDSettingsTab(this.app, this));
+        this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
+        this.registerEditorSuggest(new DateSuggest(this.app, this));
+
+        this.app.workspace.onLayoutReady(() => {
+          this.initFromSettings();
+        });
+
+        this.registerInTitleEvents();
+
+      }
+      // --------------------------------
+      addAllCommands() {
         this.addCommand({
           id: "id-dates-debug-on",
           name: "enable dev mode",
@@ -70,34 +87,67 @@ export default class InternationalDates extends Plugin implements IInternational
           callback: () => setDevMode(false),
           hotkeys: [],
         });
+        this.addCommand({
+          id: "id-select",
+          name: LLL.commands.SELECT_DATE(),
+          editorCallback: (editor, context) => getParseCommand(this, {editor, context, mode: "select"}),
+          hotkeys: [],
+
+        });
 
         this.addCommand({
           id: "nlp-dates",
           name: LLL.commands.PARSE_DATE(),
-          callback: () => getParseCommand(this, {mode: "replace"}),
+
+          editorCheckCallback: (checking, editor, context) => {
+            console.log("isEditingNote", this.isEditingNote)
+            if (checking) return this.isEditingNote
+            // 
+            if (!this.isEditingNote) {
+              notifyWarning("Command can only be used in the note body")
+            }
+            return getParseCommand(this, {editor, context, mode: "replace"})
+          },
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-dates-link",
           name: LLL.commands.PARSE_DATE_AS_LINK(),
-          callback: () => getParseCommand(this, {mode: "link"}),
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
+            return getParseCommand(this, {editor, context, mode: "link"})
+          },
+          hotkeys: [],
+        });
+        
+        this.addCommand({
+          id: "id-link-dailynote",
+          name: LLL.commands.LINK_TO_DAILY_NOTE(),
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
+            return getParseCommand(this, {editor, context, mode: "daily"})
+          },
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-date-clean",
           name: LLL.commands.PARSE_DATE_AS_TEXT(),
-          callback: () => getParseCommand(this, {mode: "clean"}),
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
+            return getParseCommand(this, {editor, context, mode: "clean"})}
+            ,
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-format-user",
           name: LLL.commands.PARSE_AND_FORMAT_USER(),
-          callback: () => {
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
             pickUserFormat(this, (format) => {
-              getParseCommand(this, { mode:"user", format:format.name } )
+              getParseCommand(this, { editor, context, mode:"user", format:format.name } )
             })
           }
         })
@@ -107,9 +157,10 @@ export default class InternationalDates extends Plugin implements IInternational
         this.addCommand({
           id: "id-format-locale",
           name: LLL.commands.PARSE_AND_FORMAT_LOCALE(),
-          callback: () => {
+          editorCheckCallback: (checking, editor,context) => {
+            if (checking) return this.isEditingNote
             pickLocale(this, (locale) => {
-              getParseCommand(this, { mode:"locale", locale } )
+              getParseCommand(this, { editor, context, mode:"locale", locale } )
             })
           }
         })
@@ -117,33 +168,36 @@ export default class InternationalDates extends Plugin implements IInternational
         this.addCommand({
           id: "id-format-dialog",
           name: LLL.commands.PARSE_AND_FORMAT_DIALOG(),
-          callback: () => {
-            console.log("id-format-dialog", this)
-            getParseCommand(this, { mode:"dialog" } )
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
+            getParseCommand(this, { editor, context, mode:"dialog" } )
           }
         })
 
         this.addCommand({
           id: "id-now",
           name: LLL.commands.INSERT_CURRENT_DATE_AND_TIME(),
-          callback: () => getNowCommand(this),
+          editorCheckCallback: (checking, editor, context) => {
+            if (checking) return this.isEditingNote
+            return getNowCommand(this)},
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-today",
           name: LLL.commands.INSERT_CURRENT_DATE(),
-          callback: () => getCurrentDateCommand(this),
+          editorCheckCallback: (checking, editor,context) => {
+            if (checking) return this.isEditingNote
+            return getCurrentDateCommand(this)
+          },
           hotkeys: [],
         });
 
         this.addCommand({
           id: "id-picker",
           name: LLL.commands.DATE_PICKER(),
-          checkCallback: (checking: boolean) => {
-            if (checking) {
-              return !!this.app.workspace.getActiveViewOfType(MarkdownView);
-            }
+          editorCheckCallback: (checking: boolean) => {
+            if (checking) return this.isEditingNote
             new DatePickerModal(this.app, this).open();
           },
           hotkeys: [],
@@ -154,21 +208,55 @@ export default class InternationalDates extends Plugin implements IInternational
           id: "id-parseall",
           name: LLL.commands.PARSE_ALL_DATES(),
           checkCallback: (checking: boolean) => {
-            if (checking) {
-              return !!this.app.workspace.getActiveViewOfType(MarkdownView);
-            }
-            new DatePickerModal(this.app, this).open();
+            if (checking) return this.isEditingNote
+            notifyError("Not implemented")
           },
           hotkeys: [],
         });
 
-        this.addSettingTab(new NLDSettingsTab(this.app, this));
-        this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
-        this.registerEditorSuggest(new DateSuggest(this.app, this));
+      }
 
-        this.app.workspace.onLayoutReady(() => {
-          this.initFromSettings();
-        });
+      /** register event to detectf if user is editing title or properties
+       * 
+       * PROBLEM: we use this to enable/disable commands. But the command palette grabs the focus.
+       * All commands are always enabled in the command palette
+       */
+      private registerInTitleEvents() {
+        this.registerDomEvent(document, "focusin", (event) => {
+          const target = event.target as HTMLElement;
+          // console.log("focusin", target.tagName, target.classList, target.parentElement.tagName, target.parentElement.classList)
+          if (target.closest(".inline-title")) {
+              this._noteTitleInput = target
+              this._propertyEditorInput = null  // sometimes Obsidian does not fire *focusout*
+              console.log("L'utilisateur édite le titre !", this.isEditingNote);
+          }
+              // Vérifie si l'élément est dans l'éditeur de propriétés
+          if (target.closest(".metadata-property") || target.closest(".metadata-container")) {
+            this._propertyEditorInput = target
+            this._noteTitleInput = null  // sometimes Obsidian does not fire *focusout*
+            console.log("L'utilisateur édite une propriété !", this.isEditingNote);
+          }
+          console.log(this.app.workspace.activeLeaf.getViewState())
+          console.log(`Preview : ${this.isPreviewMode()}, source:${this.isSourceMode()}, live preview: ${this.isLivePreview()}`)
+          console.log("activeEditor", this.app.workspace.activeEditor)
+          console.log("activeView", this.app.workspace.getActiveViewOfType(View), this.app.workspace.getActiveViewOfType(View).getViewType())
+      });
+
+      this.registerDomEvent(document, "focusout", (event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest(".inline-title")) {
+              this._noteTitleInput = null
+              console.log("L'utilisateur a fini d'éditer le titre.", this.isEditingNote);
+          }
+          // Vérifie si l'élément est dans l'éditeur de propriétés
+          if (target.closest(".metadata-property") || target.closest(".metadata-container")) {
+            this._propertyEditorInput = target
+            console.log("L'utilisateur a fini d'éditer une propriété.", this.isEditingNote);
+          }
+          console.log(`Preview : ${this.isPreviewMode()}, source:${this.isSourceMode()}, live preview: ${this.isLivePreview()}`)
+          console.log("activeEditor", this.app.workspace.activeEditor)
+          console.log("activeView", this.app.workspace.getActiveViewOfType(View))
+      });
       }
 
       onunload(): void {
@@ -184,7 +272,7 @@ export default class InternationalDates extends Plugin implements IInternational
 
       validateSettings() {
         debugNotif("will validate settings")
-        const lang = window.localStorage.getItem('language');
+        const lang = getObsidianLanguage();
         // create default date formats
         if (this.settings.dateFormats == undefined || this.settings.dateFormats.length == 0) {
           new Notification("NLD")
@@ -299,33 +387,7 @@ export default class InternationalDates extends Plugin implements IInternational
       
       /**  */
       parseAll(text:string ) {
-        let results:ParsedResult[] = []
-        let alreadyConsumed = 0
-        const seg = new Intl.Segmenter("und", { granularity: "word"}).segment(text)
-        const allParsers = getAllParsers();
-        for (const s of seg) {
-          // ignore words which have already been consumed
-          if (s.index < alreadyConsumed) {
-            continue;
-          }
-          const subText = text.substring(s.index)
-      
-          // collect all candidates
-          let all:ParsedResult[] = []
-          // try all parsers at this position
-          for (let p of Object.values(allParsers)) {
-            let moreCandidates = p.parseAll(subText)
-            all.push(...moreCandidates)
-          }
-          // 
-          all.sort(compareParseResult)
-          if (all.length > 0) {
-            results.push(all[0])
-            // ignore words 
-            alreadyConsumed = all[0].index + all[0].text.length
-          }
-        }
-        return results;
+        return parseAllFromTextWithLocales(text)
       }
   //#endregion
 
@@ -417,7 +479,7 @@ export default class InternationalDates extends Plugin implements IInternational
             result = generateMarkdownLink(
               this.app,
               dailyNoteName,
-              items.dateStr
+              items.useTextAsLinkAlias ? items.text : items.dateStr
             );
           } else {
             result = generateMarkdownLink(
@@ -471,13 +533,16 @@ export default class InternationalDates extends Plugin implements IInternational
           const linkToDailyNotes = flags.linkToDailyNotes ?? this.settings.linkToDailyNotes;
           // always display as link if user wants to linkToDailyNote
           let asLink:boolean = (display != DateDisplay.asTime) && (linkToDailyNotes || flags.asLink);
+          let useTextAsLinkAlias:boolean = asLink && flags.useTextAsLinkAlias
 
           // return the reulst
           const result = {
             ...dateParts, 
             display, 
             asLink, 
-            linkToDailyNotes
+            linkToDailyNotes,
+            useTextAsLinkAlias,
+            text: flags.text
           }
           return result;
         })
@@ -576,6 +641,27 @@ export default class InternationalDates extends Plugin implements IInternational
         return formatTimeWithIntl(userFormat, userFormat.locale ?? this.settings.locale, date)
           ?? formatTimeWithIntl({timeStyle:"short"}, userFormat.locale ?? this.settings.locale, date)
       }
+  //#endregion
+
+  //#region Obsidian
+
+  isPreviewMode(): boolean {
+    const leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
+    return leaf ? leaf.getMode() === "preview" : false;
+  }
+  isSourceMode(): boolean {
+    const leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
+    return leaf ? leaf.getMode() === "source" : false;
+  }
+  isLivePreview(): boolean {
+    const leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!leaf || leaf.getMode() !== "source") return false;
+
+    const editor = leaf.editor;
+    // Vérifie si l'éditeur supporte le live preview
+    return (editor as any).cm?.options?.livePreview ?? false;
+  }
+
   //#endregion
 
 

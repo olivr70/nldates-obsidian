@@ -1,49 +1,46 @@
 {
- "cells": [
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "# Information on Remark library to parse Markdown"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## The mdast representation\n",
-    "\n",
-    "As documented, [Remark](https://github.com/remarkjs/remark) uses mdast, a standard way to represent an AST for Markdown, which supports many extensions. **mdast** is an implementation of the [unist](https://github.com/syntax-tree/unist) specification. This means that many unist tools can be used to work on the resulting AST.\n",
-    "\n",
-    "\n"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "## Samples"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {
-    "vscode": {
-     "languageId": "plaintext"
-    }
-   },
-   "outputs": [],
-   "source": [
-    "import remark from remark"
-   ]
-  }
- ],
- "metadata": {
-  "language_info": {
-   "name": "python"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 2
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# Information on Remark library to parse Markdown"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## The mdast representation\r\n\r\n\r\n\r\nAs documented, [Remark](https://github.com/remarkjs/remark) uses mdast, a standard way to represent an AST for Markdown, which supports many extensions. **mdast** is an implementation of the [unist](https://github.com/syntax-tree/unist) specification. This means that many unist tools can be used to work on the resulting AST.\r\n\r\n\r\n\r\n\r\n"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "### micromark\r\n\r\nLe parser sous-jacent est micromark qui génère un AST au format [mdast](https://github.com/syntax-tree/mdast). Comme ce format est conforme à la spécification unist, on peut utiliser tous les [utilitaires unist](https://github.com/syntax-tree/unist?tab=readme-ov-file#list-of-utilities)\r\n\r\nhttps://github.com/micromark/micromark"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Samples"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                ""
+            ],
+            "outputs": []
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "import remark from remark"
+            ],
+            "outputs": []
+        }
+    ]
 }

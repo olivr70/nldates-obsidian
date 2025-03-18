@@ -140,8 +140,10 @@ export interface InternationalDateSettings {
 
 //#region Chrono
 
+/** a Record with all optinal components  of Chrono Date */
 export type DateComponents = {[k in Component]? : number }
 
+/** type guard for {@link DateComponents} */
 export function isDateComponents(arg:any): arg is DateComponents {
   if (arg == null || typeof arg != "object") return false;
   if (!("year" in arg && "month" in arg) && !("hour" in arg)) return false;
@@ -156,6 +158,7 @@ export function dateComponentsToDate(arg: DateComponents):Date {
   return new ParsingComponents(new ReferenceWithTimezone(), arg).date()
 }
 
+/** extract ONLY date components from *arg* */
 export function toDateComponents(arg:Dayjs|Date) {
   if (isDayjs(arg)) {
     // month() is 0 based
@@ -197,8 +200,13 @@ export enum RELATIVE_DAY {
   PREVIOUS_OCCURING,
 }
 
+/** a Parser with a name, usefule for debugging */
 export interface NamedChronoParser extends Parser {
   name: string;
+}
+
+export interface ParsedResultWithLocale extends ParsedResult {
+  locale: string;
 }
 
 //#endregion
@@ -219,6 +227,8 @@ export interface IMarkdownFlags {
   locale?:string;
   /** the user wants a link */
   asLink?:boolean;
+  /** the user wants a link */
+  useTextAsLinkAlias?:boolean;
   /** true is user wants the a link to target the daily note */
   linkToDailyNotes?:boolean;
   /** the text used to generated the suggestion */
@@ -264,6 +274,7 @@ export interface MarkdownDateParts extends FormattedDate, IMarkdownFlags {
   display:DateDisplay;
   asLink: boolean;
   linkToDailyNotes: boolean;
+  useTextAsLinkAlias: boolean;
 }
 
 /** the interface for all local date Parsers */

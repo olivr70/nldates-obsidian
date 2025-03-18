@@ -1,10 +1,10 @@
 
 import { DateDisplay, IDateSuggestion, IInternationalDatesPlugin, IMarkdownFlags, InternationalDateSettings } from "../types";
-import { alt, compare, compareReverseWithLt, findLastMatch, group, matchPartialItem, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
+import { alt, compare, compareReverseWithLt, findAllMatches, findLastMatch, findMatchAt, group, matchPartialItem, matchPartialItemRegex, matchPartialRegex, named, oneOrMore, opt, seq, zeroOrMore } from "../utils/regex";
 import { localeIsCompatibleWith, mayBeLocale, NEUTRAL_COLLATOR_LENIENT, REG_ISO, REG_LOCALE } from "../utils/intl";
 import { findPartialInDict } from "../utils/months";
 import { debug, enterLeave, watch } from "../utils/debug";
-import { getAllParsers } from "../parser";
+import { getAllParsers, parseAllFromTextWithLocales } from "../parser";
 import { ParsedResult } from "chrono-node";
 
 const LOC = "en"
@@ -36,30 +36,14 @@ export const INTL_DATE_STYLE_DICT: { [key:string] : string } = {
 
 const REG_INTL_DATE_FORMAT_NAME = matchPartialItem("en", INTL_DATE_STYLE_DICT, { flags: "i" })
 
-
-
-
-  /** details : format;locale: or locale;format: */
-export const REG_SUGGESTION_DETAILS_OLD = 
-alt({capture:false},
-  seq({capture:false} // locale;format
-    , named("locale2",REG_LOCALE)
-    , seq({capture:false, cardinality:"?"}
-        , /\s*;\s*/
-        , alt({}, named("format2",REG_MOMENT_FORMAT), named("display2", REG_DISPLAY_FORMAT)))
-  ), seq({capture:false}  // format;locale
-    , alt({}, named("format1", REG_MOMENT_FORMAT), named("display1",REG_DISPLAY_FORMAT))
-    , seq({capture:false, cardinality:"?"}, /\s*;\s*/, named("locale1",REG_LOCALE)))
-)
-
-
 const REG_SUGGESTION_ITEM = alt({}, 
+  
+  /link|d(?:ai|ia)ly/,
   REG_LOCALE,
   REG_MOMENT_FORMAT,
   REG_DISPLAY_FORMAT,
   REG_INTL_DATE_FORMAT_NAME,
-  REG_ISO,
-  /link|daily/
+  REG_ISO
 )
 
 /** separator for parts. COMMA (,) not included, because it is used
@@ -166,6 +150,15 @@ export function parseSuggestionPrefix(info:ReturnType<typeof parseSuggestionDeta
   return info
 })
 }
+/** prefix : format;locale: or locale;format: */
+export const REG_SUGGESTION_SUFFIX = seq({capture:false},
+  /@/,
+  REG_SUGGESTION_DETAILS
+)
+
+export function findSuggestionSuffixAt(text:string, pos:number) {
+  return findMatchAt(text, REG_SUGGESTION_SUFFIX, pos)
+}
 
 export function parseSuggestionSuffix(info:ReturnType<typeof parseSuggestionDetails>, plugin?:IInternationalDatesPlugin) {
   return enterLeave("parseSuggestionSuffix", () => {
@@ -187,14 +180,21 @@ export function parseSuggestionSuffix(info:ReturnType<typeof parseSuggestionDeta
  * Note : default values for suggestions are not added (@see {@link suggestionWithDefaults})
  * 
  * if **plugin** is provided, will look for UserDateFormats names
+ * 
+ * @returns undefined if not match
 */
 export function parseSuggestion(text:string, plugin?:IInternationalDatesPlugin):IDateSuggestion {
   // wanring, suffix must be parsed first
   const details= parseSuggestionPrefix(parseSuggestionSuffix({text}, plugin), plugin);
   // prefix and suffix have been separated
-  const value = plugin?.parser.getParsedDate(details.text)
-  const suggestion:IDateSuggestion = { ...details, ...(value && {value}) }
-  return suggestion;
+  const values = parseAllFromTextWithLocales(details.text)
+  if (values.length != 0) {
+    const value = values[0].start.date()
+    // const value = plugin?.parser.getParsedDate(details.text)
+    const suggestion:IDateSuggestion = { ...details, ...(value && {value}) }
+    return suggestion;
+  }
+  return undefined
 }
 
 

@@ -40,6 +40,17 @@ export function* iterateFromReverse<T>(items:T[], from:number): Generator<T> {
   }
 }
 
+export function mapRecordValues<K extends string|number|symbol, T, U>(
+    record: Record<K, T>, 
+    mapFn: (key:K, value: T) => U): Record<string, U> {
+  const result: Record<string, U> = {};
+  for (const key in record) {
+      if (record.hasOwnProperty(key)) {
+          result[key] = mapFn(key, record[key]);
+      }
+  }
+  return result;
+}
 
 
 export function range(begin:number,end:number,step:number = 1) {

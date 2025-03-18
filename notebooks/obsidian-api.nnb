@@ -1,0 +1,18 @@
+{
+    "cells": [
+        {
+            "language": "markdown",
+            "source": [
+                "# Eléments sur l'API d'Obsidian"
+            ],
+            "outputs": []
+        },
+        {
+            "language": "markdown",
+            "source": [
+                "## Les éléments d'interface\r\n\r\nWorkspace\r\n\r\nEvents\r\n- WorspaceItem\r\n  - WorkspaceLeaf\r\n    - WorkspaceParent\r\n      - WorkspaceSplit\r\n        - WorkspaceContainer\r\n          - WorkspaceWindow : win (DOM), doc (DOM)\r\n          - WorkspaceRoot : win (DOM), doc (DOM)\r\n        - WorkspaceFloating\r\n        - WorkspaceSidedock\r\n      - WorskpaceTabs\r\n      - WorkspaceMobileDrawer\r\n      \r\nComponent\r\n- View \r\n  - ItemView \r\n    - FileView \r\n      - EditableFileView \r\n      - TextFileView \r\n        - MarkdownView (+ MarkdownFileInfo (app, file, editor)) : previewMode\r\n- MarkdownRenderChild \r\n  - MarkdownRenderer (+ MarkdownPreviewEvents, HoverParent) \r\n    - MarkdownPreviewView ( + MarkdownSubView, MarkdownPreviewEvents)\r\n\r\nPopoverSuggest (+ ISuggestOwner, CloseableComponent) : app, scope\r\n- AbstractInputSuggest\r\n- EditorSuggest\r\n\r\nBaseComponent\r\n- ButtonComponent\r\n- ExtraButtonComponent\r\n- ValueComponent\r\n  - AbstractTextComponent\r\n    - SearchComponent\r\n    - TextComponent\r\n    - TextAreaComponent\r\n      - MomentFormatComponent\r\n  - ColorComponent\r\n  - DropdownComponent\r\n  - ProgressBarComponent\r\n  - SliderComponent\r\n  - ToggleComponent\r\n\r\n\r\nWorkspace\r\n\r\nWorkspaceItem\r\n- WorkspaceParent  \r\n  - WorkspaceFloating\r\n  - WorkspaceTabs \r\n  - WorkspaceMobileDrawer\r\n- WorkspaceSplit\r\n  - WorkspaceContainer\r\n    - WorkspaceRoot\r\n    - WorkspaceWindow\r\n  - WorkspaceSidedock\r\n- WorkspaceLeaf"
+            ],
+            "outputs": []
+        }
+    ]
+}

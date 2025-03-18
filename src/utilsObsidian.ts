@@ -15,7 +15,8 @@ const REG_SPACE = /\s/
 
 /** return the range of text around position, between occurences of **sep**
  * 
- * This is wider than {@link getWordBoundaries}, which stops on any non letter
+ * This is wider than {@link getWordBoundaries}, which stops on any non letter. which does
+ * not work for dates, who often contain punctuation
 */
 export function getBetweenRegexp(editor: Editor, sep: RegExp, position?:EditorPosition): EditorRange {
   const cursor = position || editor.getCursor();

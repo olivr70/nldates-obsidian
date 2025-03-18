@@ -2,7 +2,7 @@ import type { BaseTranslation } from '../i18n-types'
 
 const en: BaseTranslation = {
 	// TODO: your translations go here
-	HI: 'Hi {name:string}! Please leave a star if you like this project: https://github.com/ivanhofer/typesafe-i18n',
+	HI: 'Hi {name:string}',
 	utils: {
 		intl: {
 			localeDescriptionWithRegion: "{language:string} in {region:string}",
@@ -14,8 +14,10 @@ const en: BaseTranslation = {
 		INSERT_CURRENT_DATE : "Insert the current date",
 		INSERT_CURRENT_DATE_AND_TIME : "Insert the current date and time",
 		DATE_PICKER: "Date picker...",
+		SELECT_DATE	: "Select date at cursor",
 		PARSE_DATE	: "Parse and format with settings",
 		PARSE_DATE_AS_LINK : "Parse and format as link",
+		LINK_TO_DAILY_NOTE : "Convert to daily note link",
 		PARSE_DATE_AS_TEXT : "Parse and format as plain text",
 		PARSE_AND_FORMAT_USER : "Parse and format with user format",
 		PARSE_AND_FORMAT_LOCALE : "Parse and format with locale",
@@ -25,7 +27,9 @@ const en: BaseTranslation = {
 	notifications: {
 		UI_LOCALE_CHANGED: "International Dates : user interface language changed to **{locale}**",
 		SETTINGS_LOADED: "Settings loaded",
-		NOT_A_DATE : "Text '{text:string}' wird nicht als Datum erkannt"
+		NOT_A_DATE : "Text '{text:string}' was not recognized as a date",
+		UNABLE_TO_FORMAT_DATE :  "An error occured while formating date '{text:string}'",
+		UNABLE_TO_PROCESS_SELECTION :  "An error occured while processing selection"
 	},
 	modals: {
 		date_format: {

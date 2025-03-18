@@ -3,7 +3,7 @@ import { compare, compareReverseWithLt } from "./regex";
 
 
 
-/** orders results by index, and highest length */
+/** orders results by ascending index, and descending length */
 export function compareParseResult(a:ParsedResult, b:ParsedResult):-1|0|1 {
   let res = compare(a.index, b.index)
   if (res == 0) {
