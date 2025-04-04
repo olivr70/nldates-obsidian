@@ -113,11 +113,13 @@ export class MultilineString implements Range, Iterable<number> {
     end:Position
     constructor(
         lines:string[] | string
-        , start:Position = { line:0, ch:0 }
-        , end:Position = { line:lines.length - 1, ch:lines[lines.length - 1].length }
+        , start?:Position
+        , end?:Position
     ) {
         if (typeof lines == "string")
             lines = lines.split(/\n/)
+        start = start ?? { line:0, ch:0 }
+        end = end ?? { line:lines.length - 1, ch:lines[lines.length - 1].length }
         this.lines = lines; 
         this.start = this.normalize(start, lines);
         this.end = this.normalize(end, lines)

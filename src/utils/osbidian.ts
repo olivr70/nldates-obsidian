@@ -1,7 +1,12 @@
-import { EditorRange, EditorSelection, MarkdownView, Notice } from "obsidian";
+import { EditorPosition, EditorRange, EditorSelection, MarkdownView, Notice } from "obsidian";
 import { watch } from "./debug";
+import { isObject } from "util";
 
 let gDevMode = false;
+
+export function isEditorPosition(some:any): some is EditorPosition {
+    return typeof some == "object" && typeof some.line == "number" && typeof some.ch == "number"
+}
 
 export function setDevMode(onOff:boolean) {
     gDevMode = onOff;

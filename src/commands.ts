@@ -237,6 +237,7 @@ export function getCurrentTimeCommand(plugin: InternationalDates): void {
   insertMomentCommand(plugin, date, format);
 }
 
+
 /** sorts 2 EditorPositions in order of apperance */
 export function sortPositions(from:EditorPosition, to: EditorPosition) {
   if (from.line > to.line ) {
